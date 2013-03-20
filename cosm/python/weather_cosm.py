@@ -8,6 +8,7 @@ import math
 import logging as log
 import httplib
 import json
+import threading
 log.basicConfig(level=log.INFO)
 
 from tinkerforge.ip_connection import IPConnection
@@ -19,23 +20,20 @@ from tinkerforge.bricklet_humidity import Humidity
 from tinkerforge.bricklet_barometer import Barometer
 
 class Cosm:
-    host = 'api.cosm.com'
-    agent = "Tinkerforge cosm 1.0"
+    HOST = 'api.cosm.com'
+    AGENT = "Tinkerforge cosm 1.0"
+    FEED = '105813.json'
+    API_KEY = 'WtXx2m6ItNZyFYoQyR5qnoN1GsOSAKxPMGdIaXRLYzY5ND0g'
  
-    def __init__(self, feed, key, https=True, packet_size = 100):
-        self.last_upload = time.time()
-        self.packet_size = packet_size
+    def __init__(self):
         self.items = {}
         self.headers = {
             "Content-Type"  : "application/x-www-form-urlencoded",
-            "X-ApiKey"      : key,
-            "User-Agent"    : self.agent,
+            "X-ApiKey"      : Cosm.API_KEY,
+            "User-Agent"    : Cosm.AGENT,
         }
-        self.params = "/v2/feeds/" + str(feed)
-        if https:
-            self.Connection = httplib.HTTPSConnection
-        else:
-            self.Connection = httplib.HTTPConnection
+        self.params = "/v2/feeds/" + str(Cosm.FEED)
+        threading.Thread(target=self.upload).start()
 
     def put(self, identifier, value):
         try:
@@ -48,43 +46,38 @@ class Cosm:
         except:
             self.items[identifier] = (value, value, value)
 
-        if time.time() > self.last_upload + 5*60:
-            self.upload()
-        
     def upload(self):
-        if len(self.items) == 0:
-            return
+        while True:
+            time.sleep(5*60) # Upload data every 5min
+            if len(self.items) == 0:
+                continue
 
-        stream_items = []
-        for identifier, value in self.items.items():
-            stream_items.append({'id': identifier, 
-                                 'current_value': value[0], 
-                                 'min_value': value[1], 
-                                 'max_value': value[2]})
- 
-        data = {
-          'version' : '1.0.0',
-          'datastreams': stream_items,
-        }
-        self.items = {}
-        body = json.dumps(data)
+            stream_items = []
+            for identifier, value in self.items.items():
+                stream_items.append({'id': identifier, 
+                                     'current_value': value[0], 
+                                     'min_value': value[1], 
+                                     'max_value': value[2]})
+     
+            data = {
+              'version' : '1.0.0',
+              'datastreams': stream_items,
+            }
+            self.items = {}
+            body = json.dumps(data)
 
-        http = self.Connection(self.host)
-        http.request('PUT', self.params, body, self.headers)
-        response = http.getresponse()
-        http.close()
+            http = httplib.HTTPSConnection(Cosm.HOST)
+            http.request('PUT', self.params, body, self.headers)
+            response = http.getresponse()
+            http.close()
 
-        self.last_upload = time.time()
-        if response.status != 200:
-            log.error('Could not upload to cosm -> ' + 
-                      str(response.status) + ': ' + response.reason)
+            if response.status != 200:
+                log.error('Could not upload to cosm -> ' + 
+                          str(response.status) + ': ' + response.reason)
 
 class WeatherStation:
     HOST = "localhost"
     PORT = 4223
-    FEED = '105813.json'
-    API_KEY = 'WtXx2m6ItNZyFYoQyR5qnoN1GsOSAKxPMGdIaXRLYzY5ND0g'
-    FEED_ID = '105813'
 
     ipcon = None
     lcd = None
@@ -93,7 +86,7 @@ class WeatherStation:
     baro = None
 
     def __init__(self):
-        self.cosm = Cosm(WeatherStation.FEED, WeatherStation.API_KEY)
+        self.cosm = Cosm()
         self.ipcon = IPConnection()
         while True:
             try:
@@ -120,43 +113,41 @@ class WeatherStation:
                 time.sleep(1)
 
     # Format value to fit on LCD with given pre and post digits
-    def fmt(self, value, pre, post):
+    def fmt(self, value, pre, post=2):
         v2, v1 = math.modf(value)
-
         v1 = str(int(v1))
-        while len(v1) < pre:
-            v1 = ' ' + v1
-
         v2 = str(int(v2 * 10**post))
-        while len(v2) < post:
-            v2 += '0'
 
-        return v1 + '.' + v2
+        num_space = (pre - len(v1))
+        num_zero = (post - len(v2))
+
+        return ' '*num_space + v1 + '.' + v2 + '0'*num_zero
 
     def cb_illuminance(self, illuminance):
         if self.lcd is not None:
-            text = 'Helligkeit %s  lx' % self.fmt(illuminance/10.0, 3, 1)
+            text = 'Illuminanc %s lx' % self.fmt(illuminance/10.0, 3)
             self.lcd.write_line(0, 0, text)
             self.cosm.put('AmbientLight', illuminance/10.0)
             log.info('Write to line 0: ' + text)
 
     def cb_humidity(self, humidity):
         if self.lcd is not None:
-            text = 'Luftfeuchte %s   %%' % self.fmt(humidity/10.0, 2, 1)
+            text = 'Humidity %s %%' % self.fmt(humidity/10.0, 5)
             self.lcd.write_line(1, 0, text)
             self.cosm.put('Humidity', humidity/10.0)
             log.info('Write to line 1: ' + text)
  
     def cb_air_pressure(self, air_pressure):
         if self.lcd is not None:
-            text = 'Luftdruck %s mb' % self.fmt(air_pressure/1000.0, 4, 2)
+            text = 'Air Press %s mb' % self.fmt(air_pressure/1000.0, 4)
             self.lcd.write_line(2, 0, text)
             self.cosm.put('AirPressure', air_pressure/1000.0)
             log.info('Write to line 2: ' + text)
 
             temperature = self.baro.get_chip_temperature()/100.0
-            fmt_text = self.fmt(temperature, 3, 2)
-            text = 'Temperatur %s \xDFC' % fmt_text
+            fmt_text = self.fmt(temperature, 2)
+            # \xDF == ° on LCD20x4 charset
+            text = 'Temperature %s \xDFC' % fmt_text
             self.lcd.write_line(3, 0, text)
             self.cosm.put('Temperature', temperature)
             log.info('Write to line 3: ' + text.replace('\xDF', '°'))
