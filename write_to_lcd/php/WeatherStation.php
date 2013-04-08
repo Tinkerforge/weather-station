@@ -25,45 +25,34 @@ class WeatherStation
 		$this->brickletBarometer = null;
 		$this->ipcon = new IPConnection();
 
-		while(true)
-		{
-			try 
-			{
-				$this->ipcon->connect(WeatherStation::HOST, WeatherStation::PORT);
-			} 
-			catch(Exception $e) 
-			{
+		while(true) {
+			try {
+				$this->ipcon->connect(self::HOST, self::PORT);
+				break;
+			} catch(Exception $e) {
 				sleep(1);
-				continue;
 			}
-			break;
 		}
 
-		$this->ipcon->registerCallback(IPConnection::CALLBACK_ENUMERATE, array($this, 'enumerateCB'));
-		$this->ipcon->registerCallback(IPConnection::CALLBACK_CONNECTED, array($this, 'connectedCB'));
+		$this->ipcon->registerCallback(IPConnection::CALLBACK_ENUMERATE,
+		                               array($this, 'enumerateCB'));
+		$this->ipcon->registerCallback(IPConnection::CALLBACK_CONNECTED,
+		                               array($this, 'connectedCB'));
 
-		while(true)
-		{
-			try 
-			{
+		while(true) {
+			try {
 				$this->ipcon->enumerate();
-			} 
-			catch(Exception $e) 
-			{
+				break;
+			} catch(Exception $e) {
 				sleep(1);
-				continue;
 			}
-			break;
 		}
 	}
 
-
 	function illuminanceCB($illuminance)
 	{
-		$text = sprintf("Illuminanc %6.2f lx", $illuminance/10.0);
-
-		if($this->brickletLCD != null)
-		{
+		if($this->brickletLCD != null) {
+			$text = sprintf("Illuminanc %6.2f lx", $illuminance/10.0);
 			$this->brickletLCD->writeLine(0, 0, $text);
 			echo "Write to line 0: $text\n";
 		}
@@ -71,9 +60,8 @@ class WeatherStation
 
 	function humidityCB($humidity)
 	{
-		$text = sprintf("Humidity   %6.2f %%", $humidity/10.0);
-		if($this->brickletLCD != null)
-		{
+		if($this->brickletLCD != null) {
+			$text = sprintf("Humidity   %6.2f %%", $humidity/10.0);
 			$this->brickletLCD->writeLine(1, 0, $text);
 			echo "Write to line 1: $text\n";
 		}
@@ -81,73 +69,80 @@ class WeatherStation
 
 	function airPressureCB($airPressure)
 	{
-		$text = sprintf("Air Press %7.2f mb", $airPressure/1000.0);
-		if($this->brickletLCD != null)
-		{
+		if($this->brickletLCD != null) {
+			$text = sprintf("Air Press %7.2f mb", $airPressure/1000.0);
 			$this->brickletLCD->writeLine(2, 0, $text);
 			echo "Write to line 2: $text\n";
-		}
 
-		$temperature = $this->brickletBarometer->getChipTemperature();
-		$text = sprintf("Temperature %2.2f %cC", $temperature/100.0, 0xDF);
-		if($this->brickletLCD != null)
-		{
+			$temperature = $this->brickletBarometer->getChipTemperature();
+			$text = sprintf("Temperature %5.2f %cC", $temperature/100.0, 0xDF);
 			$this->brickletLCD->writeLine(3, 0, $text);
 			echo "Write to line 3: $text\n";
 		}
 	}
 
-	function enumerateCB($uid, $connectedUid, $position, $hardwareVersion, $firmwareVersion, $deviceIdentifier, $enumerationType)
+	function enumerateCB($uid, $connectedUid, $position, $hardwareVersion,
+	                     $firmwareVersion, $deviceIdentifier, $enumerationType)
 	{
 		if($enumerationType == IPConnection::ENUMERATION_TYPE_CONNECTED ||
-		   $enumerationType == IPConnection::ENUMERATION_TYPE_AVAILABLE) 
-		{
-			if($deviceIdentifier == BrickletLCD20x4::DEVICE_IDENTIFIER) 
-			{
-				$this->brickletLCD = new BrickletLCD20x4($uid, $this->ipcon);
-				$this->brickletLCD->clearDisplay();
-				$this->brickletLCD->backlightOn();
-			}
-
-			else if($deviceIdentifier == BrickletAmbientLight::DEVICE_IDENTIFIER) 
-			{
-				$this->brickletAmbientLight = new BrickletAmbientLight($uid, $this->ipcon);
-				$this->brickletAmbientLight->setIlluminanceCallbackPeriod(1000);
-				$this->brickletAmbientLight->registerCallback(BrickletAmbientLight::CALLBACK_ILLUMINANCE, array($this, 'illuminanceCB'));
-			}
-
-			else if($deviceIdentifier == BrickletHumidity::DEVICE_IDENTIFIER) 
-			{
-				$this->brickletHumidity = new BrickletHumidity($uid, $this->ipcon);
-				$this->brickletHumidity->setHumidityCallbackPeriod(1000);
-				$this->brickletHumidity->registerCallback(BrickletHumidity::CALLBACK_HUMIDITY, array($this, 'humidityCB'));
-			}
-
-			else if($deviceIdentifier == BrickletBarometer::DEVICE_IDENTIFIER) 
-			{
-				$this->brickletBarometer = new BrickletBarometer($uid, $this->ipcon);
-				$this->brickletBarometer->setAirPressureCallbackPeriod(1000);
-				$this->brickletBarometer->registerCallback(BrickletBarometer::CALLBACK_AIR_PRESSURE, array($this, 'airPressureCB'));
+		   $enumerationType == IPConnection::ENUMERATION_TYPE_AVAILABLE) {
+			if($deviceIdentifier == BrickletLCD20x4::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletLCD = new BrickletLCD20x4($uid, $this->ipcon);
+					$this->brickletLCD->clearDisplay();
+					$this->brickletLCD->backlightOn();
+					echo "LCD 20x4 initialized\n";
+				} catch(Exception $e) {
+					$this->brickletLCD = null;
+					echo "LCD 20x4 init failed: $e\n";
+				}
+			} else if($deviceIdentifier == BrickletAmbientLight::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletAmbientLight = new BrickletAmbientLight($uid, $this->ipcon);
+					$this->brickletAmbientLight->setIlluminanceCallbackPeriod(1000);
+					$this->brickletAmbientLight->registerCallback(BrickletAmbientLight::CALLBACK_ILLUMINANCE,
+					                                              array($this, 'illuminanceCB'));
+					echo "AmbientLight initialized\n";
+				} catch(Exception $e) {
+					$this->brickletAmbientLight = null;
+					echo "AmbientLight init failed: $e\n";
+				}
+			} else if($deviceIdentifier == BrickletHumidity::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletHumidity = new BrickletHumidity($uid, $this->ipcon);
+					$this->brickletHumidity->setHumidityCallbackPeriod(1000);
+					$this->brickletHumidity->registerCallback(BrickletHumidity::CALLBACK_HUMIDITY,
+					                                          array($this, 'humidityCB'));
+					echo "Humidity initialized\n";
+				} catch(Exception $e) {
+					$this->brickletHumidity = null;
+					echo "Humidity init failed: $e\n";
+				}
+			} else if($deviceIdentifier == BrickletBarometer::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletBarometer = new BrickletBarometer($uid, $this->ipcon);
+					$this->brickletBarometer->setAirPressureCallbackPeriod(1000);
+					$this->brickletBarometer->registerCallback(BrickletBarometer::CALLBACK_AIR_PRESSURE,
+					                                           array($this, 'airPressureCB'));
+					echo "Barometer initialized\n";
+				} catch(Exception $e) {
+					$this->brickletBarometer = null;
+					echo "Barometer init failed: $e\n";
+				}
 			}
 		}
 	}
 
 	function connectedCB($connectedReason)
 	{
-		if($connectedReason == IPConnection::CONNECT_REASON_AUTO_RECONNECT)
-		{
-			while(true)
-			{
-				try 
-				{
+		if($connectedReason == IPConnection::CONNECT_REASON_AUTO_RECONNECT) {
+			while(true) {
+				try {
 					$this->ipcon->enumerate();
-				} 
-				catch(Exception $e) 
-				{
+					break;
+				} catch(Exception $e) {
 					sleep(1);
-					continue;
 				}
-				break;
 			}
 		}
 	}

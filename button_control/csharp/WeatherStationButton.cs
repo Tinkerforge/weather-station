@@ -313,7 +313,7 @@ class WeatherStation
 		text = string.Format("Air Press {0,7:####.00} mb", latestAirPressure);
 		brickletLCD.WriteLine(2, 0, text);
 
-		text = string.Format("Temperature {0,2:##.00} {1}C", latestTemperature, (char)0xDF);
+		text = string.Format("Temperature {0,5:##.00} {1}C", latestTemperature, (char)0xDF);
 		brickletLCD.WriteLine(3, 0, text);
 	}
 
@@ -575,5 +575,6 @@ class WeatherStation
 
 		System.Console.WriteLine("Press key to exit");
 		System.Console.ReadKey();
+		ipcon.Disconnect();
 	}
 }

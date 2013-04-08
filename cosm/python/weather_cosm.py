@@ -59,10 +59,8 @@ class Cosm:
                                      'min_value': value[1], 
                                      'max_value': value[2]})
      
-            data = {
-              'version' : '1.0.0',
-              'datastreams': stream_items,
-            }
+            data = {'version': '1.0.0',
+                    'datastreams': stream_items}
             self.items = {}
             body = json.dumps(data)
 
@@ -213,9 +211,8 @@ if __name__ == "__main__":
     weather_station = WeatherStation()
 
     if sys.version_info < (3, 0):
-        raw_input('Press key to exit\n') # Use input() in Python 3
-    else:
-        input('Press key to exit\n') # Use input() in Python 3
+        input = raw_input # Compatibility for Python 2.x
+    input('Press key to exit\n')
 
     if weather_station.ipcon != None:
         weather_station.ipcon.disconnect()
