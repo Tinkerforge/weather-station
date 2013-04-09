@@ -4,7 +4,8 @@ program WeatherStation;
 {$ifdef FPC}{$mode OBJFPC}{$H+}{$endif}
 
 uses
-  SysUtils, IPConnection, Device, BrickletLCD20x4, BrickletHumidity, BrickletBarometer, BrickletAmbientLight;
+  SysUtils, IPConnection, Device, BrickletLCD20x4, BrickletHumidity,
+  BrickletBarometer, BrickletAmbientLight;
 
 const
   HOST = 'localhost';
@@ -22,9 +23,10 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure ConnectedCB(sender: TIPConnection; const connectedReason: byte);
-    procedure EnumerateCB(sender: TIPConnection;
-                          const uid: string; const connectedUid: string; const position: char;
-                          const hardwareVersion: TVersionNumber; const firmwareVersion: TVersionNumber;
+    procedure EnumerateCB(sender: TIPConnection; const uid: string;
+                          const connectedUid: string; const position: char;
+                          const hardwareVersion: TVersionNumber;
+                          const firmwareVersion: TVersionNumber;
                           const deviceIdentifier: word; const enumerationType: byte);
     procedure IlluminanceCB(sender: TBrickletAmbientLight; const illuminance: word);
     procedure HumidityCB(sender: TBrickletHumidity; const humidity: word);
@@ -71,9 +73,10 @@ begin
   end;
 end;
 
-procedure TWeatherStation.EnumerateCB(sender: TIPConnection;
-                                      const uid: string; const connectedUid: string; const position: char;
-                                      const hardwareVersion: TVersionNumber; const firmwareVersion: TVersionNumber;
+procedure TWeatherStation.EnumerateCB(sender: TIPConnection; const uid: string;
+                                      const connectedUid: string; const position: char;
+                                      const hardwareVersion: TVersionNumber;
+                                      const firmwareVersion: TVersionNumber;
                                       const deviceIdentifier: word; const enumerationType: byte);
 begin
   if ((enumerationType = IPCON_ENUMERATION_TYPE_CONNECTED) or
