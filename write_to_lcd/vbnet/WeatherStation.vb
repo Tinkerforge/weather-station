@@ -4,33 +4,39 @@ Module WeatherStation
     Const HOST As String = "localhost"
     Const PORT As Integer = 4223
 
-    Private ipcon As IPConnection
-    Private brickletLCD As BrickletLCD20x4
-    Private brickletHumidity As BrickletHumidity
-    Private brickletBarometer As BrickletBarometer
-    Private brickletAmbientLight As BrickletAmbientLight
+    Private ipcon As IPConnection = Nothing
+    Private brickletLCD As BrickletLCD20x4 = Nothing
+    Private brickletHumidity As BrickletHumidity = Nothing
+    Private brickletBarometer As BrickletBarometer = Nothing
+    Private brickletAmbientLight As BrickletAmbientLight = Nothing
 
     Sub IlluminanceCB(ByVal sender As BrickletAmbientLight, ByVal illuminance As Integer)
-        Dim text As String = String.Format("Illuminanc {0,6:###.00} lx", illuminance/10.0)
-        brickletLCD.WriteLine(0, 0, text)
-        System.Console.WriteLine("Write to line 0: " + text)
+        If brickletLCD IsNot Nothing Then
+            Dim text As String = String.Format("Illuminanc {0,6:###.00} lx", illuminance/10.0)
+            brickletLCD.WriteLine(0, 0, text)
+            System.Console.WriteLine("Write to line 0: " + text)
+        End If
     End Sub
 
     Sub HumidityCB(ByVal sender As BrickletHumidity, ByVal humidity As Integer)
-        Dim text As String = String.Format("Humidity   {0,6:###.00} %", humidity/10.0)
-        brickletLCD.WriteLine(1, 0, text)
-        System.Console.WriteLine("Write to line 1: " + text)
+        If brickletLCD IsNot Nothing Then
+            Dim text As String = String.Format("Humidity   {0,6:###.00} %", humidity/10.0)
+            brickletLCD.WriteLine(1, 0, text)
+            System.Console.WriteLine("Write to line 1: " + text)
+        End If
     End Sub
 
     Sub AirPressureCB(ByVal sender As BrickletBarometer, ByVal airPressure As Integer)
-        Dim text As String = String.Format("Air Press {0,7:####.00} mb", airPressure/1000.0)
-        brickletLCD.WriteLine(2, 0, text)
-        System.Console.WriteLine("Write to line 2: " + text)
+        If brickletLCD IsNot Nothing Then
+            Dim text As String = String.Format("Air Press {0,7:####.00} mb", airPressure/1000.0)
+            brickletLCD.WriteLine(2, 0, text)
+            System.Console.WriteLine("Write to line 2: " + text)
 
-        Dim temperature As Integer = sender.GetChipTemperature()
-        text = String.Format("Temperature {0,5:##.00} {1}C", temperature/100.0, Chr(&HDF))
-        brickletLCD.WriteLine(3, 0, text)
-        System.Console.WriteLine("Write to line 3: " + text)
+            Dim temperature As Integer = sender.GetChipTemperature()
+            text = String.Format("Temperature {0,5:##.00} {1}C", temperature/100.0, Chr(&HDF))
+            brickletLCD.WriteLine(3, 0, text)
+            System.Console.WriteLine("Write to line 3: " + text)
+        End If
     End Sub
 
     Sub EnumerateCB(ByVal sender As IPConnection, ByVal uid As String, _
@@ -40,21 +46,45 @@ Module WeatherStation
         If enumerationType = IPConnection.ENUMERATION_TYPE_CONNECTED Or _
            enumerationType = IPConnection.ENUMERATION_TYPE_AVAILABLE Then
             If deviceIdentifier = BrickletLCD20x4.DEVICE_IDENTIFIER Then
-                brickletLCD = New BrickletLCD20x4(UID, ipcon)
-                brickletLCD.ClearDisplay()
-                brickletLCD.BacklightOn()
+                Try
+                    brickletLCD = New BrickletLCD20x4(UID, ipcon)
+                    brickletLCD.ClearDisplay()
+                    brickletLCD.BacklightOn()
+                    System.Console.WriteLine("LCD20x4 initialized")
+                Catch e As TinkerforgeException
+                    System.Console.WriteLine("LCD20x4 init failed: " + e.Message)
+                    brickletLCD = Nothing
+                End Try
             Else If deviceIdentifier = BrickletAmbientLight.DEVICE_IDENTIFIER Then
-                brickletAmbientLight = New BrickletAmbientLight(UID, ipcon)
-                brickletAmbientLight.SetIlluminanceCallbackPeriod(1000)
-                AddHandler brickletAmbientLight.Illuminance, AddressOf IlluminanceCB
+                Try
+                    brickletAmbientLight = New BrickletAmbientLight(UID, ipcon)
+                    brickletAmbientLight.SetIlluminanceCallbackPeriod(1000)
+                    AddHandler brickletAmbientLight.Illuminance, AddressOf IlluminanceCB
+                    System.Console.WriteLine("AmbientLight initialized")
+                Catch e As TinkerforgeException
+                    System.Console.WriteLine("AmbientLight init failed: " + e.Message)
+                    brickletAmbientLight = Nothing
+                End Try
             Else If deviceIdentifier = BrickletHumidity.DEVICE_IDENTIFIER Then
-                brickletHumidity = New BrickletHumidity(UID, ipcon)
-                brickletHumidity.SetHumidityCallbackPeriod(1000)
-                AddHandler brickletHumidity.Humidity, AddressOf HumidityCB
+                Try
+                    brickletHumidity = New BrickletHumidity(UID, ipcon)
+                    brickletHumidity.SetHumidityCallbackPeriod(1000)
+                    AddHandler brickletHumidity.Humidity, AddressOf HumidityCB
+                    System.Console.WriteLine("Humidity initialized")
+                Catch e As TinkerforgeException
+                    System.Console.WriteLine("Humidity init failed: " + e.Message)
+                    brickletHumidity = Nothing
+                End Try
             Else If deviceIdentifier = BrickletBarometer.DEVICE_IDENTIFIER Then
-                brickletBarometer = New BrickletBarometer(UID, ipcon)
-                brickletBarometer.SetAirPressureCallbackPeriod(1000)
-                AddHandler brickletBarometer.AirPressure, AddressOf AirPressureCB
+                Try
+                    brickletBarometer = New BrickletBarometer(UID, ipcon)
+                    brickletBarometer.SetAirPressureCallbackPeriod(1000)
+                    AddHandler brickletBarometer.AirPressure, AddressOf AirPressureCB
+                    System.Console.WriteLine("Barometer initialized")
+                Catch e As TinkerforgeException
+                    System.Console.WriteLine("Barometer init failed: " + e.Message)
+                    brickletBarometer = Nothing
+                End Try
             End If
         End If
     End Sub
