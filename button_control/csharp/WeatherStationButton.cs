@@ -158,7 +158,7 @@ class WeatherStation
 
 		if(h > 0)
 		{
-			str += + h + "h)";
+			str += h + "h)";
 		}
 		else
 		{
@@ -479,7 +479,7 @@ class WeatherStation
 
 	static private void UpdateTime()
 	{
-		string line0 = DateTime.Now.ToString("HH:MM:ss");
+		string line0 = DateTime.Now.ToString("HH:mm:ss");
 		string line1 = DateTime.Now.ToString("dddd");
 		string line2 = DateTime.Now.ToString("D");
 		brickletLCD.WriteLine((byte)0, (byte)((LINE_LENGTH-line0.Length)/2), line0);
