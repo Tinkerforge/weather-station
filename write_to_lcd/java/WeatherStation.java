@@ -129,7 +129,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 				try {
 					Thread.sleep(1000);
-				} catch(java.lang.InterruptedException ei) {
+				} catch(InterruptedException ei) {
 				}
 			}
 		}
@@ -156,7 +156,7 @@ public class WeatherStation {
 
 			try {
 				Thread.sleep(1000);
-			} catch(java.lang.InterruptedException ei) {
+			} catch(InterruptedException ei) {
 			}
 		}
 
@@ -173,7 +173,7 @@ public class WeatherStation {
 
 			try {
 				Thread.sleep(1000);
-			} catch(java.lang.InterruptedException ei) {
+			} catch(InterruptedException ei) {
 			}
 		}
 
