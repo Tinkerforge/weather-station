@@ -80,6 +80,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
                   uint8_t firmware_version[3], uint16_t device_identifier,
                   uint8_t enumeration_type, void *user_data) {
 	WeatherStation *ws = (WeatherStation *)user_data;
+	int rc;
 
 	if(enumeration_type == IPCON_ENUMERATION_TYPE_CONNECTED ||
 	   enumeration_type == IPCON_ENUMERATION_TYPE_AVAILABLE) {
@@ -88,27 +89,46 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			lcd_20x4_clear_display(&ws->lcd);
 			lcd_20x4_backlight_on(&ws->lcd);
 			ws->lcd_created = true;
+			printf("LCD initialized\n");
 		} else if(device_identifier == AMBIENT_LIGHT_DEVICE_IDENTIFIER) {
 			ambient_light_create(&ws->ambient_light, uid, &ws->ipcon);
-			ambient_light_set_illuminance_callback_period(&ws->ambient_light, 1000);
 			ambient_light_register_callback(&ws->ambient_light,
 			                                AMBIENT_LIGHT_CALLBACK_ILLUMINANCE,
 			                                (void *)cb_illuminance,
 			                                (void *)ws);
+			rc = ambient_light_set_illuminance_callback_period(&ws->ambient_light, 1000);
+
+			if(rc < 0) {
+				fprintf(stderr, "AmbientLight init failed: %d\n", rc);
+			} else {
+				printf("AmbientLight initialized\n");
+			}
 		} else if(device_identifier == HUMIDITY_DEVICE_IDENTIFIER) {
 			humidity_create(&ws->humidity, uid, &ws->ipcon);
-			humidity_set_humidity_callback_period(&ws->humidity, 1000);
 			humidity_register_callback(&ws->humidity,
 			                           HUMIDITY_CALLBACK_HUMIDITY,
 			                           (void *)cb_humidity,
 			                           (void *)ws);
+			rc = humidity_set_humidity_callback_period(&ws->humidity, 1000);
+
+			if(rc < 0) {
+				fprintf(stderr, "Humidity init failed: %d\n", rc);
+			} else {
+				printf("Humidity initialized\n");
+			}
 		} else if(device_identifier == BAROMETER_DEVICE_IDENTIFIER) {
 			barometer_create(&ws->barometer, uid, &ws->ipcon);
-			barometer_set_air_pressure_callback_period(&ws->barometer, 1000);
 			barometer_register_callback(&ws->barometer,
 			                            BAROMETER_CALLBACK_AIR_PRESSURE,
 			                            (void *)cb_air_pressure,
 			                            (void *)ws);
+			rc = barometer_set_air_pressure_callback_period(&ws->barometer, 1000);
+
+			if(rc < 0) {
+				fprintf(stderr, "Barometer init failed: %d\n", rc);
+			} else {
+				printf("Barometer initialized\n");
+			}
 		}
 	}
 }
