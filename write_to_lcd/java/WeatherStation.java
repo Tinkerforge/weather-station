@@ -59,13 +59,14 @@ class WeatherListener implements IPConnection.EnumerateListener,
 			} catch(com.tinkerforge.TinkerforgeException e) {
 			}
 
+			// 0xDF == ° on LCD 20x4 charset
 			text = String.format("Temperature %5.2f %cC", temperature/100.0, 0xDF);
 			try {
 				brickletLCD.writeLine((short)3, (short)0, text);
 			} catch(com.tinkerforge.TinkerforgeException e) {
 			}
 
-			System.out.println("Write to line 3: " + text);
+			System.out.println("Write to line 3: " + text.replace((char)0xDF, '°'));
 		}
 	}
 

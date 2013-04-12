@@ -33,9 +33,10 @@ Module WeatherStation
             System.Console.WriteLine("Write to line 2: " + text)
 
             Dim temperature As Integer = sender.GetChipTemperature()
+            ' &HDF == ° on LCD 20x4 charset
             text = String.Format("Temperature {0,5:##.00} {1}C", temperature/100.0, Chr(&HDF))
             brickletLCD.WriteLine(3, 0, text)
-            System.Console.WriteLine("Write to line 3: " + text)
+            System.Console.WriteLine("Write to line 3: " + text.Replace(Chr(&HDF), "°"C))
         End If
     End Sub
 

@@ -75,8 +75,10 @@ class WeatherStation
 			echo "Write to line 2: $text\n";
 
 			$temperature = $this->brickletBarometer->getChipTemperature();
+			// 0xDF == ° on LCD 20x4 charset
 			$text = sprintf("Temperature %5.2f %cC", $temperature/100.0, 0xDF);
 			$this->brickletLCD->writeLine(3, 0, $text);
+			$text = str_replace(sprintf("%c", 0xDF), '°', $text);
 			echo "Write to line 3: $text\n";
 		}
 	}

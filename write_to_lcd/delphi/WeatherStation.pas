@@ -165,6 +165,7 @@ begin
     WriteLn('Write to line 2: ' + text);
 
     temperature := brickletBarometer.GetChipTemperature;
+    { $DF == ° on LCD 20x4 charset }
     text := Format('Temperature %5.2f %sC', [temperature/100.0, '' + char($DF)]);
     brickletLCD.WriteLine(3, 0, text);
     text := StringReplace(text, char($DF), '°', [rfReplaceAll]);

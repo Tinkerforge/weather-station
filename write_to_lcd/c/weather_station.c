@@ -53,8 +53,10 @@ void cb_air_pressure(int32_t air_pressure, void *user_data) {
 		barometer_get_chip_temperature(&ws->barometer, &temperature);
 
 		memset(text, '\0', sizeof(text));
+		// 0xDF == ° on LCD 20x4 charset
 		sprintf(text, "Temperature %5.2f %cC", temperature/100.0, 0xDF);
 		lcd_20x4_write_line(&ws->lcd, 3, 0, text);
+		sprintf(text, "Temperature %5.2f °C", temperature/100.0);
 		printf("Write to line 3: %s\n", text);
 	}
 }

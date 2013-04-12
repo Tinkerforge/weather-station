@@ -86,9 +86,10 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
             puts "Write to line 2: #{text}"
 
             temperature = barometer.get_chip_temperature
+            # 0xDF == ° on LCD 20x4 charset
             text = 'Temperature %5.2f %sC' % [(temperature/100.0), 0xDF.chr]
             lcd.write_line 3, 0, text
-            puts "Write to line 3: #{text}"
+            puts "Write to line 3: #{text.sub(0xDF.chr, '°')}"
           end
         end
         puts 'Barometer initialized'
