@@ -138,6 +138,8 @@ class WeatherStation
 	function connectedCB($connectedReason)
 	{
 		if($connectedReason == IPConnection::CONNECT_REASON_AUTO_RECONNECT) {
+			echo "Auto Reconnect\n";
+
 			while(true) {
 				try {
 					$this->ipcon->enumerate();

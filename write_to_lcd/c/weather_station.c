@@ -65,6 +65,8 @@ void cb_connected(uint8_t connected_reason, void *user_data) {
 	WeatherStation *ws = (WeatherStation *)user_data;
 
 	if(connected_reason == IPCON_CONNECT_REASON_AUTO_RECONNECT) {
+		printf("Auto Reconnect\n");
+
 		while(true) {
 			int rc = ipcon_enumerate(&ws->ipcon);
 			if(rc < 0) {

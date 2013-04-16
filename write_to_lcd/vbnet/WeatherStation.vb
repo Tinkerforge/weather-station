@@ -92,6 +92,7 @@ Module WeatherStation
 
     Sub ConnectedCB(ByVal sender As IPConnection, ByVal connectedReason as Short)
         If connectedReason = IPConnection.CONNECT_REASON_AUTO_RECONNECT Then
+            System.Console.WriteLine("Auto Reconnect")
             while True
                 Try
                     ipcon.Enumerate()

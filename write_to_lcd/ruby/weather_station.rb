@@ -103,6 +103,7 @@ end
 
 ipcon.register_callback(IPConnection::CALLBACK_CONNECTED) do |connected_reason|
   if connected_reason == IPConnection::CONNECT_REASON_AUTO_RECONNECT
+    puts 'Auto Reconnect'
     while true
       begin
         ipcon.enumerate

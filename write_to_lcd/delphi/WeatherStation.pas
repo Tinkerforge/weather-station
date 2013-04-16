@@ -59,6 +59,7 @@ end;
 procedure TWeatherStation.ConnectedCB(sender: TIPConnection; const connectedReason: byte);
 begin
   if (connectedReason = IPCON_CONNECT_REASON_AUTO_RECONNECT) then begin
+    WriteLn('Auto Reconnect');
     while (true) do begin
       try
         ipcon.Enumerate;

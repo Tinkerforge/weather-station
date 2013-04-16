@@ -121,6 +121,8 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 	public void connected(short connectedReason) {
 		if(connectedReason == IPConnection.CONNECT_REASON_AUTO_RECONNECT) {
+			System.out.println("Auto Reconnect");
+
 			while(true) {
 				try {
 					ipcon.enumerate();

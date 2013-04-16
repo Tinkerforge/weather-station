@@ -122,6 +122,8 @@ class WeatherStation:
 
     def cb_connected(self, connected_reason):
         if connected_reason == IPConnection.CONNECT_REASON_AUTO_RECONNECT:
+            log.info('Auto Reconnect')
+
             while True:
                 try:
                     self.ipcon.enumerate()
