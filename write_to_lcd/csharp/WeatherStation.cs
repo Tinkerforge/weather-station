@@ -121,7 +121,7 @@ class WeatherStation
 	{
 		if(connectedReason == IPConnection.CONNECT_REASON_AUTO_RECONNECT)
 		{
-			System.Console.WriteLine("Auto Reconnect")
+			System.Console.WriteLine("Auto Reconnect");
 
 			while(true)
 			{
