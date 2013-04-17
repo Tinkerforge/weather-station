@@ -24,7 +24,7 @@ class Cosm:
     AGENT = "Tinkerforge cosm 1.0"
     FEED = '105813.json'
     API_KEY = 'WtXx2m6ItNZyFYoQyR5qnoN1GsOSAKxPMGdIaXRLYzY5ND0g'
- 
+
     def __init__(self):
         self.items = {}
         self.headers = {
@@ -54,11 +54,11 @@ class Cosm:
 
             stream_items = []
             for identifier, value in self.items.items():
-                stream_items.append({'id': identifier, 
-                                     'current_value': value[0], 
-                                     'min_value': value[1], 
+                stream_items.append({'id': identifier,
+                                     'current_value': value[0],
+                                     'min_value': value[1],
                                      'max_value': value[2]})
-     
+
             data = {'version': '1.0.0',
                     'datastreams': stream_items}
             self.items = {}
@@ -70,7 +70,7 @@ class Cosm:
             http.close()
 
             if response.status != 200:
-                log.error('Could not upload to cosm -> ' + 
+                log.error('Could not upload to cosm -> ' +
                           str(response.status) + ': ' + response.reason)
 
 class WeatherStation:
@@ -97,9 +97,9 @@ class WeatherStation:
                 log.error('Socket error: ' + str(e))
                 time.sleep(1)
 
-        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE, 
+        self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
                                      self.cb_enumerate)
-        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED, 
+        self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
                                      self.cb_connected)
 
         while True:
@@ -110,48 +110,35 @@ class WeatherStation:
                 log.error('Enumerate Error: ' + str(e.description))
                 time.sleep(1)
 
-    # Format value to fit on LCD with given pre and post digits
-    def fmt(self, value, pre, post=2):
-        v2, v1 = math.modf(value)
-        v1 = str(int(v1))
-        v2 = str(int(v2 * 10**post))
-
-        num_space = (pre - len(v1))
-        num_zero = (post - len(v2))
-
-        return ' '*num_space + v1 + '.' + v2 + '0'*num_zero
-
     def cb_illuminance(self, illuminance):
         if self.lcd is not None:
-            text = 'Illuminanc %s lx' % self.fmt(illuminance/10.0, 3)
+            text = 'Illuminanc %6.2f lx' % (illuminance/10.0)
             self.lcd.write_line(0, 0, text)
             self.cosm.put('AmbientLight', illuminance/10.0)
             log.info('Write to line 0: ' + text)
 
     def cb_humidity(self, humidity):
         if self.lcd is not None:
-            text = 'Humidity %s %%' % self.fmt(humidity/10.0, 5)
+            text = 'Humidity   %6.2f %%' % (humidity/10.0)
             self.lcd.write_line(1, 0, text)
             self.cosm.put('Humidity', humidity/10.0)
             log.info('Write to line 1: ' + text)
- 
+
     def cb_air_pressure(self, air_pressure):
         if self.lcd is not None:
-            text = 'Air Press %s mb' % self.fmt(air_pressure/1000.0, 4)
+            text = 'Air Press %7.2f mb' % (air_pressure/1000.0)
             self.lcd.write_line(2, 0, text)
             self.cosm.put('AirPressure', air_pressure/1000.0)
             log.info('Write to line 2: ' + text)
 
             temperature = self.baro.get_chip_temperature()/100.0
-            fmt_text = self.fmt(temperature, 2)
-            # \xDF == ° on LCD20x4 charset
-            text = 'Temperature %s \xDFC' % fmt_text
+            # \xDF == ° on LCD 20x4 charset
+            text = 'Temperature %5.2f \xDFC' % temperature
             self.lcd.write_line(3, 0, text)
             self.cosm.put('Temperature', temperature)
             log.info('Write to line 3: ' + text.replace('\xDF', '°'))
 
-    def cb_enumerate(self, 
-                     uid, connected_uid, position, hardware_version, 
+    def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):
         if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
            enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
@@ -168,7 +155,7 @@ class WeatherStation:
                 try:
                     self.al = AmbientLight(uid, self.ipcon)
                     self.al.set_illuminance_callback_period(1000)
-                    self.al.register_callback(self.al.CALLBACK_ILLUMINANCE, 
+                    self.al.register_callback(self.al.CALLBACK_ILLUMINANCE,
                                               self.cb_illuminance)
                     log.info('AmbientLight initialized')
                 except Error as e:
@@ -178,7 +165,7 @@ class WeatherStation:
                 try:
                     self.hum = Humidity(uid, self.ipcon)
                     self.hum.set_humidity_callback_period(1000)
-                    self.hum.register_callback(self.hum.CALLBACK_HUMIDITY, 
+                    self.hum.register_callback(self.hum.CALLBACK_HUMIDITY,
                                                self.cb_humidity)
                     log.info('Humidity initialized')
                 except Error as e:
@@ -197,6 +184,8 @@ class WeatherStation:
 
     def cb_connected(self, connected_reason):
         if connected_reason == IPConnection.CONNECT_REASON_AUTO_RECONNECT:
+            log.info('Auto Reconnect')
+
             while True:
                 try:
                     self.ipcon.enumerate()
