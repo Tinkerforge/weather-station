@@ -9,23 +9,23 @@ require 'tinkerforge/bricklet_barometer'
 
 include Tinkerforge
 
-HOST          = 'localhost'
-PORT          = 4223
+HOST = 'localhost'
+PORT = 4223
 
-lcd           = nil
+lcd = nil
 ambient_light = nil
-humidity      = nil
-barometer     = nil
+humidity = nil
+barometer = nil
 
 ipcon = IPConnection.new
 while true
   begin
     ipcon.connect HOST, PORT
-  rescue Errno::ECONNREFUSED
+    break
+  rescue Exception => e
+    puts 'Connection Error: ' + e
     sleep 1
-    redo
   end
-  break
 end
 
 ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid, position,
@@ -34,60 +34,97 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
   if enumeration_type == IPConnection::ENUMERATION_TYPE_CONNECTED or
      enumeration_type == IPConnection::ENUMERATION_TYPE_AVAILABLE
     if device_identifier == BrickletLCD20x4::DEVICE_IDENTIFIER
-	  lcd = BrickletLCD20x4.new uid, ipcon
-	  lcd.clear_display
-	  lcd.backlight_on
-	end
-    if device_identifier == BrickletAmbientLight::DEVICE_IDENTIFIER
-	  ambient_light = BrickletAmbientLight.new uid, ipcon
-	  ambient_light.set_illuminance_callback_period 1000
-	  ambient_light.register_callback(BrickletAmbientLight::CALLBACK_ILLUMINANCE) do |illuminance|
-	    text = "Illuminanc %6.2f lx" % (illuminance/10.0)
-		if lcd != nil
-          lcd.write_line 0, 0, text
-		end
-		puts "Write to line 0: #{text}"
+      begin
+        lcd = BrickletLCD20x4.new uid, ipcon
+        lcd.clear_display
+        lcd.backlight_on
+        puts 'LCD initialized'
+      rescue Exception => e
+        lcd = nil
+        puts 'LCD init failed: ' + e
       end
-	end
-    if device_identifier == BrickletHumidity::DEVICE_IDENTIFIER
-	  humidity = BrickletHumidity.new uid, ipcon
-	  humidity.set_humidity_callback_period 1000
-	  humidity.register_callback(BrickletHumidity::CALLBACK_HUMIDITY) do |humidity|
-        text = "Humidity   %6.2f %%" % (humidity/10.0)
-		if lcd != nil
-          lcd.write_line 1, 0, text
-		end
-		puts "Write to line 1: #{text}"
+    elsif device_identifier == BrickletAmbientLight::DEVICE_IDENTIFIER
+      begin
+        ambient_light = BrickletAmbientLight.new uid, ipcon
+        ambient_light.set_illuminance_callback_period 1000
+        ambient_light.register_callback(BrickletAmbientLight::CALLBACK_ILLUMINANCE) do |illuminance|
+          if lcd != nil
+            text = 'Illuminanc %6.2f lx' % (illuminance/10.0)
+            lcd.write_line 0, 0, text
+            puts "Write to line 0: #{text}"
+          end
+        end
+        puts 'AmbientLight initialized'
+      rescue Exception => e
+        ambient_light = nil
+        puts 'AmbientLight init failed: ' + e
       end
-	end
-    if device_identifier == BrickletBarometer::DEVICE_IDENTIFIER
-	  barometer = BrickletBarometer.new uid, ipcon
-	  barometer.set_air_pressure_callback_period 1000
-	  barometer.register_callback(BrickletBarometer::CALLBACK_AIR_PRESSURE) do |air_pressure|
-        text = "Air Press %7.2f mg" % (air_pressure/1000.0)
-		if lcd != nil
-          lcd.write_line 2, 0, text
-		end
-		puts "Write to line 2: #{text}"
-	    temperature = barometer.get_chip_temperature
+    elsif device_identifier == BrickletHumidity::DEVICE_IDENTIFIER
+      begin
+        humidity = BrickletHumidity.new uid, ipcon
+        humidity.set_humidity_callback_period 1000
+        humidity.register_callback(BrickletHumidity::CALLBACK_HUMIDITY) do |humidity|
+          if lcd != nil
+            text = 'Humidity   %6.2f %%' % (humidity/10.0)
+            lcd.write_line 1, 0, text
+            puts "Write to line 1: #{text}"
+          end
+        end
+        puts 'Humidity initialized'
+      rescue Exception => e
+        humidity = nil
+        puts 'Humidity init failed: ' + e
+      end
+    elsif device_identifier == BrickletBarometer::DEVICE_IDENTIFIER
+      begin
+        barometer = BrickletBarometer.new uid, ipcon
+        barometer.set_air_pressure_callback_period 1000
+        barometer.register_callback(BrickletBarometer::CALLBACK_AIR_PRESSURE) do |air_pressure|
+          if lcd != nil
+            text = 'Air Press %7.2f mb' % (air_pressure/1000.0)
+            lcd.write_line 2, 0, text
+            puts "Write to line 2: #{text}"
 
-        text = "Temperature %2.2f %sC" % [(temperature/100.0), 0xDF.chr]
-		if lcd != nil
-          lcd.write_line 3, 0, text
-		end
-		puts "Write to line 3: #{text}"
+            temperature = barometer.get_chip_temperature
+            # 0xDF == ° on LCD 20x4 charset
+            text = 'Temperature %5.2f %sC' % [(temperature/100.0), 0xDF.chr]
+            lcd.write_line 3, 0, text
+            puts "Write to line 3: #{text.sub(0xDF.chr, '°')}"
+          end
+        end
+        puts 'Barometer initialized'
+      rescue Exception => e
+        barometer = nil
+        puts 'Barometer init failed: ' + e
       end
-	end
+    end
   end
 end
 
 ipcon.register_callback(IPConnection::CALLBACK_CONNECTED) do |connected_reason|
   if connected_reason == IPConnection::CONNECT_REASON_AUTO_RECONNECT
-    ipcon.enumerate
+    puts 'Auto Reconnect'
+    while true
+      begin
+        ipcon.enumerate
+        break
+      rescue Exception => e
+        puts 'Enumerate Error: ' + e
+        sleep 1
+      end
+    end
   end
 end
 
-ipcon.enumerate
+while true
+  begin
+    ipcon.enumerate
+    break
+  rescue Exception => e
+    puts 'Enumerate Error: ' + e
+    sleep 1
+  end
+end
 
 puts 'Press key to exit'
 $stdin.gets

@@ -84,29 +84,63 @@ class WeatherStation
 		{
 			if(deviceIdentifier == BrickletLCD20x4.DEVICE_IDENTIFIER)
 			{
-				brickletLCD = new BrickletLCD20x4(UID, ipcon);
-				brickletLCD.ClearDisplay();
-				brickletLCD.BacklightOn();
-				ConfigureCustomChars(brickletLCD);
-				brickletLCD.ButtonPressed += PressedCB;
+				try
+				{
+					brickletLCD = new BrickletLCD20x4(UID, ipcon);
+					brickletLCD.ClearDisplay();
+					brickletLCD.BacklightOn();
+					ConfigureCustomChars(brickletLCD);
+					brickletLCD.ButtonPressed += PressedCB;
+					System.Console.WriteLine("LCD20x4 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("LCD20x4 init failed: " + e.Message);
+					brickletLCD = null;
+				}
 			}
 			else if(deviceIdentifier == BrickletAmbientLight.DEVICE_IDENTIFIER)
 			{
-				brickletAmbientLight = new BrickletAmbientLight(UID, ipcon);
-				brickletAmbientLight.SetIlluminanceCallbackPeriod(1000);
-				brickletAmbientLight.Illuminance += IlluminanceCB;
+				try
+				{
+					brickletAmbientLight = new BrickletAmbientLight(UID, ipcon);
+					brickletAmbientLight.SetIlluminanceCallbackPeriod(1000);
+					brickletAmbientLight.Illuminance += IlluminanceCB;
+					System.Console.WriteLine("AmbientLight initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("AmbientLight init failed: " + e.Message);
+					brickletAmbientLight = null;
+				}
 			}
 			else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER)
 			{
-				brickletHumidity = new BrickletHumidity(UID, ipcon);
-				brickletHumidity.SetHumidityCallbackPeriod(1000);
-				brickletHumidity.Humidity += HumidityCB;
+				try
+				{
+					brickletHumidity = new BrickletHumidity(UID, ipcon);
+					brickletHumidity.SetHumidityCallbackPeriod(1000);
+					brickletHumidity.Humidity += HumidityCB;
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Humidity init failed: " + e.Message);
+					brickletHumidity = null;
+				}
 			}
 			else if(deviceIdentifier == BrickletBarometer.DEVICE_IDENTIFIER)
 			{
-				brickletBarometer = new BrickletBarometer(UID, ipcon);
-				brickletBarometer.SetAirPressureCallbackPeriod(1000);
-				brickletBarometer.AirPressure += AirPressureCB;
+				try
+				{
+					brickletBarometer = new BrickletBarometer(UID, ipcon);
+					brickletBarometer.SetAirPressureCallbackPeriod(1000);
+					brickletBarometer.AirPressure += AirPressureCB;
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Barometer init failed: " + e.Message);
+					brickletBarometer = null;
+				}
 			}
 		}
 	}
@@ -115,19 +149,20 @@ class WeatherStation
 	{
 		if(connectedReason == IPConnection.CONNECT_REASON_AUTO_RECONNECT)
 		{
+			System.Console.WriteLine("Auto Reconnect");
+
 			while(true)
 			{
 				try
 				{
 					ipcon.Enumerate();
+					break;
 				}
 				catch(NotConnectedException e)
 				{
 					System.Console.WriteLine("Enumeration Error: " + e.Message);
 					System.Threading.Thread.Sleep(1000);
-					continue;
 				}
-				break;
 			}
 		}
 	}
@@ -158,7 +193,7 @@ class WeatherStation
 
 		if(h > 0)
 		{
-			str += + h + "h)";
+			str += h + "h)";
 		}
 		else
 		{
@@ -313,7 +348,7 @@ class WeatherStation
 		text = string.Format("Air Press {0,7:####.00} mb", latestAirPressure);
 		brickletLCD.WriteLine(2, 0, text);
 
-		text = string.Format("Temperature {0,2:##.00} {1}C", latestTemperature, (char)0xDF);
+		text = string.Format("Temperature {0,5:##.00} {1}C", latestTemperature, (char)0xDF);
 		brickletLCD.WriteLine(3, 0, text);
 	}
 
@@ -479,7 +514,7 @@ class WeatherStation
 
 	static private void UpdateTime()
 	{
-		string line0 = DateTime.Now.ToString("HH:MM:ss");
+		string line0 = DateTime.Now.ToString("HH:mm:ss");
 		string line1 = DateTime.Now.ToString("dddd");
 		string line2 = DateTime.Now.ToString("D");
 		brickletLCD.WriteLine((byte)0, (byte)((LINE_LENGTH-line0.Length)/2), line0);
@@ -543,14 +578,13 @@ class WeatherStation
 			try
 			{
 				ipcon.Connect(HOST, PORT);
+				break;
 			}
 			catch(System.Net.Sockets.SocketException e)
 			{
 				System.Console.WriteLine("Connection Error: " + e.Message);
 				System.Threading.Thread.Sleep(1000);
-				continue;
 			}
-			break;
 		}
 
 		ipcon.EnumerateCallback += EnumerateCB;
@@ -561,19 +595,19 @@ class WeatherStation
 			try
 			{
 				ipcon.Enumerate();
+				break;
 			}
 			catch(NotConnectedException e)
 			{
 				System.Console.WriteLine("Enumeration Error: " + e.Message);
 				System.Threading.Thread.Sleep(1000);
-				continue;
 			}
-			break;
 		}
 
 		Timer timer = new Timer(Update, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
 		System.Console.WriteLine("Press key to exit");
 		System.Console.ReadKey();
+		ipcon.Disconnect();
 	}
 }

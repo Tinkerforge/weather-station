@@ -1,6 +1,6 @@
 using Tinkerforge;
 
-class WeatherStation 
+class WeatherStation
 {
 	private static string HOST = "localhost";
 	private static int PORT = 4223;
@@ -13,100 +13,147 @@ class WeatherStation
 
 	static void IlluminanceCB(BrickletAmbientLight sender, int illuminance)
 	{
-		string text = string.Format("Illuminanc {0,6:###.00} lx", illuminance/10.0);
-		brickletLCD.WriteLine(0, 0, text);
-		System.Console.WriteLine("Write to line 0: " + text);
+		if(brickletLCD != null)
+		{
+			string text = string.Format("Illuminanc {0,6:###.00} lx", illuminance/10.0);
+			brickletLCD.WriteLine(0, 0, text);
+			System.Console.WriteLine("Write to line 0: " + text);
+		}
 	}
 
 	static void HumidityCB(BrickletHumidity sender, int humidity)
 	{
-		string text = string.Format("Humidity   {0,6:###.00} %", humidity/10.0);
-		brickletLCD.WriteLine(1, 0, text);
-		System.Console.WriteLine("Write to line 1: " + text);
+		if(brickletLCD != null)
+		{
+			string text = string.Format("Humidity   {0,6:###.00} %", humidity/10.0);
+			brickletLCD.WriteLine(1, 0, text);
+			System.Console.WriteLine("Write to line 1: " + text);
+		}
 	}
 
 	static void AirPressureCB(BrickletBarometer sender, int airPressure)
 	{
-		string text = string.Format("Air Press {0,7:####.00} mb", airPressure/1000.0);
-		brickletLCD.WriteLine(2, 0, text);
-		System.Console.WriteLine("Write to line 2: " + text);
+		if(brickletLCD != null)
+		{
+			string text = string.Format("Air Press {0,7:####.00} mb", airPressure/1000.0);
+			brickletLCD.WriteLine(2, 0, text);
+			System.Console.WriteLine("Write to line 2: " + text);
 
-		int temperature = sender.GetChipTemperature();
-		text = string.Format("Temperature {0,2:##.00} {1}C", temperature/100.0, (char)0xDF);
-		brickletLCD.WriteLine(3, 0, text);
-		System.Console.WriteLine("Write to line 3: " + text);
+			int temperature = sender.GetChipTemperature();
+			// 0xDF == ° on LCD 20x4 charset
+			text = string.Format("Temperature {0,5:##.00} {1}C", temperature/100.0, (char)0xDF);
+			brickletLCD.WriteLine(3, 0, text);
+			System.Console.WriteLine("Write to line 3: " + text.Replace((char)0xDF, '°'));
+		}
 	}
 
-
-	static void EnumerateCB(object sender, string UID, string connectedUID, char position, short[] hardwareVersion, short[] firmwareVersion, int deviceIdentifier, short enumerationType)
+	static void EnumerateCB(IPConnection sender, string UID, string connectedUID, char position,
+	                        short[] hardwareVersion, short[] firmwareVersion,
+	                        int deviceIdentifier, short enumerationType)
 	{
 		if(enumerationType == IPConnection.ENUMERATION_TYPE_CONNECTED ||
 		   enumerationType == IPConnection.ENUMERATION_TYPE_AVAILABLE)
 		{
 			if(deviceIdentifier == BrickletLCD20x4.DEVICE_IDENTIFIER)
 			{
-				brickletLCD = new BrickletLCD20x4(UID, ipcon);
-				brickletLCD.ClearDisplay();
-				brickletLCD.BacklightOn();
+				try
+				{
+					brickletLCD = new BrickletLCD20x4(UID, ipcon);
+					brickletLCD.ClearDisplay();
+					brickletLCD.BacklightOn();
+					System.Console.WriteLine("LCD20x4 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("LCD20x4 init failed: " + e.Message);
+					brickletLCD = null;
+				}
 			}
-			else if(deviceIdentifier == BrickletAmbientLight.DEVICE_IDENTIFIER) 
+			else if(deviceIdentifier == BrickletAmbientLight.DEVICE_IDENTIFIER)
 			{
-				brickletAmbientLight = new BrickletAmbientLight(UID, ipcon);
-				brickletAmbientLight.SetIlluminanceCallbackPeriod(1000);
-				brickletAmbientLight.Illuminance += IlluminanceCB;
+				try
+				{
+					brickletAmbientLight = new BrickletAmbientLight(UID, ipcon);
+					brickletAmbientLight.SetIlluminanceCallbackPeriod(1000);
+					brickletAmbientLight.Illuminance += IlluminanceCB;
+					System.Console.WriteLine("AmbientLight initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("AmbientLight init failed: " + e.Message);
+					brickletAmbientLight = null;
+				}
 			}
-			else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER) 
+			else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER)
 			{
-				brickletHumidity = new BrickletHumidity(UID, ipcon);
-				brickletHumidity.SetHumidityCallbackPeriod(1000);
-				brickletHumidity.Humidity += HumidityCB;
+				try
+				{
+					brickletHumidity = new BrickletHumidity(UID, ipcon);
+					brickletHumidity.SetHumidityCallbackPeriod(1000);
+					brickletHumidity.Humidity += HumidityCB;
+					System.Console.WriteLine("Humidity initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Humidity init failed: " + e.Message);
+					brickletHumidity = null;
+				}
 			}
-			else if(deviceIdentifier == BrickletBarometer.DEVICE_IDENTIFIER) 
+			else if(deviceIdentifier == BrickletBarometer.DEVICE_IDENTIFIER)
 			{
-				brickletBarometer = new BrickletBarometer(UID, ipcon);
-				brickletBarometer.SetAirPressureCallbackPeriod(1000);
-				brickletBarometer.AirPressure += AirPressureCB;
+				try
+				{
+					brickletBarometer = new BrickletBarometer(UID, ipcon);
+					brickletBarometer.SetAirPressureCallbackPeriod(1000);
+					brickletBarometer.AirPressure += AirPressureCB;
+					System.Console.WriteLine("Barometer initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Barometer init failed: " + e.Message);
+					brickletBarometer = null;
+				}
 			}
 		}
 	}
 
-	static void ConnectedCB(object sender, short connectedReason) 
+	static void ConnectedCB(IPConnection sender, short connectedReason)
 	{
 		if(connectedReason == IPConnection.CONNECT_REASON_AUTO_RECONNECT)
 		{
+			System.Console.WriteLine("Auto Reconnect");
+
 			while(true)
 			{
 				try
 				{
 					ipcon.Enumerate();
+					break;
 				}
 				catch(NotConnectedException e)
 				{
 					System.Console.WriteLine("Enumeration Error: " + e.Message);
 					System.Threading.Thread.Sleep(1000);
-					continue;
 				}
-				break;
 			}
 		}
 	}
 
-	static void Main() 
+	static void Main()
 	{
 		ipcon = new IPConnection();
 		while(true)
 		{
-			try 
+			try
 			{
 				ipcon.Connect(HOST, PORT);
+				break;
 			}
 			catch(System.Net.Sockets.SocketException e)
 			{
 				System.Console.WriteLine("Connection Error: " + e.Message);
 				System.Threading.Thread.Sleep(1000);
-				continue;
 			}
-			break;
 		}
 
 		ipcon.EnumerateCallback += EnumerateCB;
@@ -117,17 +164,17 @@ class WeatherStation
 			try
 			{
 				ipcon.Enumerate();
+				break;
 			}
 			catch(NotConnectedException e)
 			{
 				System.Console.WriteLine("Enumeration Error: " + e.Message);
 				System.Threading.Thread.Sleep(1000);
-				continue;
 			}
-			break;
 		}
 
 		System.Console.WriteLine("Press key to exit");
 		System.Console.ReadKey();
+		ipcon.Disconnect();
 	}
 }

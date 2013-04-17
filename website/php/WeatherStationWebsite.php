@@ -1,4 +1,5 @@
 <?php
+
 require_once('Tinkerforge/IPConnection.php');
 require_once('Tinkerforge/BrickletAmbientLight.php');
 require_once('Tinkerforge/BrickletHumidity.php');
@@ -29,4 +30,5 @@ $response = array (
 );
 
 print_r(json_encode($response));
+
 ?>
