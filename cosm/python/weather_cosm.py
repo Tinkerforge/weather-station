@@ -33,7 +33,9 @@ class Cosm:
             "User-Agent"    : Cosm.AGENT,
         }
         self.params = "/v2/feeds/" + str(Cosm.FEED)
-        threading.Thread(target=self.upload).start()
+        self.upload_thread = threading.Thread(target=self.upload)
+        self.upload_thread.daemon = True
+        self.upload_thread.start()
 
     def put(self, identifier, value):
         try:
