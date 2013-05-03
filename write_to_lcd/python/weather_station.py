@@ -75,8 +75,7 @@ class WeatherStation:
             self.lcd.write_line(3, 0, text)
             log.info('Write to line 3: ' + text.replace('\xDF', '°'))
 
-    def cb_enumerate(self,
-                     uid, connected_uid, position, hardware_version,
+    def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):
         if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
            enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
