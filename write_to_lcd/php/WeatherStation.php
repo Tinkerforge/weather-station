@@ -74,7 +74,13 @@ class WeatherStation
 			$this->brickletLCD->writeLine(2, 0, $text);
 			echo "Write to line 2: $text\n";
 
-			$temperature = $this->brickletBarometer->getChipTemperature();
+			try {
+				$temperature = $this->brickletBarometer->getChipTemperature();
+			} catch(Exception $e) {
+				echo "Could not get temperature: $e\n";
+				return;
+			}
+
 			// 0xDF == ° on LCD 20x4 charset
 			$text = sprintf("Temperature %5.2f %cC", $temperature/100.0, 0xDF);
 			$this->brickletLCD->writeLine(3, 0, $text);
@@ -104,10 +110,10 @@ class WeatherStation
 					$this->brickletAmbientLight->setIlluminanceCallbackPeriod(1000);
 					$this->brickletAmbientLight->registerCallback(BrickletAmbientLight::CALLBACK_ILLUMINANCE,
 					                                              array($this, 'illuminanceCB'));
-					echo "AmbientLight initialized\n";
+					echo "Ambient Light initialized\n";
 				} catch(Exception $e) {
 					$this->brickletAmbientLight = null;
-					echo "AmbientLight init failed: $e\n";
+					echo "Ambient Light init failed: $e\n";
 				}
 			} else if($deviceIdentifier == BrickletHumidity::DEVICE_IDENTIFIER) {
 				try {

@@ -50,7 +50,11 @@ void cb_air_pressure(int32_t air_pressure, void *user_data) {
 		printf("Write to line 2: %s\n", text);
 
 		int16_t temperature;
-		barometer_get_chip_temperature(&ws->barometer, &temperature);
+		int rc = barometer_get_chip_temperature(&ws->barometer, &temperature);
+		if(rc < 0) {
+			fprintf(stderr, "Could not get temperature: %d\n", rc);
+			return;
+		}
 
 		memset(text, '\0', sizeof(text));
 		// 0xDF == ° on LCD 20x4 charset
@@ -93,7 +97,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			lcd_20x4_clear_display(&ws->lcd);
 			lcd_20x4_backlight_on(&ws->lcd);
 			ws->lcd_created = true;
-			printf("LCD initialized\n");
+			printf("LCD 20x4 initialized\n");
 		} else if(device_identifier == AMBIENT_LIGHT_DEVICE_IDENTIFIER) {
 			ambient_light_create(&ws->ambient_light, uid, &ws->ipcon);
 			ambient_light_register_callback(&ws->ambient_light,
@@ -103,9 +107,9 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			rc = ambient_light_set_illuminance_callback_period(&ws->ambient_light, 1000);
 
 			if(rc < 0) {
-				fprintf(stderr, "AmbientLight init failed: %d\n", rc);
+				fprintf(stderr, "Ambient Light init failed: %d\n", rc);
 			} else {
-				printf("AmbientLight initialized\n");
+				printf("Ambient Light initialized\n");
 			}
 		} else if(device_identifier == HUMIDITY_DEVICE_IDENTIFIER) {
 			humidity_create(&ws->humidity, uid, &ws->ipcon);

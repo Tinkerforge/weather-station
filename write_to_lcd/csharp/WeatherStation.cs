@@ -39,7 +39,17 @@ class WeatherStation
 			brickletLCD.WriteLine(2, 0, text);
 			System.Console.WriteLine("Write to line 2: " + text);
 
-			int temperature = sender.GetChipTemperature();
+			int temperature;
+			try
+			{
+				temperature = sender.GetChipTemperature();
+			}
+			catch(TinkerforgeException e)
+			{
+				System.Console.WriteLine("Could not get temperature: " + e.Message);
+				return;
+			}
+
 			// 0xDF == ° on LCD 20x4 charset
 			text = string.Format("Temperature {0,5:##.00} {1}C", temperature/100.0, (char)0xDF);
 			brickletLCD.WriteLine(3, 0, text);
@@ -61,11 +71,11 @@ class WeatherStation
 					brickletLCD = new BrickletLCD20x4(UID, ipcon);
 					brickletLCD.ClearDisplay();
 					brickletLCD.BacklightOn();
-					System.Console.WriteLine("LCD20x4 initialized");
+					System.Console.WriteLine("LCD 20x4 initialized");
 				}
 				catch(TinkerforgeException e)
 				{
-					System.Console.WriteLine("LCD20x4 init failed: " + e.Message);
+					System.Console.WriteLine("LCD 20x4 init failed: " + e.Message);
 					brickletLCD = null;
 				}
 			}
@@ -76,11 +86,11 @@ class WeatherStation
 					brickletAmbientLight = new BrickletAmbientLight(UID, ipcon);
 					brickletAmbientLight.SetIlluminanceCallbackPeriod(1000);
 					brickletAmbientLight.Illuminance += IlluminanceCB;
-					System.Console.WriteLine("AmbientLight initialized");
+					System.Console.WriteLine("Ambient Light initialized");
 				}
 				catch(TinkerforgeException e)
 				{
-					System.Console.WriteLine("AmbientLight init failed: " + e.Message);
+					System.Console.WriteLine("Ambient Light init failed: " + e.Message);
 					brickletAmbientLight = null;
 				}
 			}

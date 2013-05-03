@@ -38,10 +38,10 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
         lcd = BrickletLCD20x4.new uid, ipcon
         lcd.clear_display
         lcd.backlight_on
-        puts 'LCD initialized'
+        puts 'LCD 20x4 initialized'
       rescue Exception => e
         lcd = nil
-        puts 'LCD init failed: ' + e
+        puts 'LCD 20x4 init failed: ' + e
       end
     elsif device_identifier == BrickletAmbientLight::DEVICE_IDENTIFIER
       begin
@@ -54,10 +54,10 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
             puts "Write to line 0: #{text}"
           end
         end
-        puts 'AmbientLight initialized'
+        puts 'Ambient Light initialized'
       rescue Exception => e
         ambient_light = nil
-        puts 'AmbientLight init failed: ' + e
+        puts 'Ambient Light init failed: ' + e
       end
     elsif device_identifier == BrickletHumidity::DEVICE_IDENTIFIER
       begin
@@ -85,7 +85,13 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
             lcd.write_line 2, 0, text
             puts "Write to line 2: #{text}"
 
-            temperature = barometer.get_chip_temperature
+            begin
+              temperature = barometer.get_chip_temperature
+            rescue Exception => e
+              puts 'Could not get temperature: ' + e
+              return
+            end
+
             # 0xDF == ° on LCD 20x4 charset
             text = 'Temperature %5.2f %sC' % [(temperature/100.0), 0xDF.chr]
             lcd.write_line 3, 0, text

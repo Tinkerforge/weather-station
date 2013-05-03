@@ -53,10 +53,12 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 			System.out.println("Write to line 2: " + text);
 
-			int temperature = 0;
+			int temperature;
 			try {
 				temperature = brickletBarometer.getChipTemperature();
 			} catch(com.tinkerforge.TinkerforgeException e) {
+				System.out.println("Could not get temperature: " + e);
+				return;
 			}
 
 			// 0xDF == ° on LCD 20x4 charset
@@ -80,20 +82,20 @@ class WeatherListener implements IPConnection.EnumerateListener,
 					brickletLCD = new BrickletLCD20x4(uid, ipcon);
 					brickletLCD.clearDisplay();
 					brickletLCD.backlightOn();
-					System.out.println("LCD20x4 initialized");
+					System.out.println("LCD 20x4 initialized");
 				} catch(com.tinkerforge.TinkerforgeException e) {
 					brickletLCD = null;
-					System.out.println("LCD20x4 init failed: " + e);
+					System.out.println("LCD 20x4 init failed: " + e);
 				}
 			} else if(deviceIdentifier == BrickletAmbientLight.DEVICE_IDENTIFIER) {
 				try {
 					brickletAmbientLight = new BrickletAmbientLight(uid, ipcon);
 					brickletAmbientLight.setIlluminanceCallbackPeriod(1000);
 					brickletAmbientLight.addIlluminanceListener(this);
-					System.out.println("AmbientLight initialized");
+					System.out.println("Ambient Light initialized");
 				} catch(com.tinkerforge.TinkerforgeException e) {
 					brickletAmbientLight = null;
-					System.out.println("AmbientLight init failed: " + e);
+					System.out.println("Ambient Light init failed: " + e);
 				}
 			} else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER) {
 				try {

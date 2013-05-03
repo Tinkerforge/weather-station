@@ -32,7 +32,14 @@ Module WeatherStation
             brickletLCD.WriteLine(2, 0, text)
             System.Console.WriteLine("Write to line 2: " + text)
 
-            Dim temperature As Integer = sender.GetChipTemperature()
+            Dim temperature As Integer
+            Try
+                temperature = sender.GetChipTemperature()
+            Catch e As TinkerforgeException
+                System.Console.WriteLine("Could not get temperature" + e.Message)
+                Return
+            End Try
+
             ' &HDF == ° on LCD 20x4 charset
             text = String.Format("Temperature {0,5:##.00} {1}C", temperature/100.0, Chr(&HDF))
             brickletLCD.WriteLine(3, 0, text)
@@ -51,9 +58,9 @@ Module WeatherStation
                     brickletLCD = New BrickletLCD20x4(UID, ipcon)
                     brickletLCD.ClearDisplay()
                     brickletLCD.BacklightOn()
-                    System.Console.WriteLine("LCD20x4 initialized")
+                    System.Console.WriteLine("LCD 20x4 initialized")
                 Catch e As TinkerforgeException
-                    System.Console.WriteLine("LCD20x4 init failed: " + e.Message)
+                    System.Console.WriteLine("LCD 20x4 init failed: " + e.Message)
                     brickletLCD = Nothing
                 End Try
             Else If deviceIdentifier = BrickletAmbientLight.DEVICE_IDENTIFIER Then
@@ -61,9 +68,9 @@ Module WeatherStation
                     brickletAmbientLight = New BrickletAmbientLight(UID, ipcon)
                     brickletAmbientLight.SetIlluminanceCallbackPeriod(1000)
                     AddHandler brickletAmbientLight.Illuminance, AddressOf IlluminanceCB
-                    System.Console.WriteLine("AmbientLight initialized")
+                    System.Console.WriteLine("Ambient Light initialized")
                 Catch e As TinkerforgeException
-                    System.Console.WriteLine("AmbientLight init failed: " + e.Message)
+                    System.Console.WriteLine("Ambient Light init failed: " + e.Message)
                     brickletAmbientLight = Nothing
                 End Try
             Else If deviceIdentifier = BrickletHumidity.DEVICE_IDENTIFIER Then

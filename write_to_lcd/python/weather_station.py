@@ -70,8 +70,14 @@ class WeatherStation:
             self.lcd.write_line(2, 0, text)
             log.info('Write to line 2: ' + text)
 
+            try:
+                temperature = self.baro.get_chip_temperature()
+            except Error as e:
+                log.error('Could not get temperature: ' + str(e.description))
+                return
+
             # \xDF == ° on LCD 20x4 charset
-            text = 'Temperature %5.2f \xDFC' % (self.baro.get_chip_temperature()/100.0)
+            text = 'Temperature %5.2f \xDFC' % (temperature/100.0)
             self.lcd.write_line(3, 0, text)
             log.info('Write to line 3: ' + text.replace('\xDF', '°'))
 
@@ -84,9 +90,9 @@ class WeatherStation:
                     self.lcd = LCD20x4(uid, self.ipcon)
                     self.lcd.clear_display()
                     self.lcd.backlight_on()
-                    log.info('LCD20x4 initialized')
+                    log.info('LCD 20x4 initialized')
                 except Error as e:
-                    log.error('LCD20x4 init failed: ' + str(e.description))
+                    log.error('LCD 20x4 init failed: ' + str(e.description))
                     self.lcd = None
             elif device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                 try:
@@ -94,9 +100,9 @@ class WeatherStation:
                     self.al.set_illuminance_callback_period(1000)
                     self.al.register_callback(self.al.CALLBACK_ILLUMINANCE,
                                               self.cb_illuminance)
-                    log.info('AmbientLight initialized')
+                    log.info('Ambient Light initialized')
                 except Error as e:
-                    log.error('AmbientLight init failed: ' + str(e.description))
+                    log.error('Ambient Light init failed: ' + str(e.description))
                     self.al = None
             elif device_identifier == Humidity.DEVICE_IDENTIFIER:
                 try:

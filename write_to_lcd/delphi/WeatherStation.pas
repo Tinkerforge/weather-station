@@ -87,10 +87,10 @@ begin
         brickletLCD := TBrickletLCD20x4.Create(UID, ipcon);
         brickletLCD.ClearDisplay();
         brickletLCD.BacklightOn();
-        WriteLn('LCD20x4 initialized');
+        WriteLn('LCD 20x4 initialized');
       except
         on e: Exception do begin
-          WriteLn('LCD20x4 init failed: ' + e.Message);
+          WriteLn('LCD 20x4 init failed: ' + e.Message);
           brickletLCD := nil;
         end;
       end;
@@ -100,10 +100,10 @@ begin
         brickletAmbientLight := TBrickletAmbientLight.Create(uid, ipcon);
         brickletAmbientLight.SetIlluminanceCallbackPeriod(1000);
         brickletAmbientLight.OnIlluminance := {$ifdef FPC}@{$endif}IlluminanceCB;
-        WriteLn('AmbientLight initialized');
+        WriteLn('Ambient Light initialized');
       except
         on e: Exception do begin
-          WriteLn('AmbientLight init failed: ' + e.Message);
+          WriteLn('Ambient Light init failed: ' + e.Message);
           brickletAmbientLight := nil;
         end;
       end;
@@ -164,8 +164,14 @@ begin
     text := Format('Air Press %7.2f mb', [airPressure/1000.0]);
     brickletLCD.WriteLine(2, 0, text);
     WriteLn('Write to line 2: ' + text);
-
-    temperature := brickletBarometer.GetChipTemperature;
+    try
+      temperature := brickletBarometer.GetChipTemperature;
+    except
+      on e: Exception do begin
+        WriteLn('Could not get temperature: ' + e.Message);
+        exit;
+      end;
+    end;
     { $DF == ° on LCD 20x4 charset }
     text := Format('Temperature %5.2f %sC', [temperature/100.0, '' + char($DF)]);
     brickletLCD.WriteLine(3, 0, text);
