@@ -66,14 +66,17 @@ class Cosm:
             self.items = {}
             body = json.dumps(data)
 
-            http = httplib.HTTPSConnection(Cosm.HOST)
-            http.request('PUT', self.params, body, self.headers)
-            response = http.getresponse()
-            http.close()
+            try:
+                http = httplib.HTTPSConnection(Cosm.HOST)
+                http.request('PUT', self.params, body, self.headers)
+                response = http.getresponse()
+                http.close()
 
-            if response.status != 200:
-                log.error('Could not upload to cosm -> ' +
-                          str(response.status) + ': ' + response.reason)
+                if response.status != 200:
+                    log.error('Could not upload to cosm -> ' +
+                              str(response.status) + ': ' + response.reason)
+            except Exception as e:
+                log.error('HTTP error: ' + str(e))
 
 class WeatherStation:
     HOST = "localhost"
