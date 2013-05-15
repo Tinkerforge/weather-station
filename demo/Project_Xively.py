@@ -102,7 +102,7 @@ class ProjectXively(QWidget):
         self.grid = QGridLayout()
 
         label = QLabel(self)
-        label.setText("Project: <b>Connect to Xively</b>. Sources in Python can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#connect-to-xively\">here</a>. This example project can be used to implement it in other programming languages as well.")
+        label.setText("Project: <b>Connect to Xively</b>. This project uploads the measured values to Xively. Please find documentation how to configure it and program sources in Python <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#connect-to-xively\">here</a>.")
         label.setTextFormat(Qt.RichText)
         label.setTextInteractionFlags(Qt.TextBrowserInteraction)
         label.setOpenExternalLinks(True)

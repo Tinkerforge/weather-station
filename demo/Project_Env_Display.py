@@ -48,7 +48,7 @@ class ProjectEnvDisplay(QWidget):
 
         self.grid = QGridLayout()
         label = QLabel(self)
-        label.setText("Project: <b>Display Environment Measurements on LCD</b>. Sources for all programming languages can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#display-environment-measurements-on-lcd\">here</a>.")
+        label.setText("Simple Project: <b>Display Environment Measurements on LCD</b>. Simply displays all measured values on LCD. Sources in all programming languages can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#display-environment-measurements-on-lcd\">here</a>.")
         label.setTextFormat(Qt.RichText)
         label.setTextInteractionFlags(Qt.TextBrowserInteraction)
         label.setOpenExternalLinks(True)
@@ -64,9 +64,6 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_update_temperature.connect(self.update_temperature_data_slot)
         self.qtcb_update_humidity.connect(self.update_humidity_data_slot)
         self.qtcb_button_pressed.connect(self.button_pressed_slot)
-
-        self.setToolTip("Project: Display Environment Measurements on LCD\nSources for different programming languages can be found at the")
-
 
 
     def update_illuminance_data_slot(self, illuminance):

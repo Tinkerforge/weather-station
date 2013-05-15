@@ -86,7 +86,7 @@ class ProjectStatistics(QWidget):
 
 
         label = QLabel(self)
-        label.setText("Project: <b>Show Statistics with Button Control</b>. Sources for C# can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#show-statistics-with-button-control\">here</a>. This example project can be used to implement it in other programming languages as well.")
+        label.setText("Project: <b>Show Statistics with Button Control</b>. Shows different statistics. You can select different modi by pressing the buttons. Some modi will allow display change by pressing the button multiple times. Sources in C# can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#show-statistics-with-button-control\">here</a>.")
         label.setTextFormat(Qt.RichText)
         label.setTextInteractionFlags(Qt.TextBrowserInteraction)
         label.setOpenExternalLinks(True)
