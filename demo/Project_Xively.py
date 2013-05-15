@@ -26,7 +26,15 @@ Boston, MA 02111-1307, USA.
 from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QCheckBox
+from PyQt4.QtGui import QTextEdit
+from PyQt4.QtGui import QPushButton
+from PyQt4.QtGui import QLabel
+from PyQt4.QtGui import QFont
+from PyQt4.QtGui import QErrorMessage
 from PyQt4.QtCore import QTimer
+from PyQt4.QtCore import Qt
+
 
 import httplib
 import json
@@ -48,24 +56,77 @@ class ProjectXively(QWidget):
 
     xively_host = "api.xively.com"
     xively_agent = "Tinkerforge Weather Kit: Starter Kit Demo"
-    xively_feed = ""
-    xively_api_key = ""
+    xively_feed = "Enter Feed ID here"
+    xively_api_key = "Enter API Key here"
 
     xively_items = {}
     xively_headers = None
     xively_params = ""
     xively_update_rate = 0.1 # in minutes
 
+    text_agent = None
+    text_feed = None
+    text_key = None
+    text_rate = None
+
+    save_button = None
+
     xively_timer = None
+
+    error_message = None
+
+    label_upload_active = None
 
     def __init__(self, parent, app):
         super(QWidget, self).__init__()
 
         self.lcdwidget = LCDWidget(self, app)
         self.lcdwidget.hide()
+
+        self.text_agent = QTextEdit(self)
+        self.text_agent.setPlainText(str(self.xively_agent))
+        self.text_agent.setFixedSize(400,30)
+        self.text_feed = QTextEdit(self)
+        self.text_feed.setPlainText(str(self.xively_feed))
+        self.text_feed.setFixedSize(400,30)
+        self.text_key = QTextEdit(self)
+        self.text_key.setPlainText(str(self.xively_api_key))
+        self.text_key.setFixedSize(400,30)
+        self.text_rate = QTextEdit(self)
+        self.text_rate.setPlainText(str(self.xively_update_rate))
+        self.text_rate.setFixedSize(100,30)
+
+        self.save_button = QPushButton("Save/Activate")
+        self.save_button.setFixedSize(120,30)
         
         self.grid = QGridLayout()
-        #self.grid.addWidget(self.lcdwidget)
+
+        label = QLabel(self)
+        label.setText("Project: <b>Connect to Xively</b>. Sources in Python can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#connect-to-xively\">here</a>. This example project can be used to implement it in other programming languages as well.")
+        label.setTextFormat(Qt.RichText)
+        label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        label.setOpenExternalLinks(True)
+        label.setWordWrap(True)
+        self.grid.addWidget(label, 0, 0, 1, 2)
+
+        self.grid.addWidget(QLabel("Agent Description:"),1,0)
+        self.grid.addWidget(self.text_agent,1,1)
+        self.grid.addWidget(QLabel("Feed:"),2,0)
+        self.grid.addWidget(self.text_feed,2,1)
+        self.grid.addWidget(QLabel("Key:"),3,0)
+        self.grid.addWidget(self.text_key,3,1)
+        self.grid.addWidget(QLabel("Update Rate (min):"),4,0)
+        self.grid.addWidget(self.text_rate,4,1)
+        self.grid.addWidget(self.save_button,5,1)
+
+        self.label_upload_active = QLabel("Not Active", self)
+        font = QFont()
+        font.setPixelSize(20)
+        self.label_upload_active.setFont(font)
+        self.label_upload_active.setFixedSize(120, 50)
+        self.set_active_label(False)
+        self.grid.addWidget(self.label_upload_active,5,0)
+
         self.setLayout(self.grid)
 
         self.qtcb_update_illuminance.connect(self.update_illuminance_data_slot)
@@ -73,10 +134,28 @@ class ProjectXively(QWidget):
         self.qtcb_update_temperature.connect(self.update_temperature_data_slot)
         self.qtcb_update_humidity.connect(self.update_humidity_data_slot)
         self.qtcb_button_pressed.connect(self.button_pressed_slot)
+        self.save_button.clicked.connect(self.save_configuration)
 
-        self.save_configuration()
+        self.error_message = QErrorMessage(self)
+
+    def set_active_label(self, value):
+        palette = self.label_upload_active.palette()
+        if value:
+            palette.setColor(self.foregroundRole(), Qt.green)
+            self.label_upload_active.setText("Active")
+        else:
+            palette.setColor(self.foregroundRole(), Qt.red)
+            self.label_upload_active.setText("Not Active")
+
+        self.label_upload_active.setPalette(palette)
 
     def save_configuration(self):
+
+        self.xively_agent = self.text_agent.toPlainText()
+        self.xively_feed = self.text_feed.toPlainText()
+        self.xively_api_key = self.text_key.toPlainText()
+        self.xively_update_rate = float(self.text_rate.toPlainText())
+
         self.xively_headers = {
             "Content-Type"  : "application/x-www-form-urlencoded",
             "X-ApiKey"      : self.xively_api_key,
@@ -88,6 +167,8 @@ class ProjectXively(QWidget):
             self.xively_timer = QTimer(self)
             self.xively_timer.timeout.connect(self.update_xively)
             self.xively_timer.start(self.xively_update_rate*60*1000)
+
+        self.set_active_label(True)
 
     def update_xively(self):
 
@@ -113,10 +194,16 @@ class ProjectXively(QWidget):
             http.close()
 
             if response.status != 200:
-                print('Could not upload to xively -> ' +
-                          str(response.status) + ': ' + response.reason)
+                self.error_message.showMessage('Could not upload to xively -> Response:' +
+                          str(response.status) + ': ' + response.reason + '. Check your configuration.')
+                self.xively_timer.stop()
+                self.xively_timer = None
+                self.set_active_label(False)
         except Exception as e:
-            print('HTTP error: ' + str(e))
+            self.error_message.showMessage('HTTP error: ' + str(e))
+            self.xively_timer.stop()
+            self.xively_timer = None
+            self.set_active_label(False)
 
 
     def put(self, identifier, value):

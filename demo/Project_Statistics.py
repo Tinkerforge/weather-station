@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.
 from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QLabel
 from PyQt4.QtGui import QPushButton
 from PyQt4.QtCore import Qt
 from PyQt4.QtCore import QTimer
@@ -83,6 +84,15 @@ class ProjectStatistics(QWidget):
         self.grid = QGridLayout()
         self.lcdwidget = LCDWidget(self, app)
 
+
+        label = QLabel(self)
+        label.setText("Project: <b>Show Statistics with Button Control</b>. Sources for C# can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#show-statistics-with-button-control\">here</a>. This example project can be used to implement it in other programming languages as well.")
+        label.setTextFormat(Qt.RichText)
+        label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        label.setOpenExternalLinks(True)
+        label.setWordWrap(True)
+        self.grid.addWidget(label, 0, 0, 1, 4)
+
         self.buttons[0] = QPushButton(self)
         self.buttons[0].setFixedSize(100, 30)
         self.buttons[0].setText("BTN0")
@@ -104,11 +114,12 @@ class ProjectStatistics(QWidget):
         self.buttons[3].clicked.connect(lambda: self.button_pressed_slot(7))
 
         self.grid.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.lcdwidget,0,0,1,4, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[0],1,0, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[1],1,1, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[2],1,2, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[3],1,3, Qt.AlignHCenter | Qt.AlignVCenter)
+        self.grid.addWidget(self.lcdwidget,1,0,1,4, Qt.AlignHCenter | Qt.AlignVCenter)
+        self.grid.addWidget(self.buttons[0],2,0, Qt.AlignHCenter | Qt.AlignVCenter)
+        self.grid.addWidget(self.buttons[1],2,1, Qt.AlignHCenter | Qt.AlignVCenter)
+        self.grid.addWidget(self.buttons[2],2,2, Qt.AlignHCenter | Qt.AlignVCenter)
+        self.grid.addWidget(self.buttons[3],2,3, Qt.AlignHCenter | Qt.AlignVCenter)
+
         self.setLayout(self.grid)
 
         self.qtcb_update_illuminance.connect(self.update_illuminance_data_slot)

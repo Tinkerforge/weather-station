@@ -23,9 +23,10 @@ Boston, MA 02111-1307, USA.
 """
 
 
-from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
+from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT, Qt
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QLabel
 
 import math
 
@@ -46,6 +47,14 @@ class ProjectEnvDisplay(QWidget):
         super(QWidget, self).__init__()
 
         self.grid = QGridLayout()
+        label = QLabel(self)
+        label.setText("Project: <b>Display Environment Measurements on LCD</b>. Sources for all programming languages can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#display-environment-measurements-on-lcd\">here</a>.")
+        label.setTextFormat(Qt.RichText)
+        label.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        label.setOpenExternalLinks(True)
+        label.setWordWrap(True)
+        self.grid.addWidget(label)
+        
         self.lcdwidget = LCDWidget(self, app)
         self.grid.addWidget(self.lcdwidget)
         self.setLayout(self.grid)
@@ -55,6 +64,8 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_update_temperature.connect(self.update_temperature_data_slot)
         self.qtcb_update_humidity.connect(self.update_humidity_data_slot)
         self.qtcb_button_pressed.connect(self.button_pressed_slot)
+
+        self.setToolTip("Project: Display Environment Measurements on LCD\nSources for different programming languages can be found at the")
 
 
 

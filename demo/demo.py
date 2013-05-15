@@ -29,7 +29,6 @@ import math
 
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
-from tinkerforge.brick_master import Master
 from tinkerforge.bricklet_lcd_20x4 import LCD20x4
 from tinkerforge.bricklet_ambient_light import AmbientLight
 from tinkerforge.bricklet_humidity import Humidity
@@ -73,7 +72,7 @@ class WeatherStation (QApplication):
         super(QApplication, self).__init__(args)
 
         self.tabs = QTabWidget()
-        self.tabs.setFixedSize(600, 300)
+        self.tabs.setFixedSize(700, 400)
         self.projects.append(ProjectEnvDisplay(self.tabs, self))
         self.projects.append(ProjectStatistics(self.tabs, self))
         self.projects.append(ProjectXively(self.tabs, self))
