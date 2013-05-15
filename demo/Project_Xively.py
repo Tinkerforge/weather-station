@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Starter Kit: Weather Station Demo Application(Brick Viewer) 
+Starter Kit: Weather Station Demo Application
 Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 
-Project_Env_Display.py: Environment Display Project Implementation
+Project_Xively.py: Xively Data Upload Project Implementation
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License 

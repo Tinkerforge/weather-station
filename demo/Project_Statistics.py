@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Starter Kit: Weather Station Demo Application(Brick Viewer) 
+Starter Kit: Weather Station Demo Application
 Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 
 Project_Statistics.py: Statistics Display Project Implementation
