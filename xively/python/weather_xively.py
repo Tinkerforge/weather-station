@@ -19,9 +19,9 @@ from tinkerforge.bricklet_ambient_light import AmbientLight
 from tinkerforge.bricklet_humidity import Humidity
 from tinkerforge.bricklet_barometer import Barometer
 
-class Cosm:
-    HOST = 'api.cosm.com'
-    AGENT = "Tinkerforge cosm 1.0"
+class Xively:
+    HOST = 'api.xively.com'
+    AGENT = "Tinkerforge xively 1.0"
     FEED = '105813.json'
     API_KEY = 'WtXx2m6ItNZyFYoQyR5qnoN1GsOSAKxPMGdIaXRLYzY5ND0g'
 
@@ -29,10 +29,10 @@ class Cosm:
         self.items = {}
         self.headers = {
             "Content-Type"  : "application/x-www-form-urlencoded",
-            "X-ApiKey"      : Cosm.API_KEY,
-            "User-Agent"    : Cosm.AGENT,
+            "X-ApiKey"      : Xively.API_KEY,
+            "User-Agent"    : Xively.AGENT,
         }
-        self.params = "/v2/feeds/" + str(Cosm.FEED)
+        self.params = "/v2/feeds/" + str(Xively.FEED)
         self.upload_thread = threading.Thread(target=self.upload)
         self.upload_thread.daemon = True
         self.upload_thread.start()
@@ -67,13 +67,13 @@ class Cosm:
             body = json.dumps(data)
 
             try:
-                http = httplib.HTTPSConnection(Cosm.HOST)
+                http = httplib.HTTPSConnection(Xively.HOST)
                 http.request('PUT', self.params, body, self.headers)
                 response = http.getresponse()
                 http.close()
 
                 if response.status != 200:
-                    log.error('Could not upload to cosm -> ' +
+                    log.error('Could not upload to xively -> ' +
                               str(response.status) + ': ' + response.reason)
             except Exception as e:
                 log.error('HTTP error: ' + str(e))
@@ -89,7 +89,7 @@ class WeatherStation:
     baro = None
 
     def __init__(self):
-        self.cosm = Cosm()
+        self.xively = Xively()
         self.ipcon = IPConnection()
         while True:
             try:
@@ -119,28 +119,28 @@ class WeatherStation:
         if self.lcd is not None:
             text = 'Illuminanc %6.2f lx' % (illuminance/10.0)
             self.lcd.write_line(0, 0, text)
-            self.cosm.put('AmbientLight', illuminance/10.0)
+            self.xively.put('AmbientLight', illuminance/10.0)
             log.info('Write to line 0: ' + text)
 
     def cb_humidity(self, humidity):
         if self.lcd is not None:
             text = 'Humidity   %6.2f %%' % (humidity/10.0)
             self.lcd.write_line(1, 0, text)
-            self.cosm.put('Humidity', humidity/10.0)
+            self.xively.put('Humidity', humidity/10.0)
             log.info('Write to line 1: ' + text)
 
     def cb_air_pressure(self, air_pressure):
         if self.lcd is not None:
             text = 'Air Press %7.2f mb' % (air_pressure/1000.0)
             self.lcd.write_line(2, 0, text)
-            self.cosm.put('AirPressure', air_pressure/1000.0)
+            self.xively.put('AirPressure', air_pressure/1000.0)
             log.info('Write to line 2: ' + text)
 
             temperature = self.baro.get_chip_temperature()/100.0
             # \xDF == ° on LCD 20x4 charset
             text = 'Temperature %5.2f \xDFC' % temperature
             self.lcd.write_line(3, 0, text)
-            self.cosm.put('Temperature', temperature)
+            self.xively.put('Temperature', temperature)
             log.info('Write to line 3: ' + text.replace('\xDF', '°'))
 
     def cb_enumerate(self, uid, connected_uid, position, hardware_version,
