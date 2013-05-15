@@ -88,7 +88,7 @@ class LCDWidget (QWidget):
 
 
         self.qtcb_write_line.connect(self.write_line_slot)
-
+        self.configure_custom_chars()
 
         self.grid = QGridLayout()
 
@@ -99,6 +99,21 @@ class LCDWidget (QWidget):
                 self.grid.addWidget(character,y,x)
 
         self.setLayout(self.grid)
+
+    def configure_custom_chars(self):
+        c = [[0x00 for x in range(8)] for y in range(8)]
+	
+		c[0] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff]
+		c[1] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff]
+		c[2] = [0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff]
+		c[3] = [0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff]
+		c[4] = [0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff]
+		c[5] = [0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
+		c[6] = [0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
+		c[7] = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
+
+		for i in range(self.Length):
+			self.app.lcd.set_custom_character(i, c[i]);
 
     def write_line_slot(self, line, begin, text):
 
@@ -113,3 +128,9 @@ class LCDWidget (QWidget):
 
     def write_line(self, line, begin, text):
         self.qtcb_write_line.emit(line, begin, text)
+
+    def clear(self):
+        self.write_line(0,0, "                    ")
+        self.write_line(1,0, "                    ")
+        self.write_line(2,0, "                    ")
+        self.write_line(3,0, "                    ")
