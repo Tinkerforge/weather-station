@@ -48,6 +48,7 @@ from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
 
 from Project_Env_Display import ProjectEnvDisplay
 from Project_Statistics import ProjectStatistics
+from Project_Xively import ProjectXively
 
 
 
@@ -62,11 +63,9 @@ class WeatherStation (QApplication):
     baro = None
 
     widget = None
-    projenv = None
-    projcosm = None
-    projstat = None
 
-    currentActiveWidget = None
+    projects = []
+    active_project = None
 
 
 
@@ -74,14 +73,16 @@ class WeatherStation (QApplication):
         super(QApplication, self).__init__(args)
 
         self.tabs = QTabWidget()
-        self.tabs.setFixedSize(600, 250)
-        self.projenv = ProjectEnvDisplay(self.tabs, self)
-        self.projstat = ProjectStatistics(self.tabs, self)
-        self.currentActiveWidget = self.projenv
+        self.tabs.setFixedSize(600, 300)
+        self.projects.append(ProjectEnvDisplay(self.tabs, self))
+        self.projects.append(ProjectStatistics(self.tabs, self))
+        self.projects.append(ProjectXively(self.tabs, self))
 
-        self.tabs.addTab(self.projenv, "Display Environment Measurements")
-#self.tabs.addTab(self.projcosm, "Connect to Cosm")
-        self.tabs.addTab(self.projstat, "Show Statistics with Button Control")
+        self.tabs.addTab(self.projects[0], "Display Environment Measurements")
+        self.tabs.addTab(self.projects[1], "Show Statistics with Button Control")
+        self.tabs.addTab(self.projects[2], "Connect to Xively")
+
+        self.active_project = self.projects[0]
 
         self.tabs.currentChanged.connect(self.tabChangedSlot)
 
@@ -116,22 +117,19 @@ class WeatherStation (QApplication):
         sys.exit(self.exec_())
 
     def tabChangedSlot(self, tabIndex):
-        if tabIndex == 0:
-            self.currentActiveWidget = self.projenv
-        elif tabIndex == 1:
-            self.currentActiveWidget = self.projstat
-
+        self.active_project = self.projects[tabIndex]
 
     def cb_illuminance(self, illuminance):
-        self.currentActiveWidget.update_illuminance(illuminance)
+        for p in self.projects:
+            p.update_illuminance(illuminance)
 
     def cb_humidity(self, humidity):
-        self.currentActiveWidget.update_humidity(humidity)
-
+        for p in self.projects:
+            p.update_humidity(humidity)
 
     def cb_air_pressure(self, air_pressure):
-        self.currentActiveWidget.update_air_pressure(air_pressure)
-
+        for p in self.projects:
+            p.update_air_pressure(air_pressure)
 
         try:
             temperature = self.baro.get_chip_temperature()
@@ -139,9 +137,27 @@ class WeatherStation (QApplication):
             log.error('Could not get temperature: ' + str(e.description))
             return
 
-        self.currentActiveWidget.update_temperature(temperature)
+        for p in self.projects:
+            p.update_temperature(temperature)
 
+    def configure_custom_chars(self):
+        c = [[0x00 for x in range(8)] for y in range(8)]
+	
+        c[0] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff]
+        c[1] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff]
+        c[2] = [0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff]
+        c[3] = [0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff]
+        c[4] = [0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff]
+        c[5] = [0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
+        c[6] = [0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
+        c[7] = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
 
+        for i in range(len(c)):
+            self.lcd.set_custom_character(i, c[i]);
+
+    def cb_button_pressed(self, button):
+        for p in self.projects:
+            p.button_pressed(button)
 
     def cb_enumerate(self, uid, connected_uid, position, hardware_version,
                      firmware_version, device_identifier, enumeration_type):
@@ -152,9 +168,11 @@ class WeatherStation (QApplication):
                     self.lcd = LCD20x4(uid, self.ipcon)
                     self.lcd.clear_display()
                     self.lcd.backlight_on()
-                    log.info('LCD 20x4 initialized')
+                    self.lcd.register_callback(self.lcd.CALLBACK_BUTTON_PRESSED, self.cb_button_pressed)
+                    self.configure_custom_chars()
+
                 except Error as e:
-                    log.error('LCD 20x4 init failed: ' + str(e.description))
+                    print('LCD 20x4 init failed: ' + str(e.description))
                     self.lcd = None
             elif device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                 try:
@@ -162,9 +180,8 @@ class WeatherStation (QApplication):
                     self.al.set_illuminance_callback_period(1000)
                     self.al.register_callback(self.al.CALLBACK_ILLUMINANCE,
                                               self.cb_illuminance)
-                    log.info('Ambient Light initialized')
                 except Error as e:
-                    log.error('Ambient Light init failed: ' + str(e.description))
+                    print('Ambient Light init failed: ' + str(e.description))
                     self.al = None
             elif device_identifier == Humidity.DEVICE_IDENTIFIER:
                 try:
@@ -172,9 +189,8 @@ class WeatherStation (QApplication):
                     self.hum.set_humidity_callback_period(1000)
                     self.hum.register_callback(self.hum.CALLBACK_HUMIDITY,
                                                self.cb_humidity)
-                    log.info('Humidity initialized')
                 except Error as e:
-                    log.error('Humidity init failed: ' + str(e.description))
+                    print('Humidity init failed: ' + str(e.description))
                     self.hum = None
             elif device_identifier == Barometer.DEVICE_IDENTIFIER:
                 try:
@@ -182,9 +198,8 @@ class WeatherStation (QApplication):
                     self.baro.set_air_pressure_callback_period(1000)
                     self.baro.register_callback(self.baro.CALLBACK_AIR_PRESSURE,
                                                 self.cb_air_pressure)
-                    log.info('Barometer initialized')
                 except Error as e:
-                    log.error('Barometer init failed: ' + str(e.description))
+                    print('Barometer init failed: ' + str(e.description))
                     self.baro = None
 
     def cb_connected(self, connected_reason):
@@ -196,19 +211,11 @@ class WeatherStation (QApplication):
                     self.ipcon.enumerate()
                     break
                 except Error as e:
-                    log.error('Enumerate Error: ' + str(e.description))
+                    print('Enumerate Error: ' + str(e.description))
                     time.sleep(1)
 
 if __name__ == "__main__":
-    log.info('Weather Station: Start')
-
     weather_station = WeatherStation(sys.argv)
-
-    if sys.version_info < (3, 0):
-        input = raw_input # Compatibility for Python 2.x
-    input('Press key to exit\n')
 
     if weather_station.ipcon != None:
         weather_station.ipcon.disconnect()
-
-    log.info('Weather Station: End')

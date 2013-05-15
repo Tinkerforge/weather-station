@@ -38,6 +38,7 @@ class ProjectEnvDisplay(QWidget):
     qtcb_update_air_pressure = pyqtSignal(float)
     qtcb_update_temperature = pyqtSignal(float)
     qtcb_update_humidity = pyqtSignal(float)
+    qtcb_button_pressed = pyqtSignal(int)
 
     lcdwidget = None
 
@@ -53,20 +54,21 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_update_air_pressure.connect(self.update_air_pressure_data_slot)
         self.qtcb_update_temperature.connect(self.update_temperature_data_slot)
         self.qtcb_update_humidity.connect(self.update_humidity_data_slot)
+        self.qtcb_button_pressed.connect(self.button_pressed_slot)
 
 
 
     def update_illuminance_data_slot(self, illuminance):
 
         text = 'Illuminanc %6.2f lx' % (illuminance/10.0)
-        self.lcdwidget.write_line(0, 0, text)
+        self.lcdwidget.write_line(0, 0, text, self)
 
     def update_illuminance(self, illuminance):
         self.qtcb_update_illuminance.emit(illuminance)
 
     def update_humidity_data_slot(self, humidity):
         text = 'Humidity   %6.2f %%' % (humidity/10.0)
-        self.lcdwidget.write_line(1, 0, text)
+        self.lcdwidget.write_line(1, 0, text, self)
     
     def update_humidity(self, humidity):
         self.qtcb_update_humidity.emit(humidity)
@@ -74,7 +76,7 @@ class ProjectEnvDisplay(QWidget):
     def update_air_pressure_data_slot(self, air_pressure):
 
         text = 'Air Press %7.2f mb' % (air_pressure/1000.0)
-        self.lcdwidget.write_line(2, 0, text)
+        self.lcdwidget.write_line(2, 0, text, self)
     
     def update_air_pressure(self, air_pressure):
         self.qtcb_update_air_pressure.emit(air_pressure)
@@ -83,10 +85,16 @@ class ProjectEnvDisplay(QWidget):
 
         # \xDF == ° on LCD 20x4 charset
         text = 'Temperature %5.2f \xDFC' % (temperature/100.0)
-        self.lcdwidget.write_line(3, 0, text)
+        self.lcdwidget.write_line(3, 0, text, self)
 
     def update_temperature(self, temperature):
         self.qtcb_update_temperature.emit(temperature)
+
+    def button_pressed_slot(self, button):
+        pass
+
+    def button_pressed(self, button):
+        self.qtcb_button_pressed.emit(button)
         
         
 

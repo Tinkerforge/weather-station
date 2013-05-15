@@ -24,8 +24,11 @@ Boston, MA 02111-1307, USA.
 """
 
 from PyQt4.QtGui import QLabel
+from PyQt4.QtGui import QPixmap
+from PyQt4.QtGui import QPainter
 from PyQt4.QtGui import QFont
 from PyQt4.QtCore import Qt
+from PyQt4.QtCore import QString
 from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QWidget
@@ -38,6 +41,8 @@ import math
 class LCDChar (QLabel):
 
     qtcb_set_char = pyqtSignal(str)
+    CUSTOM_CHAR_START = 8
+    CUSTOM_CHAR_END = 15
 
     def __init__(self, parent):
         super(QLabel, self).__init__(parent)
@@ -48,6 +53,7 @@ class LCDChar (QLabel):
         self.qtcb_set_char.connect(self.set_char_slot)
 
         self.setText(" ")
+        self.setFixedSize(23, 45)
 
 
         self.setAutoFillBackground(True)
@@ -58,10 +64,28 @@ class LCDChar (QLabel):
 
     def set_char_slot(self, char):
 
-        if char == '\xDF':
-            char = '\xB0'
-        self.setText(char)
-        self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+        if char <= chr(self.CUSTOM_CHAR_END):
+            c = ord(str(char)) - self.CUSTOM_CHAR_START + 1
+
+            width = self.width()
+            height = self.height()
+        
+            pixmap = QPixmap(width,height)
+            painter = QPainter(pixmap)
+
+            painter.fillRect(0, 0, width, height, Qt.blue)
+            painter.fillRect(0, int(height*((8-c)/8.0)), width, height, Qt.white)
+
+            painter.end() 
+
+            self.setPixmap(pixmap)
+            
+        else:
+            if char == '\xDF':
+                char = '\xB0'
+
+            self.setText(char)
+            self.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
     def set_char(self, char):
         self.qtcb_set_char.emit(char)
@@ -78,7 +102,7 @@ class LCDWidget (QWidget):
 
         self.app = app
 
-        self.setFixedSize(550, 200)
+        self.setFixedSize(550, 204)
 
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -88,9 +112,9 @@ class LCDWidget (QWidget):
 
 
         self.qtcb_write_line.connect(self.write_line_slot)
-        self.configure_custom_chars()
 
         self.grid = QGridLayout()
+        self.grid.setSpacing(4)
 
         for y in range(len(self.array)):
             for x in range(len(self.array[0])):
@@ -100,37 +124,25 @@ class LCDWidget (QWidget):
 
         self.setLayout(self.grid)
 
-    def configure_custom_chars(self):
-        c = [[0x00 for x in range(8)] for y in range(8)]
-	
-		c[0] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff]
-		c[1] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff]
-		c[2] = [0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff]
-		c[3] = [0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff]
-		c[4] = [0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff]
-		c[5] = [0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
-		c[6] = [0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
-		c[7] = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
-
-		for i in range(self.Length):
-			self.app.lcd.set_custom_character(i, c[i]);
 
     def write_line_slot(self, line, begin, text):
 
         if self.app.lcd is not None:
             self.app.lcd.write_line(line, begin, str(text.toAscii().data()))
 
-        for i in range(len(self.array[0])):
+        for i in range(begin, len(self.array[0])):
             try:
-                self.array[line][i].set_char(text[i])
+                self.array[line][i].set_char(text[i-begin])
             except Exception:
                 break
 
-    def write_line(self, line, begin, text):
-        self.qtcb_write_line.emit(line, begin, text)
+    def write_line(self, line, begin, text, proj):
+        if proj == self.app.active_project:
+            self.qtcb_write_line.emit(line, begin, text)
 
-    def clear(self):
-        self.write_line(0,0, "                    ")
-        self.write_line(1,0, "                    ")
-        self.write_line(2,0, "                    ")
-        self.write_line(3,0, "                    ")
+    def clear(self, proj):
+        if proj == self.app.active_project:
+            self.write_line_slot(0,0, QString("                    "))
+            self.write_line_slot(1,0, QString("                    "))
+            self.write_line_slot(2,0, QString("                    "))
+            self.write_line_slot(3,0, QString("                    "))
