@@ -62,6 +62,7 @@ class LCDChar (QLabel):
         palette.setColor(self.foregroundRole(), Qt.white)
         self.setPalette(palette)
 
+
     def set_char_slot(self, char):
 
         if char <= chr(self.CUSTOM_CHAR_END):
@@ -96,7 +97,7 @@ class LCDWidget (QWidget):
     qtcb_write_line = pyqtSignal(int, int, str)
     
     FIXED_WIDGTH = 554
-
+    
     def __init__(self, parent, app):
         super(QWidget, self).__init__(parent)
         self.array = [[None for x in range(20)] for y in range(4)]
@@ -142,6 +143,7 @@ class LCDWidget (QWidget):
                 break
 
     def write_line(self, line, begin, text, proj):
+
         if proj == self.app.active_project:
             self.qtcb_write_line.emit(line, begin, text)
 

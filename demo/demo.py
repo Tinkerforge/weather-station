@@ -26,6 +26,7 @@ import socket
 import sys
 import time
 import math
+import signal
 
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
@@ -73,21 +74,32 @@ class WeatherStation (QApplication):
     def __init__(self, args):
         super(QApplication, self).__init__(args)
 
-
-
         self.error_msg = QErrorMessage()
 
         self.ipcon = IPConnection()
+
+        signal.signal(signal.SIGINT, self.exit)
+        signal.signal(signal.SIGTERM, self.exit)
 
         timer = QTimer(self)
         timer.setSingleShot(True)
         timer.timeout.connect(self.connect)
         timer.start(1)
 
+    def exit(self, signl=None, frme=None):
+        try:
+            self.ipcon.disconnect()
+            self.timer.stop()
+            self.tabs.destroy()
+        except:
+            pass
+
+        sys.exit()
+
     def open_gui(self):
 
         self.tabs = QTabWidget()
-        self.tabs.setFixedSize(700, 400)
+        self.tabs.setFixedSize(700, 420)
         self.projects.append(ProjectEnvDisplay(self.tabs, self))
         self.projects.append(ProjectStatistics(self.tabs, self))
         self.projects.append(ProjectXively(self.tabs, self))
@@ -102,7 +114,6 @@ class WeatherStation (QApplication):
 
         self.tabs.setWindowTitle("Starter Kit: Weather Station Demo")
         self.tabs.show()
-
 
     def connect(self):
         try:
@@ -128,6 +139,7 @@ class WeatherStation (QApplication):
         self.open_gui()
 
     def tabChangedSlot(self, tabIndex):
+        self.lcd.clear_display()
         self.active_project = self.projects[tabIndex]
 
     def cb_illuminance(self, illuminance):
@@ -226,4 +238,5 @@ class WeatherStation (QApplication):
 
 if __name__ == "__main__":
     weather_station = WeatherStation(sys.argv)
-    weather_station.exec_()    
+
+    sys.exit(weather_station.exec_())

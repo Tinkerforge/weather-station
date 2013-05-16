@@ -29,6 +29,7 @@ from PyQt4.QtGui import QPushButton, QLabel, QFont, QErrorMessage, QSpacerItem
 from PyQt4.QtCore import QTimer, Qt
 
 
+import time
 import httplib
 import json
 
@@ -49,7 +50,7 @@ class ProjectXively(QWidget):
 
     xively_host = "api.xively.com"
     xively_agent = "Tinkerforge Starter Kit Weather Station Demo"
-    xively_channel = "Enter Channel ID here"
+    xively_channel = "Enter Feed ID here"
     xively_api_key = "Enter API Key here"
 
     xively_items = {}
@@ -69,6 +70,8 @@ class ProjectXively(QWidget):
     error_message = None
 
     label_upload_active = None
+
+    last_upload = None
 
     def __init__(self, parent, app):
         super(QWidget, self).__init__()
@@ -121,7 +124,7 @@ class ProjectXively(QWidget):
         layout2.addSpacing(10)
 
         layout3b = QHBoxLayout()
-        label = QLabel("Channel:")
+        label = QLabel("Feed:")
         label.setMinimumWidth(150)
         layout3b.addWidget(label)
         layout3b.addWidget(self.text_channel, 1)
@@ -172,12 +175,14 @@ class ProjectXively(QWidget):
         self.qtcb_button_pressed.connect(self.button_pressed_slot)
         self.save_button.clicked.connect(self.save_configuration)
 
+        self.lcdwidget.clear(self)
+
         self.error_message = QErrorMessage(self)
 
     def set_active_label(self, value):
         palette = self.label_upload_active.palette()
         if value:
-            palette.setColor(self.foregroundRole(), Qt.green)
+            palette.setColor(self.foregroundRole(), Qt.darkGreen)
             self.label_upload_active.setText("Active")
         else:
             palette.setColor(self.foregroundRole(), Qt.red)
@@ -206,10 +211,20 @@ class ProjectXively(QWidget):
         self.set_active_label(True)
         self.update_xively()
 
+    def write_lcd(self):
+        if self.last_upload == None:
+            tmp = "Last: Never"
+        else:
+            tmp = "Last: " + self.last_upload
+
+        self.lcdwidget.write_line(0, 0, "Xively Upload", self)
+        self.lcdwidget.write_line(2, 0, tmp, self)
+
     def update_xively(self):
 
-        self.lcdwidget.clear(self)
-        self.lcdwidget.write_line(0,0,"Uploading...", self)
+        if len(self.xively_items) == 0:
+            return
+
 
         stream_items = []
         for identifier, value in self.xively_items.items():
@@ -235,15 +250,20 @@ class ProjectXively(QWidget):
                 self.xively_timer.stop()
                 self.xively_timer = None
                 self.set_active_label(False)
+                return
         except Exception as e:
             self.error_message.showMessage('HTTP error: ' + str(e))
             self.xively_timer.stop()
             self.xively_timer = None
             self.set_active_label(False)
+            return
+
+        # set upload time if upload was a success
+        self.last_upload = time.strftime("%H:%M:%S")
 
 
     def put(self, identifier, value):
-        self.lcdwidget.clear(self)
+        self.write_lcd()
         try:
             _, min_value, max_value = self.xively_items[identifier]
             if value < min_value:
