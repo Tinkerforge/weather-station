@@ -139,7 +139,10 @@ class WeatherStation (QApplication):
         self.open_gui()
 
     def tabChangedSlot(self, tabIndex):
-        self.lcd.clear_display()
+
+        if self.lcd is not None:
+            self.lcd.clear_display()
+
         self.active_project = self.projects[tabIndex]
 
     def cb_illuminance(self, illuminance):
