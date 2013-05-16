@@ -191,9 +191,14 @@ class ProjectXively(QWidget):
         self.label_upload_active.setPalette(palette)
 
     def save_configuration(self):
-        self.xively_agent = str(self.text_agent.text())
-        self.xively_channel = str(self.text_channel.text())
-        self.xively_api_key = str(self.text_api_key.text())
+        try:
+            self.xively_agent = str(self.text_agent.text()).decode('ascii')
+            self.xively_channel = str(self.text_channel.text()).decode('ascii')
+            self.xively_api_key = str(self.text_api_key.text()).decode('ascii')
+        except:
+            self.error_message.showMessage('Agent, Feed and API Key can only contain ASCII characters')
+            return
+
         self.xively_update_rate = self.number_update_rate.value()
 
         self.xively_headers = {
@@ -221,10 +226,8 @@ class ProjectXively(QWidget):
         self.lcdwidget.write_line(2, 0, tmp, self)
 
     def update_xively(self):
-
         if len(self.xively_items) == 0:
             return
-
 
         stream_items = []
         for identifier, value in self.xively_items.items():
