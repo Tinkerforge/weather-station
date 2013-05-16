@@ -1,0 +1,10 @@
+Package: starter-kit-weather-station-demo
+Version: 1.0.0
+Section: electronics
+Maintainer: Matthias Bolte <matthias@tinkerforge.com>
+Architecture: all
+Installed-Size: 320
+Depends: python, python-qt4
+Description: Starter Kit: Weather Station Demo
+ This demo provides a small Qt GUI to demonstrate the features of the
+ Starter Kit: Weather Station from Tinkerforge (see www.tinkerforge.com)
