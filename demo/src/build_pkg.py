@@ -62,7 +62,7 @@ def build_macosx_pkg():
     plist = dict(
         CFBundleName = 'starter_kit_weather_station_demo',
         CFBundleShortVersionString = config.DEMO_VERSION,
-        CFBundleGetInfoString = ' '.join(['Starter Kit: Weather Station Demo', config.VERSION]),
+        CFBundleGetInfoString = ' '.join(['Starter Kit: Weather Station Demo', config.DEMO_VERSION]),
         CFBundleExecutable = 'demo',
         CFBundleIdentifier = 'com.tinkerforge.starter_kit_weather_station_demo',
         CFBundleIconFile = 'demo-icon.icns',
@@ -105,7 +105,7 @@ def build_macosx_pkg():
         ]
 
         OPTIONS = {'argv_emulation' : True,
-                   'iconfile' : '../build_data/macos/starter_kit_weather_station_demo-icon.icns',
+                   'iconfile' : '../build_data/macos/demo-icon.icns',
                    'site_packages' : True,
                    'includes' : ["atexit",
                                  "sip",
