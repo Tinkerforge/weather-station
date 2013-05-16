@@ -22,13 +22,9 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
-from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QWidget
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QPushButton
-from PyQt4.QtCore import Qt
-from PyQt4.QtCore import QTimer
+from PyQt4.QtCore import pyqtSignal
+from PyQt4.QtGui import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
+from PyQt4.QtCore import Qt, QTimer
 
 import math
 import time
@@ -81,9 +77,12 @@ class ProjectStatistics(QWidget):
     def __init__(self, parent, app):
         super(QWidget, self).__init__()
 
-        self.grid = QGridLayout()
-        self.lcdwidget = LCDWidget(self, app)
-
+        layout1 = QHBoxLayout()
+        layout2 = QVBoxLayout()
+        
+        layout1.addStretch()
+        layout1.addLayout(layout2)
+        layout1.addStretch()
 
         label = QLabel(self)
         label.setText("Project: <b>Show Statistics with Button Control</b>. Shows different statistics. You can select different modi by pressing the buttons. Some modi will allow display change by pressing the button multiple times. Sources in C# can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#show-statistics-with-button-control\">here</a>.")
@@ -91,7 +90,16 @@ class ProjectStatistics(QWidget):
         label.setTextInteractionFlags(Qt.TextBrowserInteraction)
         label.setOpenExternalLinks(True)
         label.setWordWrap(True)
-        self.grid.addWidget(label, 0, 0, 1, 4)
+        label.setAlignment(Qt.AlignJustify)
+
+        layout2.addSpacing(10)
+        layout2.addWidget(label)
+        layout2.addSpacing(10)
+
+        self.lcdwidget = LCDWidget(self, app)
+
+        layout2.addWidget(self.lcdwidget)
+        layout2.addSpacing(10)
 
         self.buttons[0] = QPushButton(self)
         self.buttons[0].setFixedSize(100, 30)
@@ -112,15 +120,17 @@ class ProjectStatistics(QWidget):
         self.buttons[3].setFixedSize(100, 30)
         self.buttons[3].setText("BTN3")
         self.buttons[3].clicked.connect(lambda: self.button_pressed_slot(7))
+        
+        layout3 = QHBoxLayout()
+        layout3.addWidget(self.buttons[0])
+        layout3.addWidget(self.buttons[1])
+        layout3.addWidget(self.buttons[2])
+        layout3.addWidget(self.buttons[3])
 
-        self.grid.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.lcdwidget,1,0,1,4, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[0],2,0, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[1],2,1, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[2],2,2, Qt.AlignHCenter | Qt.AlignVCenter)
-        self.grid.addWidget(self.buttons[3],2,3, Qt.AlignHCenter | Qt.AlignVCenter)
+        layout2.addLayout(layout3)
+        layout2.addStretch()
 
-        self.setLayout(self.grid)
+        self.setLayout(layout1)
 
         self.qtcb_update_illuminance.connect(self.update_illuminance_data_slot)
         self.qtcb_update_air_pressure.connect(self.update_air_pressure_data_slot)

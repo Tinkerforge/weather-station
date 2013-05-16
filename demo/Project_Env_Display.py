@@ -23,13 +23,10 @@ Boston, MA 02111-1307, USA.
 """
 
 
-from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT, Qt
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QWidget
-from PyQt4.QtGui import QLabel
+from PyQt4.QtCore import pyqtSignal, Qt
+from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton
 
 import math
-
 
 from LCDWidget import LCDWidget
 
@@ -46,18 +43,31 @@ class ProjectEnvDisplay(QWidget):
     def __init__(self, parent, app):
         super(QWidget, self).__init__()
 
-        self.grid = QGridLayout()
+        layout1 = QHBoxLayout()
+        layout2 = QVBoxLayout()
+        
+        layout1.addStretch()
+        layout1.addLayout(layout2)
+        layout1.addStretch()
+
         label = QLabel(self)
-        label.setText("Simple Project: <b>Display Environment Measurements on LCD</b>. Simply displays all measured values on LCD. Sources in all programming languages can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#display-environment-measurements-on-lcd\">here</a>.")
+        label.setText("Simple Project: <b>Display Environment Measurements on LCD</b>. Simply displays all measured values on LCD. Sources in all programming languages can be found <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#display-environment-measurements-on-lcd\">here</a>.<br>")
         label.setTextFormat(Qt.RichText)
         label.setTextInteractionFlags(Qt.TextBrowserInteraction)
         label.setOpenExternalLinks(True)
         label.setWordWrap(True)
-        self.grid.addWidget(label)
-        
+        label.setAlignment(Qt.AlignJustify)
+
+        layout2.addSpacing(10)
+        layout2.addWidget(label)
+        layout2.addSpacing(10)
+
         self.lcdwidget = LCDWidget(self, app)
-        self.grid.addWidget(self.lcdwidget)
-        self.setLayout(self.grid)
+
+        layout2.addWidget(self.lcdwidget)
+        layout2.addStretch()
+
+        self.setLayout(layout1)
 
         self.qtcb_update_illuminance.connect(self.update_illuminance_data_slot)
         self.qtcb_update_air_pressure.connect(self.update_air_pressure_data_slot)

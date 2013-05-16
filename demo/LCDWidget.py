@@ -94,6 +94,8 @@ class LCDChar (QLabel):
 class LCDWidget (QWidget):
 
     qtcb_write_line = pyqtSignal(int, int, str)
+    
+    FIXED_WIDGTH = 554
 
     def __init__(self, parent, app):
         super(QWidget, self).__init__(parent)
@@ -102,7 +104,7 @@ class LCDWidget (QWidget):
 
         self.app = app
 
-        self.setFixedSize(550, 204)
+        self.setFixedSize(LCDWidget.FIXED_WIDGTH, 210)
 
         self.setAutoFillBackground(True)
         palette = self.palette()

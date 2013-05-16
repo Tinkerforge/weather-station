@@ -24,16 +24,9 @@ Boston, MA 02111-1307, USA.
 
 
 from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QWidget
-from PyQt4.QtGui import QCheckBox
-from PyQt4.QtGui import QTextEdit
-from PyQt4.QtGui import QPushButton
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QFont
-from PyQt4.QtGui import QErrorMessage
-from PyQt4.QtCore import QTimer
-from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QWidget, QCheckBox, QLineEdit, QSpinBox
+from PyQt4.QtGui import QPushButton, QLabel, QFont, QErrorMessage, QSpacerItem
+from PyQt4.QtCore import QTimer, Qt
 
 
 import httplib
@@ -55,8 +48,8 @@ class ProjectXively(QWidget):
     lcdwidget = None
 
     xively_host = "api.xively.com"
-    xively_agent = "Tinkerforge Weather Kit: Starter Kit Demo"
-    xively_feed = "Enter Feed ID here"
+    xively_agent = "Tinkerforge Starter Kit Weather Station Demo"
+    xively_channel = "Enter Channel ID here"
     xively_api_key = "Enter API Key here"
 
     xively_items = {}
@@ -65,9 +58,9 @@ class ProjectXively(QWidget):
     xively_update_rate = 5 # in minutes
 
     text_agent = None
-    text_feed = None
-    text_key = None
-    text_rate = None
+    text_channel = None
+    text_api_key = None
+    number_update_rate = None
 
     save_button = None
 
@@ -83,51 +76,94 @@ class ProjectXively(QWidget):
         self.lcdwidget = LCDWidget(self, app)
         self.lcdwidget.hide()
 
-        self.text_agent = QTextEdit(self)
-        self.text_agent.setPlainText(str(self.xively_agent))
-        self.text_agent.setFixedSize(400,30)
-        self.text_feed = QTextEdit(self)
-        self.text_feed.setPlainText(str(self.xively_feed))
-        self.text_feed.setFixedSize(400,30)
-        self.text_key = QTextEdit(self)
-        self.text_key.setPlainText(str(self.xively_api_key))
-        self.text_key.setFixedSize(400,30)
-        self.text_rate = QTextEdit(self)
-        self.text_rate.setPlainText(str(self.xively_update_rate))
-        self.text_rate.setFixedSize(100,30)
-
-        self.save_button = QPushButton("Save/Activate")
-        self.save_button.setFixedSize(120,30)
+        self.text_agent = QLineEdit(self)
+        self.text_agent.setText(self.xively_agent)
         
-        self.grid = QGridLayout()
+        self.text_channel = QLineEdit(self)
+        self.text_channel.setText(self.xively_channel)
+        
+        self.text_api_key = QLineEdit(self)
+        self.text_api_key.setText(self.xively_api_key)
+        
+        self.number_update_rate = QSpinBox(self)
+        self.number_update_rate.setRange(1, 1440)
+        self.number_update_rate.setSuffix(' min')
+        self.number_update_rate.setValue(self.xively_update_rate)
+
+        layout1 = QHBoxLayout()
+        layout2 = QVBoxLayout()
+        
+        layout1.addStretch()
+        layout1.addLayout(layout2)
+        layout1.addStretch()
+        
+        layout2.addSpacerItem(QSpacerItem(LCDWidget.FIXED_WIDGTH, 0))
 
         label = QLabel(self)
-        label.setText("Project: <b>Connect to Xively</b>. This project uploads the measured values to Xively. Please find documentation how to configure it and program sources in Python <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#connect-to-xively\">here</a>.")
+        label.setText("Project: <b>Connect to Xively</b>. This project uploads the measured values to Xively. Please find documentation how to configure it and program sources in Python <a href=\"http://www.tinkerforge.com/en/doc/Kits/WeatherStation/WeatherStation.html#connect-to-xively\">here</a>.<br>")
         label.setTextFormat(Qt.RichText)
         label.setTextInteractionFlags(Qt.TextBrowserInteraction)
         label.setOpenExternalLinks(True)
         label.setWordWrap(True)
-        self.grid.addWidget(label, 0, 0, 1, 2)
+        label.setAlignment(Qt.AlignJustify)
 
-        self.grid.addWidget(QLabel("Agent Description:"),1,0)
-        self.grid.addWidget(self.text_agent,1,1)
-        self.grid.addWidget(QLabel("Feed:"),2,0)
-        self.grid.addWidget(self.text_feed,2,1)
-        self.grid.addWidget(QLabel("Key:"),3,0)
-        self.grid.addWidget(self.text_key,3,1)
-        self.grid.addWidget(QLabel("Update Rate (min):"),4,0)
-        self.grid.addWidget(self.text_rate,4,1)
-        self.grid.addWidget(self.save_button,5,1)
+        layout2.addSpacing(10)
+        layout2.addWidget(label)
+        layout2.addSpacing(10)
+
+        layout3a = QHBoxLayout()
+        label = QLabel("Agent Description:")
+        label.setMinimumWidth(150)
+        layout3a.addWidget(label)
+        layout3a.addWidget(self.text_agent, 1)
+
+        layout2.addLayout(layout3a)
+        layout2.addSpacing(10)
+
+        layout3b = QHBoxLayout()
+        label = QLabel("Channel:")
+        label.setMinimumWidth(150)
+        layout3b.addWidget(label)
+        layout3b.addWidget(self.text_channel, 1)
+
+        layout2.addLayout(layout3b)
+        layout2.addSpacing(10)
+
+        layout3c = QHBoxLayout()
+        label = QLabel("API Key:")
+        label.setMinimumWidth(150)
+        layout3c.addWidget(label)
+        layout3c.addWidget(self.text_api_key, 1)
+
+        layout2.addLayout(layout3c)
+        layout2.addSpacing(10)
+
+        layout3d = QHBoxLayout()
+        label = QLabel("Update Rate:")
+        label.setMinimumWidth(150)
+        layout3d.addWidget(label)
+        layout3d.addWidget(self.number_update_rate, 1)
+
+        layout2.addLayout(layout3d)
+        layout2.addSpacing(10)
 
         self.label_upload_active = QLabel("Not Active", self)
+        self.label_upload_active.setMinimumWidth(150)
         font = QFont()
         font.setPixelSize(20)
         self.label_upload_active.setFont(font)
-        self.label_upload_active.setFixedSize(120, 50)
         self.set_active_label(False)
-        self.grid.addWidget(self.label_upload_active,5,0)
 
-        self.setLayout(self.grid)
+        self.save_button = QPushButton("Save/Activate")
+
+        layout4 = QHBoxLayout()
+        layout4.addWidget(self.label_upload_active)
+        layout4.addWidget(self.save_button, 1)
+
+        layout2.addLayout(layout4)
+        layout2.addStretch()
+
+        self.setLayout(layout1)
 
         self.qtcb_update_illuminance.connect(self.update_illuminance_data_slot)
         self.qtcb_update_air_pressure.connect(self.update_air_pressure_data_slot)
@@ -150,20 +186,19 @@ class ProjectXively(QWidget):
         self.label_upload_active.setPalette(palette)
 
     def save_configuration(self):
-
-        self.xively_agent = self.text_agent.toPlainText()
-        self.xively_feed = self.text_feed.toPlainText()
-        self.xively_api_key = self.text_key.toPlainText()
-        self.xively_update_rate = float(self.text_rate.toPlainText())
+        self.xively_agent = str(self.text_agent.text())
+        self.xively_channel = str(self.text_channel.text())
+        self.xively_api_key = str(self.text_api_key.text())
+        self.xively_update_rate = self.number_update_rate.value()
 
         self.xively_headers = {
             "Content-Type"  : "application/x-www-form-urlencoded",
             "X-ApiKey"      : self.xively_api_key,
             "User-Agent"    : self.xively_agent,
         }
-        self.xively_params = "/v2/feeds/" + str(self.xively_feed)
+        self.xively_params = "/v2/feeds/" + self.xively_channel
 
-        if self.xively_timer == None:
+        if self.xively_timer is None:
             self.xively_timer = QTimer(self)
             self.xively_timer.timeout.connect(self.update_xively)
             self.xively_timer.start(self.xively_update_rate*60*1000)
