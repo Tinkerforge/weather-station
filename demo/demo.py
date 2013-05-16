@@ -27,6 +27,8 @@ import sys
 import time
 import math
 import signal
+import os
+from program_path import ProgramPath
 
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
@@ -35,23 +37,13 @@ from tinkerforge.bricklet_ambient_light import AmbientLight
 from tinkerforge.bricklet_humidity import Humidity
 from tinkerforge.bricklet_barometer import Barometer
 
-import sys
-from PyQt4.QtGui import QApplication
-from PyQt4.QtGui import QWidget
-from PyQt4.QtGui import QErrorMessage
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QPalette
-from PyQt4.QtGui import QTextFormat
-from PyQt4.QtGui import QTabWidget
-from PyQt4.QtCore import QTimer
-from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
-
-
+from PyQt4.QtGui import QApplication, QWidget, QErrorMessage, QGridLayout, QIcon
+from PyQt4.QtGui import QPalette, QTextFormat, QTabWidget
+from PyQt4.QtCore import QTimer, pyqtSignal
 
 from Project_Env_Display import ProjectEnvDisplay
 from Project_Statistics import ProjectStatistics
 from Project_Xively import ProjectXively
-
 
 
 class WeatherStation (QApplication):
@@ -75,7 +67,6 @@ class WeatherStation (QApplication):
         super(QApplication, self).__init__(args)
 
         self.error_msg = QErrorMessage()
-
         self.ipcon = IPConnection()
 
         signal.signal(signal.SIGINT, self.exit)
@@ -100,6 +91,7 @@ class WeatherStation (QApplication):
 
         self.tabs = QTabWidget()
         self.tabs.setFixedSize(700, 420)
+        self.tabs.setWindowIcon(QIcon(os.path.join(ProgramPath.program_path(), "demo-icon.png")))
         self.projects.append(ProjectEnvDisplay(self.tabs, self))
         self.projects.append(ProjectStatistics(self.tabs, self))
         self.projects.append(ProjectXively(self.tabs, self))
