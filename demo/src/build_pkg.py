@@ -65,7 +65,7 @@ def build_macosx_pkg():
         CFBundleGetInfoString = ' '.join(['Starter Kit: Weather Station Demo', config.VERSION]),
         CFBundleExecutable = 'demo',
         CFBundleIdentifier = 'com.tinkerforge.starter_kit_weather_station_demo',
-        CFBundleIconFile = 'starter_kit_weather_station_demo-icon.icns',
+        CFBundleIconFile = 'demo-icon.icns',
         # hide dock icon
     #    LSUIElement = True,
     )
@@ -81,7 +81,7 @@ def build_macosx_pkg():
     
     os.path.walk(os.path.normcase("../build_data/macos/"), visitor, ('y',os.path.normcase("../build_data/macos/")))
     
-    additional_data_files.append((os.path.join('.'), [os.path.join('.', 'starter_kit_weather_station_demo-icon.png')]))
+    additional_data_files.append((os.path.join('.'), [os.path.join('.', 'demo-icon.png')]))
 
     additional_modules = []
     for f in os.listdir('tinkerforge'):
@@ -221,7 +221,7 @@ def build_windows_pkg():
     
     os.path.walk(os.path.normcase("../build_data/Windows/"), visitor, ('y', os.path.normcase("../build_data/Windows/")))
     
-    data_files.append( ( os.path.join('.') , [os.path.join('.', 'starter_kit_weather_station_demo-icon.png')] ) )
+    data_files.append( ( os.path.join('.') , [os.path.join('.', 'demo-icon.png')] ) )
 
     additional_modules = []
     for f in os.listdir('tinkerforge'):
@@ -266,7 +266,7 @@ def build_windows_pkg():
                     }
                     },
           zipfile = None,
-          windows = [{'script' : 'demo.py', 'icon_resources' : [(0, os.path.normcase("../build_data/Windows/starter_kit_weather_station_demo-icon.ico"))]}]
+          windows = [{'script' : 'demo.py', 'icon_resources' : [(0, os.path.normcase("../build_data/Windows/demo-icon.ico"))]}]
     )
     
     # build nsis
