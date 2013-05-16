@@ -75,7 +75,7 @@ class ProjectStatistics(QWidget):
     lcdwidget = None
 
     def __init__(self, parent, app):
-        super(QWidget, self).__init__()
+        super(QWidget, self).__init__(parent)
 
         layout1 = QHBoxLayout()
         layout2 = QVBoxLayout()

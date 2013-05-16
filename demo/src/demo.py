@@ -29,6 +29,7 @@ import math
 import signal
 import os
 from program_path import ProgramPath
+import config
 
 from tinkerforge.ip_connection import IPConnection
 from tinkerforge.ip_connection import Error
@@ -46,7 +47,16 @@ from Project_Statistics import ProjectStatistics
 from Project_Xively import ProjectXively
 
 
-class WeatherStation (QApplication):
+class TabWidget(QTabWidget):
+    def __init__(self, app, parent=None):
+        super(QTabWidget, self).__init__(parent)
+        self.app = app
+
+    def closeEvent(self, event):
+        self.app.exit_demo()
+
+
+class WeatherStation(QApplication):
     HOST = "localhost"
     PORT = 4223
 
@@ -69,15 +79,15 @@ class WeatherStation (QApplication):
         self.error_msg = QErrorMessage()
         self.ipcon = IPConnection()
 
-        signal.signal(signal.SIGINT, self.exit)
-        signal.signal(signal.SIGTERM, self.exit)
+        signal.signal(signal.SIGINT, self.exit_demo)
+        signal.signal(signal.SIGTERM, self.exit_demo)
 
         timer = QTimer(self)
         timer.setSingleShot(True)
         timer.timeout.connect(self.connect)
         timer.start(1)
 
-    def exit(self, signl=None, frme=None):
+    def exit_demo(self, signl=None, frme=None):
         try:
             self.ipcon.disconnect()
             self.timer.stop()
@@ -88,8 +98,8 @@ class WeatherStation (QApplication):
         sys.exit()
 
     def open_gui(self):
+        self.tabs = TabWidget(self)
 
-        self.tabs = QTabWidget()
         self.tabs.setFixedSize(700, 420)
         self.tabs.setWindowIcon(QIcon(os.path.join(ProgramPath.program_path(), "demo-icon.png")))
         self.projects.append(ProjectEnvDisplay(self.tabs, self))
@@ -104,7 +114,7 @@ class WeatherStation (QApplication):
 
         self.tabs.currentChanged.connect(self.tabChangedSlot)
 
-        self.tabs.setWindowTitle("Starter Kit: Weather Station Demo")
+        self.tabs.setWindowTitle("Starter Kit: Weather Station Demo " + config.DEMO_VERSION)
         self.tabs.show()
 
     def connect(self):
