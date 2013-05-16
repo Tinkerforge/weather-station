@@ -47,8 +47,8 @@ class LCDChar (QLabel):
     def __init__(self, parent):
         super(QLabel, self).__init__(parent)
         
-        font = QFont()
-        font.setPixelSize(self.height())
+        font = QFont("monospace")
+        font.setPixelSize(27)
         self.setFont(font)
         self.qtcb_set_char.connect(self.set_char_slot)
 
