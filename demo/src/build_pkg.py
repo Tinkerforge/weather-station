@@ -52,7 +52,7 @@ def build_macosx_pkg():
     from setuptools import setup, find_packages
 
     PWD = os.path.dirname(os.path.realpath(__file__))
-    RES_PATH = os.path.join(PWD, 'dist', '%s.app' % 'starter_kit_weather_station_demo', 'Contents', 'Resources')
+    RES_PATH = os.path.join(PWD, 'dist', 'Starter Kit Weather Station Demo.app', 'Contents', 'Resources')
     data_files = [
         ("../build_data/macos/", glob.glob(os.path.join(PWD, "../build_data/macos/", "*.nib"))),
         #('/usr/share/applications',['foo.desktop']),
@@ -60,7 +60,7 @@ def build_macosx_pkg():
     packages = find_packages()
 
     plist = dict(
-        CFBundleName = 'starter_kit_weather_station_demo',
+        CFBundleName = 'Starter Kit Weather Station Demo',
         CFBundleShortVersionString = config.DEMO_VERSION,
         CFBundleGetInfoString = ' '.join(['Starter Kit: Weather Station Demo', config.DEMO_VERSION]),
         CFBundleExecutable = 'demo',
