@@ -39,7 +39,7 @@ from tinkerforge.bricklet_humidity import Humidity
 from tinkerforge.bricklet_barometer import Barometer
 
 from PyQt4.QtGui import QApplication, QWidget, QErrorMessage, QGridLayout, QIcon
-from PyQt4.QtGui import QPalette, QTextFormat, QTabWidget
+from PyQt4.QtGui import QPalette, QTextFormat, QTabWidget, QMainWindow, QVBoxLayout
 from PyQt4.QtCore import QTimer, pyqtSignal
 
 from Project_Env_Display import ProjectEnvDisplay
@@ -47,9 +47,9 @@ from Project_Statistics import ProjectStatistics
 from Project_Xively import ProjectXively
 
 
-class TabWidget(QTabWidget):
+class MainWindow(QMainWindow):
     def __init__(self, app, parent=None):
-        super(QTabWidget, self).__init__(parent)
+        super(QMainWindow, self).__init__(parent)
         self.app = app
 
     def closeEvent(self, event):
@@ -65,8 +65,6 @@ class WeatherStation(QApplication):
     al = None
     hum = None
     baro = None
-
-    widget = None
 
     projects = []
     active_project = None
@@ -98,10 +96,19 @@ class WeatherStation(QApplication):
         sys.exit()
 
     def open_gui(self):
-        self.tabs = TabWidget(self)
+        self.main = MainWindow(self)
+        self.main.setFixedSize(700, 430)
+        self.main.setWindowIcon(QIcon(os.path.join(ProgramPath.program_path(), "demo-icon.png")))
+        
+        self.tabs = QTabWidget()
+        
+        widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(self.tabs)
+        widget.setLayout(layout)
 
-        self.tabs.setFixedSize(700, 420)
-        self.tabs.setWindowIcon(QIcon(os.path.join(ProgramPath.program_path(), "demo-icon.png")))
+        self.main.setCentralWidget(widget)
+        
         self.projects.append(ProjectEnvDisplay(self.tabs, self))
         self.projects.append(ProjectStatistics(self.tabs, self))
         self.projects.append(ProjectXively(self.tabs, self))
@@ -114,8 +121,8 @@ class WeatherStation(QApplication):
 
         self.tabs.currentChanged.connect(self.tabChangedSlot)
 
-        self.tabs.setWindowTitle("Starter Kit: Weather Station Demo " + config.DEMO_VERSION)
-        self.tabs.show()
+        self.main.setWindowTitle("Starter Kit: Weather Station Demo " + config.DEMO_VERSION)
+        self.main.show()
 
     def connect(self):
         try:
