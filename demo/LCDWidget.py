@@ -128,7 +128,10 @@ class LCDWidget (QWidget):
     def write_line_slot(self, line, begin, text):
 
         if self.app.lcd is not None:
-            self.app.lcd.write_line(line, begin, str(text.toAscii().data()))
+            try:
+                self.app.lcd.write_line(line, begin, str(text.toAscii().data()))
+            except Exception:
+                pass
 
         for i in range(begin, len(self.array[0])):
             try:

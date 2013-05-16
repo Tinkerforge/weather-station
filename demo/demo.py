@@ -37,10 +37,12 @@ from tinkerforge.bricklet_barometer import Barometer
 import sys
 from PyQt4.QtGui import QApplication
 from PyQt4.QtGui import QWidget
+from PyQt4.QtGui import QErrorMessage
 from PyQt4.QtGui import QGridLayout
 from PyQt4.QtGui import QPalette
 from PyQt4.QtGui import QTextFormat
 from PyQt4.QtGui import QTabWidget
+from PyQt4.QtCore import QTimer
 from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
 
 
@@ -66,10 +68,23 @@ class WeatherStation (QApplication):
     projects = []
     active_project = None
 
-
+    error_msg = None
 
     def __init__(self, args):
         super(QApplication, self).__init__(args)
+
+
+
+        self.error_msg = QErrorMessage()
+
+        self.ipcon = IPConnection()
+
+        timer = QTimer(self)
+        timer.setSingleShot(True)
+        timer.timeout.connect(self.connect)
+        timer.start(1)
+
+    def open_gui(self):
 
         self.tabs = QTabWidget()
         self.tabs.setFixedSize(700, 400)
@@ -88,32 +103,29 @@ class WeatherStation (QApplication):
         self.tabs.setWindowTitle("Starter Kit: Weather Station Demo")
         self.tabs.show()
 
-        self.ipcon = IPConnection()
-        while True:
-            try:
-                self.ipcon.connect(WeatherStation.HOST, WeatherStation.PORT)
-                break
-            except Error as e:
-                log.error('Connection Error: ' + str(e.description))
-                time.sleep(1)
-            except socket.error as e:
-                log.error('Socket error: ' + str(e))
-                time.sleep(1)
+
+    def connect(self):
+        try:
+            self.ipcon.connect(WeatherStation.HOST, WeatherStation.PORT)
+        except Error as e:
+            self.error_msg.showMessage('Connection Error: ' + str(e.description) + "\nBrickd installed and running?")
+            return
+        except socket.error as e:
+            self.error_msg.showMessage('Socket error: ' + str(e) + "\nBrickd installed and running?")
+            return
 
         self.ipcon.register_callback(IPConnection.CALLBACK_ENUMERATE,
                                      self.cb_enumerate)
         self.ipcon.register_callback(IPConnection.CALLBACK_CONNECTED,
                                      self.cb_connected)
 
-        while True:
-            try:
-                self.ipcon.enumerate()
-                break
-            except Error as e:
-                log.error('Enumerate Error: ' + str(e.description))
-                time.sleep(1)
+        try:
+            self.ipcon.enumerate()
+        except Error as e:
+            self.error_msg.showMessage('Enumerate Error: ' + str(e.description))
+            return
 
-        sys.exit(self.exec_())
+        self.open_gui()
 
     def tabChangedSlot(self, tabIndex):
         self.active_project = self.projects[tabIndex]
@@ -133,7 +145,7 @@ class WeatherStation (QApplication):
         try:
             temperature = self.baro.get_chip_temperature()
         except Error as e:
-            log.error('Could not get temperature: ' + str(e.description))
+            print('Could not get temperature: ' + str(e.description))
             return
 
         for p in self.projects:
@@ -171,7 +183,7 @@ class WeatherStation (QApplication):
                     self.configure_custom_chars()
 
                 except Error as e:
-                    print('LCD 20x4 init failed: ' + str(e.description))
+                    self.error_msg.showMessage('LCD 20x4 init failed: ' + str(e.description))
                     self.lcd = None
             elif device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                 try:
@@ -180,7 +192,7 @@ class WeatherStation (QApplication):
                     self.al.register_callback(self.al.CALLBACK_ILLUMINANCE,
                                               self.cb_illuminance)
                 except Error as e:
-                    print('Ambient Light init failed: ' + str(e.description))
+                    self.error_msg.showMessage('Ambient Light init failed: ' + str(e.description))
                     self.al = None
             elif device_identifier == Humidity.DEVICE_IDENTIFIER:
                 try:
@@ -189,7 +201,7 @@ class WeatherStation (QApplication):
                     self.hum.register_callback(self.hum.CALLBACK_HUMIDITY,
                                                self.cb_humidity)
                 except Error as e:
-                    print('Humidity init failed: ' + str(e.description))
+                    self.error_msg.showMessage('Humidity init failed: ' + str(e.description))
                     self.hum = None
             elif device_identifier == Barometer.DEVICE_IDENTIFIER:
                 try:
@@ -198,23 +210,20 @@ class WeatherStation (QApplication):
                     self.baro.register_callback(self.baro.CALLBACK_AIR_PRESSURE,
                                                 self.cb_air_pressure)
                 except Error as e:
-                    print('Barometer init failed: ' + str(e.description))
+                    self.error_msg.showMessage('Barometer init failed: ' + str(e.description))
                     self.baro = None
 
     def cb_connected(self, connected_reason):
         if connected_reason == IPConnection.CONNECT_REASON_AUTO_RECONNECT:
-            log.info('Auto Reconnect')
 
             while True:
                 try:
                     self.ipcon.enumerate()
                     break
                 except Error as e:
-                    print('Enumerate Error: ' + str(e.description))
+                    self.error_msg.showMessage('Enumerate Error: ' + str(e.description))
                     time.sleep(1)
 
 if __name__ == "__main__":
     weather_station = WeatherStation(sys.argv)
-
-    if weather_station.ipcon != None:
-        weather_station.ipcon.disconnect()
+    weather_station.exec_()    

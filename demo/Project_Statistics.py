@@ -210,25 +210,27 @@ class ProjectStatistics(QWidget):
 
     def UpdateStandard(self):
 
-        if self.latestIlluminance == None or \
-           self.latestHumidity == None or \
-           self.latestAirPressure == None or \
-           self.latestTemperature == None:
-            return
+        if not self.latestIlluminance == None:
+            text = 'Illuminanc %6.2f lx' % (self.latestIlluminance)
+            self.lcdwidget.write_line(0, 0, text, self)
 
-        text = 'Illuminanc %6.2f lx' % (self.latestIlluminance)
-        self.lcdwidget.write_line(0, 0, text, self)
-        text = 'Humidity   %6.2f %%' % (self.latestHumidity)
-        self.lcdwidget.write_line(1, 0, text, self)
-        text = 'Air Press %7.2f mb' % (self.latestAirPressure)
-        self.lcdwidget.write_line(2, 0, text, self)
-        text = 'Temperature %5.2f \xDFC' % (self.latestTemperature)
-        self.lcdwidget.write_line(3, 0, text, self)
+        if not self.latestHumidity == None:
+            text = 'Humidity   %6.2f %%' % (self.latestHumidity)
+            self.lcdwidget.write_line(1, 0, text, self)
+
+        if not self.latestAirPressure == None:
+            text = 'Air Press %7.2f mb' % (self.latestAirPressure)
+            self.lcdwidget.write_line(2, 0, text, self)
+        
+        if not self.latestTemperature == None:
+            text = 'Temperature %5.2f \xDFC' % (self.latestTemperature)
+            self.lcdwidget.write_line(3, 0, text, self)
 
 
     def UpdateGraph(self):
         barSumMin = 0.0
         barSumMax = 0.0
+    
 
         if self.buttonPressedCounter[1] % 4 == self.MODE_ILLUMINANCE:
             [barSumMin, barSumMax] = self.UpdateGraphWriteBars(self.illuminanceQueue)
@@ -285,7 +287,11 @@ class ProjectStatistics(QWidget):
             if barSum[i] > barSumMax:
                 barSumMax = barSum[i]
 
-        scale = (self.BAR_HEIGHT-1)/(barSumMax - barSumMin)
+        if (barSumMax - barSumMin) == 0:
+            scale = 1
+        else:
+            scale = (self.BAR_HEIGHT-1)/(barSumMax - barSumMin)
+
         offset = barSumMin * scale - 1
 
         barHeight = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -317,7 +323,7 @@ class ProjectStatistics(QWidget):
         if self.buttonPressedCounter[2] % 4 == self.MODE_HUMIDITY:
             self.UpdateMinMaxAvgWrite("Humidity       " + self.TimeFromSeconds(len(self.humidityQueue)), "%RH", self.GetMinMaxAvg(self.humidityQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_AIR_PRESSURE:
-            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "Lux", self.GetMinMaxAvg(self.illuminanceQueue))
+            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "Lux", self.GetMinMaxAvg(self.airPressureQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_TEMPERATURE:
             self.UpdateMinMaxAvgWrite("Temperature    " + self.TimeFromSeconds(len(self.temperatureQueue)), "\xDFC", self.GetMinMaxAvg(self.temperatureQueue))
 
@@ -353,27 +359,25 @@ class ProjectStatistics(QWidget):
 
     def Update(self):
 
-        if self.latestIlluminance == None or \
-           self.latestHumidity == None or \
-           self.latestAirPressure == None or \
-           self.latestTemperature == None:
-            return
+        if not self.latestIlluminance == None:
+            self.illuminanceQueue.append(self.latestIlluminance)
+            if len(self.illuminanceQueue) > 60*60*24:
+                self.illuminanceQueue.pop()
 
-        self.illuminanceQueue.append(self.latestIlluminance)
-        if len(self.illuminanceQueue) > 60*60*24:
-            self.illuminanceQueue.pop()
-
-        self.humidityQueue.append(self.latestHumidity)
-        if len(self.humidityQueue) > 60*60*24:
-            self.humidityQueue.pop()
+        if not self.latestHumidity == None:
+            self.humidityQueue.append(self.latestHumidity)
+            if len(self.humidityQueue) > 60*60*24:
+                self.humidityQueue.pop()
         
-        self.airPressureQueue.append(self.latestAirPressure)
-        if len(self.airPressureQueue) > 60*60*24:
-            self.airPressureQueue.pop()
+        if not self.latestAirPressure == None:
+            self.airPressureQueue.append(self.latestAirPressure)
+            if len(self.airPressureQueue) > 60*60*24:
+                self.airPressureQueue.pop()
         
-        self.temperatureQueue.append(self.latestTemperature)
-        if len(self.temperatureQueue) > 60*60*24:
-            self.temperatureQueue.pop()
+        if not self.latestTemperature == None:
+            self.temperatureQueue.append(self.latestTemperature)
+            if len(self.temperatureQueue) > 60*60*24:
+                self.temperatureQueue.pop()
 
         self.UpdateSwitch()
 

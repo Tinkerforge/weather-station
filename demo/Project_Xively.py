@@ -62,7 +62,7 @@ class ProjectXively(QWidget):
     xively_items = {}
     xively_headers = None
     xively_params = ""
-    xively_update_rate = 0.1 # in minutes
+    xively_update_rate = 5 # in minutes
 
     text_agent = None
     text_feed = None
@@ -169,6 +169,7 @@ class ProjectXively(QWidget):
             self.xively_timer.start(self.xively_update_rate*60*1000)
 
         self.set_active_label(True)
+        self.update_xively()
 
     def update_xively(self):
 
