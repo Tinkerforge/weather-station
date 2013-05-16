@@ -97,7 +97,7 @@ class WeatherStation(QApplication):
 
     def open_gui(self):
         self.main = MainWindow(self)
-        self.main.setFixedSize(700, 430)
+        self.main.setFixedSize(730, 430)
         self.main.setWindowIcon(QIcon(os.path.join(ProgramPath.program_path(), "demo-icon.png")))
         
         self.tabs = QTabWidget()
