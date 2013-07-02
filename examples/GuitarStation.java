@@ -46,7 +46,7 @@ class GameHandle extends Thread{
 			int codePoint = utf16.codePointAt(i);
 
 			switch (codePoint) {
-				case ' ': c = (char)' '; break;
+				case ' ': c = ' '; break;
 				default:
 					c = (char)0xff; break; // BLACK SQUARE
 			}
