@@ -26,7 +26,7 @@ $response = array (
     "illuminance"  => "Illuminance: $illuminance Lux",
     "humidity"     => "Humidity: $humidity %RH",
     "air_pressure" => "Air Pressure: $air_pressure mbar",
-    "temperature"  => "Temperature: $temperature °C",
+    "temperature"  => "Temperature: $temperature &deg;C",
 );
 
 print_r(json_encode($response));
