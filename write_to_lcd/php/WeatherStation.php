@@ -35,9 +35,9 @@ class WeatherStation
 		}
 
 		$this->ipcon->registerCallback(IPConnection::CALLBACK_ENUMERATE,
-		                               array($this, 'enumerateCB'));
+		                               array($this, 'cb_enumerate'));
 		$this->ipcon->registerCallback(IPConnection::CALLBACK_CONNECTED,
-		                               array($this, 'connectedCB'));
+		                               array($this, 'cb_connected'));
 
 		while(true) {
 			try {
@@ -49,7 +49,7 @@ class WeatherStation
 		}
 	}
 
-	function illuminanceCB($illuminance)
+	function cb_illuminance($illuminance)
 	{
 		if($this->brickletLCD != null) {
 			$text = sprintf("Illuminanc %6.2f lx", $illuminance/10.0);
@@ -58,7 +58,7 @@ class WeatherStation
 		}
 	}
 
-	function humidityCB($humidity)
+	function cb_humidity($humidity)
 	{
 		if($this->brickletLCD != null) {
 			$text = sprintf("Humidity   %6.2f %%", $humidity/10.0);
@@ -67,7 +67,7 @@ class WeatherStation
 		}
 	}
 
-	function airPressureCB($airPressure)
+	function cb_airPressure($airPressure)
 	{
 		if($this->brickletLCD != null) {
 			$text = sprintf("Air Press %7.2f mb", $airPressure/1000.0);
@@ -89,8 +89,8 @@ class WeatherStation
 		}
 	}
 
-	function enumerateCB($uid, $connectedUid, $position, $hardwareVersion,
-	                     $firmwareVersion, $deviceIdentifier, $enumerationType)
+	function cb_enumerate($uid, $connectedUid, $position, $hardwareVersion,
+	                      $firmwareVersion, $deviceIdentifier, $enumerationType)
 	{
 		if($enumerationType == IPConnection::ENUMERATION_TYPE_CONNECTED ||
 		   $enumerationType == IPConnection::ENUMERATION_TYPE_AVAILABLE) {
@@ -109,7 +109,7 @@ class WeatherStation
 					$this->brickletAmbientLight = new BrickletAmbientLight($uid, $this->ipcon);
 					$this->brickletAmbientLight->setIlluminanceCallbackPeriod(1000);
 					$this->brickletAmbientLight->registerCallback(BrickletAmbientLight::CALLBACK_ILLUMINANCE,
-					                                              array($this, 'illuminanceCB'));
+					                                              array($this, 'cb_illuminance'));
 					echo "Ambient Light initialized\n";
 				} catch(Exception $e) {
 					$this->brickletAmbientLight = null;
@@ -120,7 +120,7 @@ class WeatherStation
 					$this->brickletHumidity = new BrickletHumidity($uid, $this->ipcon);
 					$this->brickletHumidity->setHumidityCallbackPeriod(1000);
 					$this->brickletHumidity->registerCallback(BrickletHumidity::CALLBACK_HUMIDITY,
-					                                          array($this, 'humidityCB'));
+					                                          array($this, 'cb_humidity'));
 					echo "Humidity initialized\n";
 				} catch(Exception $e) {
 					$this->brickletHumidity = null;
@@ -131,7 +131,7 @@ class WeatherStation
 					$this->brickletBarometer = new BrickletBarometer($uid, $this->ipcon);
 					$this->brickletBarometer->setAirPressureCallbackPeriod(1000);
 					$this->brickletBarometer->registerCallback(BrickletBarometer::CALLBACK_AIR_PRESSURE,
-					                                           array($this, 'airPressureCB'));
+					                                           array($this, 'cb_airPressure'));
 					echo "Barometer initialized\n";
 				} catch(Exception $e) {
 					$this->brickletBarometer = null;
@@ -141,7 +141,7 @@ class WeatherStation
 		}
 	}
 
-	function connectedCB($connectedReason)
+	function cb_connected($connectedReason)
 	{
 		if($connectedReason == IPConnection::CONNECT_REASON_AUTO_RECONNECT) {
 			echo "Auto Reconnect\n";
