@@ -229,7 +229,7 @@ class ProjectStatistics(QWidget):
             self.lcdwidget.write_line(1, 0, text, self)
 
         if not self.latestAirPressure == None:
-            text = 'Air Press %7.2f mb' % (self.latestAirPressure)
+            text = 'Air Press %7.2f mB' % (self.latestAirPressure)
             self.lcdwidget.write_line(2, 0, text, self)
         
         if not self.latestTemperature == None:
@@ -329,11 +329,11 @@ class ProjectStatistics(QWidget):
 
     def UpdateMinMaxAvg(self):
         if self.buttonPressedCounter[2] % 4 == self.MODE_ILLUMINANCE:
-            self.UpdateMinMaxAvgWrite("Illuminance    " + self.TimeFromSeconds(len(self.illuminanceQueue)), "Lux", self.GetMinMaxAvg(self.illuminanceQueue))
+            self.UpdateMinMaxAvgWrite("Illuminance    " + self.TimeFromSeconds(len(self.illuminanceQueue)), "lx", self.GetMinMaxAvg(self.illuminanceQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_HUMIDITY:
             self.UpdateMinMaxAvgWrite("Humidity       " + self.TimeFromSeconds(len(self.humidityQueue)), "%RH", self.GetMinMaxAvg(self.humidityQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_AIR_PRESSURE:
-            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "Lux", self.GetMinMaxAvg(self.airPressureQueue))
+            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "mB", self.GetMinMaxAvg(self.airPressureQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_TEMPERATURE:
             self.UpdateMinMaxAvgWrite("Temperature    " + self.TimeFromSeconds(len(self.temperatureQueue)), "\xDFC", self.GetMinMaxAvg(self.temperatureQueue))
 
