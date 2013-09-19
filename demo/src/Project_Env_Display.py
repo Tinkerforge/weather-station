@@ -113,8 +113,3 @@ class ProjectEnvDisplay(QWidget):
 
     def button_pressed(self, button):
         self.qtcb_button_pressed.emit(button)
-        
-        
-
-
-
