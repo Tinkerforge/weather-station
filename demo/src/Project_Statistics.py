@@ -333,14 +333,14 @@ class ProjectStatistics(QWidget):
         if self.buttonPressedCounter[2] % 4 == self.MODE_HUMIDITY:
             self.UpdateMinMaxAvgWrite("Humidity       " + self.TimeFromSeconds(len(self.humidityQueue)), "%RH", self.GetMinMaxAvg(self.humidityQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_AIR_PRESSURE:
-            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "mb", self.GetMinMaxAvg(self.airPressureQueue))
+            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "mbar", self.GetMinMaxAvg(self.airPressureQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_TEMPERATURE:
             self.UpdateMinMaxAvgWrite("Temperature    " + self.TimeFromSeconds(len(self.temperatureQueue)), "\xDFC", self.GetMinMaxAvg(self.temperatureQueue))
 
     def UpdateMinMaxAvgWrite(self, title, unit, values):
-        vmin = "Min: %6.2f" % values[0] + unit 
-        vavg = "Avg: %6.2f" % values[2] + unit 
-        vmax = "Max: %6.2f" % values[1] + unit 
+        vmin = "Min: %6.2f" % values[0] + " " + unit
+        vavg = "Avg: %6.2f" % values[2] + " " + unit
+        vmax = "Max: %6.2f" % values[1] + " " + unit
 
         self.lcdwidget.write_line(0, 0, title, self)
         self.lcdwidget.write_line(1, 0, vmin, self)

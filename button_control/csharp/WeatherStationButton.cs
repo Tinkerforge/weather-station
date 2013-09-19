@@ -477,7 +477,7 @@ class WeatherStation
 		{
 			case MODE_ILLUMINANCE:
 				UpdateMinMaxAvgWrite("Illuminance    " + TimeFromSeconds(illuminanceQueue.Count),
-				                     "Lux",
+				                     "lx",
 				                     GetMinMaxAvg(illuminanceQueue));
 				break;
 
