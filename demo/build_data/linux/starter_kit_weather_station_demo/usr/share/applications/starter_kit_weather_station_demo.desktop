@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Starter Kit: Weather Station Demo
+Name[de]=Starterkit: Wetterstation Demo
+Version=1.0
+Comment=Demo for Starter Kit: Weather Station
+Comment[de]=Demo für Starterkit: Wetterstation
+GenericName=Starter Kit: Weather Station Demo
+Terminal=false
+Icon=starter_kit_weather_station_demo-icon.png
+Type=Application
+Exec=python /usr/share/starter_kit_weather_station_demo/demo.py
+Categories=Electronics;

@@ -1,5 +1,5 @@
 *.pyc
 demo/src/build
 demo/src/dist
-demo/build_data/linux/starter_kit_weather_station_demo/usr/share
+demo/build_data/linux/starter_kit_weather_station_demo/usr/share/starter_kit_weather_station_demo
 demo/build_data/Windows/nsis/demo_installer.nsi

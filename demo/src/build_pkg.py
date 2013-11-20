@@ -312,6 +312,7 @@ def build_linux_pkg():
 
     os.system('chown -R root:root starter_kit_weather_station_demo/usr')
     os.system('dpkg -b starter_kit_weather_station_demo/ starter-kit-weather-station-demo-' + config.DEMO_VERSION + '_all.deb')
+    os.system('chown -R `logname`:`logname` starter_kit_weather_station_demo/usr')
 
 
 # call python build_pkg.py to build the windows/linux/macosx package
