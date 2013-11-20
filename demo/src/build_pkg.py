@@ -219,7 +219,7 @@ def build_windows_pkg():
                 else: # keep full path
                     data_files.append((os.path.join(dirname) , [os.path.join(dirname, n)]))
     
-    os.path.walk(os.path.normcase("../build_data/Windows/"), visitor, ('y', os.path.normcase("../build_data/Windows/")))
+    os.path.walk(os.path.normcase("../build_data/windows/"), visitor, ('y', os.path.normcase("../build_data/windows/")))
     
     data_files.append( ( os.path.join('.') , [os.path.join('.', 'demo-icon.png')] ) )
 
@@ -271,7 +271,7 @@ def build_windows_pkg():
     
     # build nsis
     lines = []
-    for line in file('../build_data/Windows/nsis/demo_installer.nsi', 'rb').readlines():
+    for line in file('../build_data/windows/nsis/demo_installer.nsi', 'rb').readlines():
         line = line.replace('<<DEMO_DOT_VERSION>>', config.DEMO_VERSION)
         line = line.replace('<<DEMO_UNDERSCORE_VERSION>>', config.DEMO_VERSION.replace('.', '_'))
         lines.append(line)
