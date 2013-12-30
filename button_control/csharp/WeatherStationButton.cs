@@ -41,6 +41,8 @@ class WeatherStation
 
 	private static byte buttonPressed = 0;
 	private static int[] buttonPressedCounter = {0, 0, 0, 0};
+	
+	private static Timer timer;
 
 	static void IlluminanceCB(BrickletAmbientLight sender, int illuminance)
 	{
@@ -604,7 +606,7 @@ class WeatherStation
 			}
 		}
 
-		Timer timer = new Timer(Update, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+		timer = new Timer(Update, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
 		System.Console.WriteLine("Press key to exit");
 		System.Console.ReadKey();
