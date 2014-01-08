@@ -85,8 +85,8 @@ begin
     if (deviceIdentifier = BRICKLET_LCD_20X4_DEVICE_IDENTIFIER) then begin
       try
         brickletLCD := TBrickletLCD20x4.Create(UID, ipcon);
-        brickletLCD.ClearDisplay();
-        brickletLCD.BacklightOn();
+        brickletLCD.ClearDisplay;
+        brickletLCD.BacklightOn;
         WriteLn('LCD 20x4 initialized');
       except
         on e: Exception do begin
