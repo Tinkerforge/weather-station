@@ -63,9 +63,9 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
       begin
         humidity = BrickletHumidity.new uid, ipcon
         humidity.set_humidity_callback_period 1000
-        humidity.register_callback(BrickletHumidity::CALLBACK_HUMIDITY) do |humidity|
+        humidity.register_callback(BrickletHumidity::CALLBACK_HUMIDITY) do |relative_humidity|
           if lcd != nil
-            text = 'Humidity   %6.2f %%' % (humidity/10.0)
+            text = 'Humidity   %6.2f %%' % (relative_humidity/10.0)
             lcd.write_line 1, 0, text
             puts "Write to line 1: #{text}"
           end
