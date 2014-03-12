@@ -90,6 +90,9 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 	WeatherStation *ws = (WeatherStation *)user_data;
 	int rc;
 
+	// avoid unused parameter warning
+	(void)connected_uid; (void)position; (void)hardware_version; (void)firmware_version;
+
 	if(enumeration_type == IPCON_ENUMERATION_TYPE_CONNECTED ||
 	   enumeration_type == IPCON_ENUMERATION_TYPE_AVAILABLE) {
 		if(device_identifier == LCD_20X4_DEVICE_IDENTIFIER) {
