@@ -3,15 +3,14 @@ import com.tinkerforge.IPConnection;
 import javax.sound.midi.*;
 import java.util.*;
 
-class GameHandle extends Thread{
-	private static final String host = "localhost";
-	private static final int port = 4223;
+class GameHandle extends Thread {
+	private static final String HOST = "localhost";
+	private static final int PORT = 4223;
 
 	private BrickletLCD20x4 lcd = null;
 	private IPConnection ipcon = null;
 	private Synthesizer synthesizer = null;
 	private MidiChannel[] channels = null;
-
 
 	private static final int ACOUSTIC_GUITAR_NYLON = 24;
 	private static final int ACOUSTIC_GUITAR_STEEL = 25;
@@ -56,7 +55,6 @@ class GameHandle extends Thread{
 		return ks0066u;
 	}
 
-
 	public GameHandle () {
 		this.ipcon = new IPConnection();
 
@@ -64,19 +62,19 @@ class GameHandle extends Thread{
 		System.out.println("Waiting for Brickd...");
 		while(true) {
 			try {
-				ipcon.connect(host, port);
+				ipcon.connect(HOST, PORT);
 				break;
 			}
 			catch(Exception e) {}
 		}
 
 		ipcon.addEnumerateListener(new IPConnection.EnumerateListener() {
-            public void enumerate(String uid, String connectedUid, char position,
-                                  short[] hardwareVersion, short[] firmwareVersion,
-                                  int deviceIdentifier, short enumerationType) {
+			public void enumerate(String uid, String connectedUid, char position,
+			                      short[] hardwareVersion, short[] firmwareVersion,
+			                      int deviceIdentifier, short enumerationType) {
 
-                if(enumerationType == IPConnection.ENUMERATION_TYPE_CONNECTED || 
-                  enumerationType == IPConnection.ENUMERATION_TYPE_AVAILABLE) {
+				if(enumerationType == IPConnection.ENUMERATION_TYPE_CONNECTED ||
+				   enumerationType == IPConnection.ENUMERATION_TYPE_AVAILABLE) {
 
 					if(deviceIdentifier == BrickletLCD20x4.DEVICE_IDENTIFIER) {
 						System.out.println("Found LCD");
@@ -93,28 +91,26 @@ class GameHandle extends Thread{
 
 							lcd.writeLine((short)0, (short)0, createLCDString("  XXX   "));
 							lcd.addButtonPressedListener(new BrickletLCD20x4.ButtonPressedListener() {
-            					public void buttonPressed(short button) {
-					                System.out.println("Pressed: " + button);
+								public void buttonPressed(short button) {
+									System.out.println("Pressed: " + button);
 									channels[0].noteOn(40+10*button, 100);
-            					}
-        					});
+								}
+							});
 							lcd.addButtonReleasedListener(new BrickletLCD20x4.ButtonReleasedListener() {
-            					public void buttonReleased(short button) {
-                					System.out.println("Released: " + button);
+								public void buttonReleased(short button) {
+									System.out.println("Released: " + button);
 									channels[0].noteOff(40+10*button);
-            					}
-        					});
-
-						} 
+								}
+							});
+						}
 						catch(Exception e)
 						{
 							System.out.println("LCD Initialization Failed");
 						}
 					}
-                }
-
-            }
-        });
+				}
+			}
+		});
 
 		// Try to enumerate
 		System.out.println("Enummerate...");
@@ -125,77 +121,72 @@ class GameHandle extends Thread{
 			}
 			catch(Exception e) {}
 		}
-
-
 	}
 
 	public void run() {
-        char mask[][] = new char[4][20];
+		char mask[][] = new char[4][20];
 		int barlist[] = {0,0,0,0};
 
 		System.out.println("Start thread");
 
-        // initial drawing empty mask
-        for(int i=0; i < 4; i++) {
+		// initial drawing empty mask
+		for(int i=0; i < 4; i++) {
 			try {
-	            lcd.writeLine((short)i, (short)0, createLCDString(new String(mask[i])));
+				lcd.writeLine((short)i, (short)0, createLCDString(new String(mask[i])));
 			}
 			catch (Exception e) {}
 		}
 
-        while(true) {
+		while(true) {
 			try {
-	            Thread.sleep(SPEED);
+				Thread.sleep(SPEED);
 			} catch(Exception e) {}
 
-            // move mask
-            for(int i=0; i < 4; i++) {
-            	for(int j=0; j < 19; j++) {
-                    mask[i][19-j] = mask[i][19-j-1];
+			// move mask
+			for(int i=0; i < 4; i++) {
+				for(int j=0; j < 19; j++) {
+					mask[i][19-j] = mask[i][19-j-1];
 				}
 			}
 
-            // decrement counters
-            for(int i=0; i < 4; i++) {
-                if(barlist[i] > 0) {
-                    barlist[i] = barlist[i] - 1;
+			// decrement counters
+			for(int i=0; i < 4; i++) {
+				if(barlist[i] > 0) {
+					barlist[i] = barlist[i] - 1;
 				}
 			}
 
-            // create new bars
-            for(int i=0; i < 4; i++) {
-                if(barlist[i] == 0) {
+			// create new bars
+			for(int i=0; i < 4; i++) {
+				if(barlist[i] == 0) {
 					Random rand = new Random();
 
-                    if(rand.nextDouble() >= BAR_PROPABILITY) {
-                        barlist[i] = (int)(MAX_BAR_LENGTH*rand.nextDouble());
+					if(rand.nextDouble() >= BAR_PROPABILITY) {
+						barlist[i] = (int)(MAX_BAR_LENGTH*rand.nextDouble());
 					}
 				}
 			}
 
-            // create first new line based on bars
-            for(int i=0; i < 4; i++) {
-                if(barlist[i] > 0) {
-                    mask[i][0] = 'X';
+			// create first new line based on bars
+			for(int i=0; i < 4; i++) {
+				if(barlist[i] > 0) {
+					mask[i][0] = 'X';
 				}
-                else {
-                    mask[i][0] = ' ';
+				else {
+					mask[i][0] = ' ';
 				}
 			}
 
-            // print mask
-            for(int i=0; i < 4; i++) {
+			// print mask
+			for(int i=0; i < 4; i++) {
 				try {
-	            	lcd.writeLine((short)i, (short)0, createLCDString(new String(mask[i])));
+					lcd.writeLine((short)i, (short)0, createLCDString(new String(mask[i])));
 				}
 				catch (Exception e) {}
 			}
 		}
 	}
-
-
 }
-
 
 public class GuitarStation {
 	// Note: To make the example code cleaner we do not handle exceptions. Exceptions you
