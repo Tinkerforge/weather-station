@@ -182,7 +182,11 @@ public class WeatherStation {
 			}
 		}
 
-		System.console().readLine("Press key to exit\n");
+		try {
+			System.out.println("Press key to exit"); System.in.read();
+		} catch(java.io.IOException e) {
+		}
+
 		try {
 			ipcon.disconnect();
 		} catch(com.tinkerforge.NotConnectedException e) {

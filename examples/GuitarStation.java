@@ -193,7 +193,7 @@ public class GuitarStation {
 	//       might normally want to catch are described in the documentation
 	public static void main(String args[]) throws Exception {
 		(new GameHandle()).start();
-		System.console().readLine("Press key to exit\n");
+		System.out.println("Press key to exit"); System.in.read();
 		// Try to disconnect
 		System.out.println("Disconnect...");
 	}
