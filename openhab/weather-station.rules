@@ -1,0 +1,70 @@
+import org.openhab.core.library.types.*
+
+var Number initialSleepTime = 10
+
+rule "Weather Station LCD Init From Backlight"
+when
+    Item TF_LCD_Backlight changed from UNDEF or System started
+then
+    createTimer(now.plusSeconds(initialSleepTime)) [|
+        sendCommand(TF_LCD, "TFNUM<00>Temperature:")
+        sendCommand(TF_LCD, "TFNUM<019>C")
+        sendCommand(TF_LCD, "TFNUM<10>Humidity   :")
+        sendCommand(TF_LCD, "TFNUM<119>%")
+        sendCommand(TF_LCD, "TFNUM<20>Pressure   :")
+        sendCommand(TF_LCD, "TFNUM<217>hPa")
+        sendCommand(TF_LCD, "TFNUM<30>Luminance  :")
+        sendCommand(TF_LCD, "TFNUM<318>lx")
+        sendCommand(TF_LCD_Backlight, ON)
+        sendCommand(TF_LCD, String::format("TFNUM<013>%4s", TF_Barometer_Temperature.state.format("%.1f")))
+        sendCommand(TF_LCD, String::format("TFNUM<113>%4s", TF_Humdity.state.format("%.1f")))
+        sendCommand(TF_LCD, String::format("TFNUM<213>%4s", TF_Barometer.state.format("%.0f")))
+        sendCommand(TF_LCD, String::format("TFNUM<313>%4s", TF_AmbientLight.state.format("%.0f")))
+    ]
+
+end
+
+rule "Goodbye"
+when
+    System shuts down
+then
+    sendCommand(TF_LCD_Backlight, OFF)
+end
+
+rule "Weather Station LCD Backlight"
+when
+    Item TF_Button0 received update
+then
+    if (TF_Button0.state == ON)
+        sendCommand(TF_LCD_Backlight, ON)
+    else
+        sendCommand(TF_LCD_Backlight, OFF)
+end
+
+rule "Weather Station LCD Update Temperature"
+when
+    Item TF_Barometer_Temperature received update
+then
+    sendCommand(TF_LCD, String::format("TFNUM<013>%4s", TF_Barometer_Temperature.state.format("%.1f")))
+end
+
+rule "Weather Station LCD Update Humidity"
+when
+    Item TF_Humdity received update
+then
+    sendCommand(TF_LCD, String::format("TFNUM<113>%4s", TF_Humdity.state.format("%.1f")))
+end
+
+rule "Weather Station LCD Update Air Pressure"
+when
+    Item TF_Barometer received update
+then
+    sendCommand(TF_LCD, String::format("TFNUM<213>%4s", TF_Barometer.state.format("%.0f")))
+end
+
+rule "Weather Station LCD Update Ambient Light"
+when
+    Item TF_AmbientLight received update
+then
+    sendCommand(TF_LCD, String::format("TFNUM<313>%4s", TF_AmbientLight.state.format("%.0f")))
+end
