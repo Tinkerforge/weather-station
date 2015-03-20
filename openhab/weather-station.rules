@@ -1,10 +1,10 @@
 import org.openhab.core.library.types.*
 
-var Number initialSleepTime = 10
+var Integer initialSleepTime = 10
 
 rule "Weather Station LCD Init From Backlight"
 when
-    Item TF_LCD_Backlight changed from UNDEF or System started
+    Item TF_LCD_Backlight changed or System started
 then
     createTimer(now.plusSeconds(initialSleepTime)) [|
         sendCommand(TF_LCD, "TFNUM<00>Temperature:")
@@ -15,7 +15,6 @@ then
         sendCommand(TF_LCD, "TFNUM<217>hPa")
         sendCommand(TF_LCD, "TFNUM<30>Luminance  :")
         sendCommand(TF_LCD, "TFNUM<318>lx")
-        sendCommand(TF_LCD_Backlight, ON)
         sendCommand(TF_LCD, String::format("TFNUM<013>%4s", TF_Barometer_Temperature.state.format("%.1f")))
         sendCommand(TF_LCD, String::format("TFNUM<113>%4s", TF_Humdity.state.format("%.1f")))
         sendCommand(TF_LCD, String::format("TFNUM<213>%4s", TF_Barometer.state.format("%.0f")))
@@ -33,12 +32,12 @@ end
 
 rule "Weather Station LCD Backlight"
 when
-    Item TF_Button0 received update
+    Item TF_Button0 changed
 then
-    if (TF_Button0.state == ON)
-        sendCommand(TF_LCD_Backlight, ON)
-    else
+    if (TF_LCD_Backlight.state == ON)
         sendCommand(TF_LCD_Backlight, OFF)
+    else
+        sendCommand(TF_LCD_Backlight, ON)
 end
 
 rule "Weather Station LCD Update Temperature"
