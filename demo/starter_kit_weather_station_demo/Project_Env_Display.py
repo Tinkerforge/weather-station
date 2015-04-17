@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Starter Kit: Weather Station Demo Application
+Starter Kit: Weather Station Demo
 Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 
 Project_Env_Display.py: Environment Display Project Implementation
@@ -22,16 +22,14 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
+import math
 
 from PyQt4.QtCore import pyqtSignal, Qt
 from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton
 
-import math
-
-from LCDWidget import LCDWidget
+from starter_kit_weather_station_demo.LCDWidget import LCDWidget
 
 class ProjectEnvDisplay(QWidget):
-
     qtcb_update_illuminance = pyqtSignal(float)
     qtcb_update_air_pressure = pyqtSignal(float)
     qtcb_update_temperature = pyqtSignal(float)
@@ -75,9 +73,7 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_update_humidity.connect(self.update_humidity_data_slot)
         self.qtcb_button_pressed.connect(self.button_pressed_slot)
 
-
     def update_illuminance_data_slot(self, illuminance):
-
         text = 'Illuminanc %6.2f lx' % (illuminance/10.0)
         self.lcdwidget.write_line(0, 0, text, self)
 
@@ -92,7 +88,6 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_update_humidity.emit(humidity)
 
     def update_air_pressure_data_slot(self, air_pressure):
-
         text = 'Air Press %7.2f mb' % (air_pressure/1000.0)
         self.lcdwidget.write_line(2, 0, text, self)
     
@@ -100,7 +95,6 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_update_air_pressure.emit(air_pressure)
 
     def update_temperature_data_slot(self, temperature):
-
         # \xDF == ° on LCD 20x4 charset
         text = 'Temperature %5.2f \xDFC' % (temperature/100.0)
         self.lcdwidget.write_line(3, 0, text, self)

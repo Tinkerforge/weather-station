@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Starter Kit: Weather Station Demo Application
+Starter Kit: Weather Station Demo
 Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 
 Project_Statistics.py: Statistics Display Project Implementation
@@ -22,18 +22,15 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
-from PyQt4.QtCore import pyqtSignal
-from PyQt4.QtGui import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
-from PyQt4.QtCore import Qt, QTimer
-
 import math
 import time
 
+from PyQt4.QtCore import Qt, QTimer, pyqtSignal
+from PyQt4.QtGui import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
 
-from LCDWidget import LCDWidget
+from starter_kit_weather_station_demo. LCDWidget import LCDWidget
 
 class ProjectStatistics(QWidget):
-
     UPDATE_TYPE_STANDARD = 0
     UPDATE_TYPE_GRAPH = 1
     UPDATE_TYPE_MIN_MAX_AVG = 2
@@ -170,7 +167,6 @@ class ProjectStatistics(QWidget):
         if button < 4:
             self.buttons[button % 4].animateClick()
         else:
-
             if button % 4 == self.buttonPressed:
                 self.buttonPressedCounter[button % 4] += 1
             else:
@@ -219,7 +215,6 @@ class ProjectStatistics(QWidget):
         return [vmin, vmax, vavg]
 
     def UpdateStandard(self):
-
         if not self.latestIlluminance == None:
             text = 'Illuminanc %6.2f lx' % (self.latestIlluminance)
             self.lcdwidget.write_line(0, 0, text, self)
@@ -236,12 +231,10 @@ class ProjectStatistics(QWidget):
             text = 'Temperature %5.2f \xDFC' % (self.latestTemperature)
             self.lcdwidget.write_line(3, 0, text, self)
 
-
     def UpdateGraph(self):
         barSumMin = 0.0
         barSumMax = 0.0
     
-
         if self.buttonPressedCounter[1] % 4 == self.MODE_ILLUMINANCE:
             [barSumMin, barSumMax] = self.UpdateGraphWriteBars(self.illuminanceQueue)
             self.UpdateGraphWriteTitle("I: ", barSumMin, barSumMax, len(self.illuminanceQueue))
@@ -326,7 +319,6 @@ class ProjectStatistics(QWidget):
 
         return [barSumMin, barSumMax]
 
-
     def UpdateMinMaxAvg(self):
         if self.buttonPressedCounter[2] % 4 == self.MODE_ILLUMINANCE:
             self.UpdateMinMaxAvgWrite("Illuminance    " + self.TimeFromSeconds(len(self.illuminanceQueue)), "lx", self.GetMinMaxAvg(self.illuminanceQueue))
@@ -347,7 +339,6 @@ class ProjectStatistics(QWidget):
         self.lcdwidget.write_line(2, 0, vavg, self)
         self.lcdwidget.write_line(3, 0, vmax, self)
         
-    
     def UpdateTime(self): 
         line0 = time.strftime("%H:%M:%S")
         line1 = time.strftime("%A")
@@ -368,7 +359,6 @@ class ProjectStatistics(QWidget):
             self.UpdateTime()
 
     def Update(self):
-
         if not self.latestIlluminance == None:
             self.illuminanceQueue.append(self.latestIlluminance)
             if len(self.illuminanceQueue) > 60*60*24:

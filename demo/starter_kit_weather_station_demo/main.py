@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Starter Kit: Weather Station Demo Application
+Starter Kit: Weather Station Demo
 Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
+Copyright (C) 2015 Matthias Bolte <matthias@tinkerforge.com>
 
-demo.py: Entry file for Demo
+main.py: Entry file for Starter Kit: Weather Station Demo
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License 
@@ -22,29 +23,53 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
-import socket
+import os
 import sys
+
+def prepare_package(package_name):
+    # from http://www.py2exe.org/index.cgi/WhereAmI
+    if hasattr(sys, 'frozen'):
+        program_path = os.path.dirname(os.path.realpath(unicode(sys.executable, sys.getfilesystemencoding())))
+    else:
+        program_path = os.path.dirname(os.path.realpath(unicode(__file__, sys.getfilesystemencoding())))
+
+    # add program_path so OpenGL is properly imported
+    sys.path.insert(0, program_path)
+
+    # allow the program to be directly started by calling 'main.py'
+    # without '<package_name>' being in the path already
+    if not package_name in sys.modules:
+        head, tail = os.path.split(program_path)
+
+        if not head in sys.path:
+            sys.path.insert(0, head)
+
+        if not hasattr(sys, 'frozen'):
+            # load and inject in modules list, this allows to have the source in a
+            # directory named differently than '<package_name>'
+            sys.modules[package_name] = __import__(tail, globals(), locals(), [], -1)
+
+prepare_package('starter_kit_weather_station_demo')
+
+import socket
 import time
 import math
 import signal
-import os
-from program_path import ProgramPath
-import config
-
-from tinkerforge.ip_connection import IPConnection
-from tinkerforge.ip_connection import Error
-from tinkerforge.bricklet_lcd_20x4 import LCD20x4
-from tinkerforge.bricklet_ambient_light import AmbientLight
-from tinkerforge.bricklet_humidity import Humidity
-from tinkerforge.bricklet_barometer import Barometer
 
 from PyQt4.QtGui import QApplication, QWidget, QErrorMessage, QGridLayout, QIcon
 from PyQt4.QtGui import QPalette, QTextFormat, QTabWidget, QMainWindow, QVBoxLayout
 from PyQt4.QtCore import QTimer, pyqtSignal
 
-from Project_Env_Display import ProjectEnvDisplay
-from Project_Statistics import ProjectStatistics
-from Project_Xively import ProjectXively
+from starter_kit_weather_station_demo.tinkerforge.ip_connection import IPConnection, Error
+from starter_kit_weather_station_demo.tinkerforge.bricklet_lcd_20x4 import LCD20x4
+from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light import AmbientLight
+from starter_kit_weather_station_demo.tinkerforge.bricklet_humidity import Humidity
+from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer import Barometer
+from starter_kit_weather_station_demo.Project_Env_Display import ProjectEnvDisplay
+from starter_kit_weather_station_demo.Project_Statistics import ProjectStatistics
+from starter_kit_weather_station_demo.Project_Xively import ProjectXively
+from starter_kit_weather_station_demo.config import DEMO_VERSION
+from starter_kit_weather_station_demo.load_pixmap import load_pixmap
 
 
 class MainWindow(QMainWindow):
@@ -98,7 +123,7 @@ class WeatherStation(QApplication):
     def open_gui(self):
         self.main = MainWindow(self)
         self.main.setFixedSize(730, 430)
-        self.main.setWindowIcon(QIcon(os.path.join(ProgramPath.program_path(), "demo-icon.png")))
+        self.main.setWindowIcon(QIcon(load_pixmap('starter_kit_weather_station_demo-icon.png')))
         
         self.tabs = QTabWidget()
         
@@ -121,7 +146,7 @@ class WeatherStation(QApplication):
 
         self.tabs.currentChanged.connect(self.tabChangedSlot)
 
-        self.main.setWindowTitle("Starter Kit: Weather Station Demo " + config.DEMO_VERSION)
+        self.main.setWindowTitle("Starter Kit: Weather Station Demo " + DEMO_VERSION)
         self.main.show()
 
     def connect(self):

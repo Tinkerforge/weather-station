@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Starter Kit: Weather Station Demo Application
+Starter Kit: Weather Station Demo
 Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 
 Project_Xively.py: Xively Data Upload Project Implementation
@@ -22,24 +22,18 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
-
-from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
-from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QWidget, QCheckBox, QLineEdit, QSpinBox
-from PyQt4.QtGui import QPushButton, QLabel, QFont, QErrorMessage, QSpacerItem
-from PyQt4.QtCore import QTimer, Qt
-
-
 import time
 import httplib
 import json
-
-from LCDWidget import LCDWidget
-
 import math
 
+from PyQt4.QtCore import QTimer, Qt, pyqtSignal
+from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QWidget, QCheckBox, QLineEdit, QSpinBox, \
+                        QPushButton, QLabel, QFont, QErrorMessage, QSpacerItem
+
+from starter_kit_weather_station_demo.LCDWidget import LCDWidget
 
 class ProjectXively(QWidget):
-
     qtcb_update_illuminance = pyqtSignal(float)
     qtcb_update_air_pressure = pyqtSignal(float)
     qtcb_update_temperature = pyqtSignal(float)
@@ -263,7 +257,6 @@ class ProjectXively(QWidget):
 
         # set upload time if upload was a success
         self.last_upload = time.strftime("%H:%M:%S")
-
 
     def put(self, identifier, value):
         self.write_lcd()

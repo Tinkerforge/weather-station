@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Starter Kit: Weather Station Demo Application
+Starter Kit: Weather Station Demo
 Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 
 LCDWidget.py: LCD Display Widget Implementation which controls
@@ -23,23 +23,14 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
-from PyQt4.QtGui import QLabel
-from PyQt4.QtGui import QPixmap
-from PyQt4.QtGui import QPainter
-from PyQt4.QtGui import QFont
-from PyQt4.QtCore import Qt
-from PyQt4.QtCore import QString
-from PyQt4.QtCore import pyqtSignal, SIGNAL, SLOT
-from PyQt4.QtGui import QGridLayout
-from PyQt4.QtGui import QWidget
-from tinkerforge.bricklet_lcd_20x4 import LCD20x4
-
-
 import math
 
+from PyQt4.QtCore import Qt, QString, pyqtSignal
+from PyQt4.QtGui import QLabel, QPixmap, QPainter, QFont, QGridLayout, QWidget
 
-class LCDChar (QLabel):
+from starter_kit_weather_station_demo.tinkerforge.bricklet_lcd_20x4 import LCD20x4
 
+class LCDChar(QLabel):
     qtcb_set_char = pyqtSignal(str)
     CUSTOM_CHAR_START = 8
     CUSTOM_CHAR_END = 15
@@ -62,9 +53,7 @@ class LCDChar (QLabel):
         palette.setColor(self.foregroundRole(), Qt.white)
         self.setPalette(palette)
 
-
     def set_char_slot(self, char):
-
         if char <= chr(self.CUSTOM_CHAR_END):
             c = ord(str(char)) - self.CUSTOM_CHAR_START + 1
 
@@ -93,7 +82,6 @@ class LCDChar (QLabel):
 
 
 class LCDWidget (QWidget):
-
     qtcb_write_line = pyqtSignal(int, int, str)
     
     FIXED_WIDGTH = 554
@@ -113,7 +101,6 @@ class LCDWidget (QWidget):
         palette.setColor(self.foregroundRole(), Qt.white)
         self.setPalette(palette)
 
-
         self.qtcb_write_line.connect(self.write_line_slot)
 
         self.grid = QGridLayout()
@@ -126,7 +113,6 @@ class LCDWidget (QWidget):
                 self.grid.addWidget(character,y,x)
 
         self.setLayout(self.grid)
-
 
     def write_line_slot(self, line, begin, text):
 
