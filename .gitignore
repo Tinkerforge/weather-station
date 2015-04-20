@@ -1,3 +1,4 @@
 *.pyc
 demo/build
 demo/dist
+demo/starter_kit_weather_station_demo/frozen_images.py
