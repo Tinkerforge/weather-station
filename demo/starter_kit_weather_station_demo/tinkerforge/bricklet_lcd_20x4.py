@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 #############################################################
-# This file was automatically generated on 2013-09-11.      #
+# This file was automatically generated on 2015-04-20.      #
 #                                                           #
-# Bindings Version 2.0.11                                    #
+# Bindings Version 2.1.4                                    #
 #                                                           #
 # If you have a bugfix for this file and want to commit it, #
 # please fix the bug in the generator. You can find a link  #
-# to the generator git on tinkerforge.com                   #
+# to the generators git repository on tinkerforge.com       #
 #############################################################
 
 try:
@@ -31,6 +31,7 @@ class BrickletLCD20x4(Device):
     """
 
     DEVICE_IDENTIFIER = 212
+    DEVICE_DISPLAY_NAME = 'LCD 20x4 Bricklet'
 
     CALLBACK_BUTTON_PRESSED = 9
     CALLBACK_BUTTON_RELEASED = 10
@@ -141,7 +142,7 @@ class BrickletLCD20x4(Device):
 
     def is_button_pressed(self, button):
         """
-        Returns *true* if the button (0 to 2 or 0 to 3 with hardware version >= 1.2) 
+        Returns *true* if the button (0 to 2 or 0 to 3 since hardware version 1.2)
         is pressed. If you want to react
         on button presses and releases it is recommended to use the
         :func:`ButtonPressed` and :func:`ButtonReleased` callbacks.
@@ -165,7 +166,7 @@ class BrickletLCD20x4(Device):
         * ``character[7] = 0b00000000`` (decimal value 0)
         
         The characters can later be written with :func:`WriteLine` by using the
-        characters with the byte representation 8 to 15.
+        characters with the byte representation 8 ("\x08") to 15 ("\x0F").
         
         You can play around with the custom characters in Brick Viewer version
         since 2.0.1.
@@ -245,9 +246,8 @@ class BrickletLCD20x4(Device):
         
         The position can be 'a', 'b', 'c' or 'd'.
         
-        The device identifiers can be found :ref:`here <device_identifier>`.
-        
-        .. versionadded:: 2.0.0~(Plugin)
+        The device identifier numbers can be found :ref:`here <device_identifier>`.
+        |device_identifier_constant|
         """
         return GetIdentity(*self.ipcon.send_request(self, BrickletLCD20x4.FUNCTION_GET_IDENTITY, (), '', '8s 8s c 3B 3B H'))
 

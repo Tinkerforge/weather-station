@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 #############################################################
-# This file was automatically generated on 2013-09-11.      #
+# This file was automatically generated on 2015-04-20.      #
 #                                                           #
-# Bindings Version 2.0.11                                    #
+# Bindings Version 2.1.4                                    #
 #                                                           #
 # If you have a bugfix for this file and want to commit it, #
 # please fix the bug in the generator. You can find a link  #
-# to the generator git on tinkerforge.com                   #
+# to the generators git repository on tinkerforge.com       #
 #############################################################
 
 try:
@@ -33,6 +33,7 @@ class BrickletBarometer(Device):
     """
 
     DEVICE_IDENTIFIER = 221
+    DEVICE_DISPLAY_NAME = 'Barometer Bricklet'
 
     CALLBACK_AIR_PRESSURE = 15
     CALLBACK_ALTITUDE = 16
@@ -250,8 +251,6 @@ class BrickletBarometer(Device):
         used in aviation.
         
         The default value is 1013.25mbar.
-        
-        .. versionadded:: 1.1.0~(Plugin)
         """
         self.ipcon.send_request(self, BrickletBarometer.FUNCTION_SET_REFERENCE_AIR_PRESSURE, (air_pressure,), 'i', '')
 
@@ -270,8 +269,6 @@ class BrickletBarometer(Device):
     def get_reference_air_pressure(self):
         """
         Returns the reference air pressure as set by :func:`SetReferenceAirPressure`.
-        
-        .. versionadded:: 1.1.0~(Plugin)
         """
         return self.ipcon.send_request(self, BrickletBarometer.FUNCTION_GET_REFERENCE_AIR_PRESSURE, (), '', 'i')
 
@@ -316,9 +313,8 @@ class BrickletBarometer(Device):
         
         The position can be 'a', 'b', 'c' or 'd'.
         
-        The device identifiers can be found :ref:`here <device_identifier>`.
-        
-        .. versionadded:: 2.0.0~(Plugin)
+        The device identifier numbers can be found :ref:`here <device_identifier>`.
+        |device_identifier_constant|
         """
         return GetIdentity(*self.ipcon.send_request(self, BrickletBarometer.FUNCTION_GET_IDENTITY, (), '', '8s 8s c 3B 3B H'))
 

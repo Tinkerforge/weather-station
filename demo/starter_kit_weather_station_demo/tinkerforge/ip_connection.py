@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2013 Matthias Bolte <matthias@tinkerforge.com>
+# Copyright (C) 2012-2015 Matthias Bolte <matthias@tinkerforge.com>
 # Copyright (C) 2011-2012 Olaf Lüke <olaf@tinkerforge.com>
 #
 # Redistribution and use in source and binary forms of this file,
-# with or without modification, are permitted.
+# with or without modification, are permitted. See the Creative
+# Commons Zero (CC0 1.0) License for more details.
 
 from threading import Thread, Lock, Semaphore
 
@@ -21,9 +22,13 @@ except ImportError:
 
 import struct
 import socket
-import types
 import sys
 import time
+import os
+import math
+import hmac
+import hashlib
+import errno
 
 # use normal tuples instead of namedtuples in python version below 2.6
 if sys.hexversion < 0x02060000:
@@ -95,7 +100,7 @@ class Error(Exception):
         self.description = description
 
     def __str__(self):
-        return str(self.value) + ': ' + str(self.description)
+        return str(self.description) + ' (' + str(self.value) + ')'
 
 class Device:
     RESPONSE_EXPECTED_INVALID_FUNCTION_ID = 0
@@ -124,7 +129,6 @@ class Device:
         self.expected_response_sequence_number = None # protected by request_lock
         self.response_queue = Queue()
         self.request_lock = Lock()
-        self.auth_key = None
 
         self.response_expected = [Device.RESPONSE_EXPECTED_INVALID_FUNCTION_ID] * 256
         self.response_expected[IPConnection.FUNCTION_ENUMERATE] = Device.RESPONSE_EXPECTED_ALWAYS_FALSE
@@ -221,6 +225,24 @@ class Device:
             if self.response_expected[i] in [Device.RESPONSE_EXPECTED_TRUE, Device.RESPONSE_EXPECTED_FALSE]:
                 self.response_expected[i] = flag
 
+class BrickDaemon(Device):
+    FUNCTION_GET_AUTHENTICATION_NONCE = 1
+    FUNCTION_AUTHENTICATE = 2
+
+    def __init__(self, uid, ipcon):
+        Device.__init__(self, uid, ipcon)
+
+        self.api_version = (2, 0, 0)
+
+        self.response_expected[BrickDaemon.FUNCTION_GET_AUTHENTICATION_NONCE] = BrickDaemon.RESPONSE_EXPECTED_ALWAYS_TRUE
+        self.response_expected[BrickDaemon.FUNCTION_AUTHENTICATE] = BrickDaemon.RESPONSE_EXPECTED_TRUE
+
+    def get_authentication_nonce(self):
+        return self.ipcon.send_request(self, BrickDaemon.FUNCTION_GET_AUTHENTICATION_NONCE, (), '', '4B')
+
+    def authenticate(self, client_nonce, digest):
+        self.ipcon.send_request(self, BrickDaemon.FUNCTION_AUTHENTICATE, (client_nonce, digest), '4B 20B', '')
+
 class IPConnection:
     FUNCTION_ENUMERATE = 254
     FUNCTION_ADC_CALIBRATE = 251
@@ -285,7 +307,8 @@ class IPConnection:
         self.auto_reconnect_pending = False
         self.sequence_number_lock = Lock()
         self.next_sequence_number = 0 # protected by sequence_number_lock
-        self.auth_key = None
+        self.authentication_lock = Lock() # protects authentication handshake
+        self.next_authentication_nonce = 0 # protected by authentication_lock
         self.devices = {}
         self.registered_callbacks = {}
         self.socket = None # protected by socket_lock
@@ -299,6 +322,7 @@ class IPConnection:
         self.disconnect_probe_queue = None
         self.disconnect_probe_thread = None
         self.waiter = Semaphore()
+        self.brickd = BrickDaemon("2", self)
 
     def connect(self, host, port):
         """
@@ -354,6 +378,45 @@ class IPConnection:
 
         if current_thread() is not callback.thread:
             callback.thread.join()
+
+    def authenticate(self, secret):
+        """
+        Performs an authentication handshake with the connected Brick Daemon or
+        WIFI/Ethernet Extension. If the handshake succeeds the connection switches
+        from non-authenticated to authenticated state and communication can
+        continue as normal. If the handshake fails then the connection gets closed.
+        Authentication can fail if the wrong secret was used or if authentication
+        is not enabled at all on the Brick Daemon or the WIFI/Ethernet Extension.
+
+        For more information about authentication see
+        http://www.tinkerforge.com/en/doc/Tutorials/Tutorial_Authentication/Tutorial.html
+        """
+
+        secret_bytes = secret.encode('ascii')
+
+        with self.authentication_lock:
+            if self.next_authentication_nonce == 0:
+                try:
+                    self.next_authentication_nonce = struct.unpack('<I', os.urandom(4))[0]
+                except NotImplementedError:
+                    subseconds, seconds = math.modf(time.time())
+                    seconds = int(seconds)
+                    subseconds = int(subseconds * 1000000)
+                    self.next_authentication_nonce = ((seconds << 26 | seconds >> 6) & 0xFFFFFFFF) + subseconds + os.getpid()
+
+            server_nonce = self.brickd.get_authentication_nonce()
+            client_nonce = struct.unpack('<4B', struct.pack('<I', self.next_authentication_nonce))
+            self.next_authentication_nonce = (self.next_authentication_nonce + 1) % (1 << 32)
+
+            h = hmac.new(secret_bytes, digestmod=hashlib.sha1)
+
+            h.update(struct.pack('<4B', *server_nonce))
+            h.update(struct.pack('<4B', *client_nonce))
+
+            digest = struct.unpack('<20B', h.digest())
+            h = None
+
+            self.brickd.authenticate(client_nonce, digest)
 
     def get_connection_state(self):
         """
@@ -457,7 +520,7 @@ class IPConnection:
         self.registered_callbacks[id] = callback
 
     def connect_unlocked(self, is_auto_reconnect):
-        # NOTE: assumes that socket_lock is locked
+        # NOTE: assumes that socket is None and socket_lock is locked
 
         # create callback thread and queue
         if self.callback is None:
@@ -477,14 +540,11 @@ class IPConnection:
 
         # create and connect socket
         try:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-            self.socket.connect((self.host, self.port))
-            self.socket_id += 1
+            tmp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            tmp.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            tmp.connect((self.host, self.port))
         except:
             def cleanup():
-                self.socket = None
-
                 # end callback thread
                 if not is_auto_reconnect:
                     self.callback.queue.put((IPConnection.QUEUE_EXIT, None))
@@ -496,6 +556,9 @@ class IPConnection:
 
             cleanup()
             raise
+
+        self.socket = tmp
+        self.socket_id += 1
 
         # create disconnect probe thread
         try:
@@ -538,6 +601,7 @@ class IPConnection:
             self.receive_thread.start()
         except:
             def cleanup():
+                # close socket
                 self.disconnect_unlocked()
 
                 # end callback thread
@@ -565,7 +629,7 @@ class IPConnection:
                                  connect_reason, None)))
 
     def disconnect_unlocked(self):
-        # NOTE: assumes that socket_lock is locked
+        # NOTE: assumes that socket is not None and socket_lock is locked
 
         # end disconnect probe thread
         self.disconnect_probe_queue.put(True)
@@ -611,6 +675,10 @@ class IPConnection:
                 data = self.socket.recv(8192)
             except socket.error:
                 if self.receive_flag:
+                    e = sys.exc_info()[1]
+                    if e.errno == errno.EINTR:
+                        continue
+
                     self.handle_disconnect_by_peer(IPConnection.DISCONNECT_REASON_ERROR, socket_id, False)
                 break
 
@@ -827,12 +895,14 @@ class IPConnection:
 
         def pack_string(f, d):
             if sys.hexversion < 0x03000000:
-                if type(d) == types.UnicodeType:
-                    f = f.replace('s', 'B')
+                if isinstance(d, unicode):
+                    f = f.replace('s', 'B').replace('c', 'B')
                     l = map(ord, d)
-                    l += [0] * (int(f.replace('B', '')) - len(l))
+                    p = f.replace('B', '')
+                    if len(p) == 0:
+                        p = '1'
+                    l += [0] * (int(p) - len(l))
                     return struct.pack('<' + f, *l)
-
                 else:
                     return struct.pack('<' + f, d)
             else:
@@ -849,7 +919,7 @@ class IPConnection:
             elif 'c' in f:
                 if len(f) > 1:
                     if int(f.replace('c', '')) != len(d):
-                        raise ValueError('Incorrect char list length');
+                        raise ValueError('Incorrect char list length')
                     for k in d:
                         request += pack_string('c', k)
                 else:
@@ -953,7 +1023,6 @@ class IPConnection:
         uid = IPConnection.BROADCAST_UID
         sequence_number = self.get_next_sequence_number()
         r_bit = 0
-        a_bit = 0
 
         if device is not None:
             uid = device.uid
@@ -961,14 +1030,7 @@ class IPConnection:
             if device.get_response_expected(function_id):
                 r_bit = 1
 
-            if device.auth_key is not None:
-                a_bit = 1
-        else:
-            if self.auth_key is not None:
-                a_bit = 1
-
-        sequence_number_and_options = \
-            (sequence_number << 4) | (r_bit << 3) | (a_bit << 2)
+        sequence_number_and_options = (sequence_number << 4) | (r_bit << 3)
 
         return (struct.pack('<IBBBB', uid, length, function_id,
                             sequence_number_and_options, 0),
