@@ -58,10 +58,3 @@ def load_pixmap(path, apply_mask=False):
         pixmap = QPixmap(absolute_path)
 
     return pixmap
-
-def load_masked_pixmap(path):
-    pixmap = load_pixmap(path)
-    mask = pixmap.createMaskFromColor(QColor(0xFF, 0x00, 0xF0), Qt.MaskInColor)
-    pixmap.setMask(mask)
-
-    return pixmap
