@@ -31,7 +31,7 @@ try:
     if __name__ == "__main__":
         main()
 except ImportError:
-    print('Could not import starter_kit_weather_station_demo. Please make sure that brickv is installed properly. ' + \
-          'If you want to start brickv from source, you should direclty call "python main.py".')
+    print('Could not import starter_kit_weather_station_demo. Please make sure that the demo is installed properly. ' + \
+          'If you want to start the demo from source, you should direclty call "python main.py".')
 
     sys.exit(1)
