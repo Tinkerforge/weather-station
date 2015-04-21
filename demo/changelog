@@ -1,3 +1,4 @@
 1.0.0: Initial version
 1.0.1: Cleanup and unify the way units are displayed on the LCD
 1.0.2: Windows installer is signed now
+       Add workaround for Mac OS X font problem
