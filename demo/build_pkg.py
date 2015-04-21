@@ -40,6 +40,10 @@ import subprocess
 from starter_kit_weather_station_demo.config import DEMO_VERSION
 
 
+UNDERSCORE_NAME = 'starter_kit_weather_station_demo'
+CAMEL_CASE_NAME = 'Starter Kit Weather Station Demo'
+
+
 def system(command):
     if os.system(command) != 0:
         sys.exit(1)
@@ -91,7 +95,7 @@ def specialize_template(template_filename, destination_filename, replacements):
 
 
 def freeze_images():
-    directory = 'starter_kit_weather_station_demo'
+    directory = UNDERSCORE_NAME
     image_files = []
 
     for root, dirnames, names in os.walk(directory):
@@ -138,7 +142,7 @@ def build_macosx_pkg():
 
     print('copying build data')
     build_data_path = os.path.join(root_path, 'build_data', 'macosx', '*')
-    resources_path = os.path.join(dist_path, 'Starter Kit Weather Station Demo.app', 'Contents', 'Resources')
+    resources_path = os.path.join(dist_path, '{0}.app'.format(CAMEL_CASE_NAME), 'Contents', 'Resources')
     system('cp -R {0} "{1}"'.format(build_data_path, resources_path))
 
     print('patching __boot__.py')
@@ -152,12 +156,13 @@ def build_macosx_pkg():
         f.write(boot_prefix + boot)
 
     print('building disk image')
-    dmg_name = 'starter_kit_weather_station_demo_macos_{0}.dmg'.format(DEMO_VERSION.replace('.', '_'))
+    dmg_name = '{0}_macos_{1}.dmg'.format(UNDERSCORE_NAME, DEMO_VERSION.replace('.', '_'))
 
     if os.path.exists(dmg_name):
         os.remove(dmg_name)
 
-    system('hdiutil create -fs HFS+ -volname "Starter-Kit-Weather-Station-Demo-{0}" -srcfolder dist {1}'.format(DEMO_VERSION, dmg_name))
+    system('hdiutil create -fs HFS+ -volname "{0}-{1}" -srcfolder dist {2}'
+           .format(CAMEL_CASE_NAME.replace(' ', '-'), DEMO_VERSION, dmg_name))
 
 
 # https://github.com/rfk/www.rfk.id.au/blob/master/content/blog/entry/code-signing-py2exe/index.html
@@ -202,18 +207,18 @@ def build_windows_pkg():
 
     # FIXME: doesn't work yet
     #if os.path.exists('X:\\sign.bat'):
-    #    sign_py2exe('dist\\starter_kit_weather_station_demo.exe')
+    #    sign_py2exe('dist\\{0}.exe'.format(UNDERSCORE_NAME))
 
     print('creating NSIS script from template')
-    nsis_template_path = os.path.join(root_path, 'build_data', 'windows', 'nsis', 'starter_kit_weather_station_demo_installer.nsi.template')
-    nsis_path = os.path.join(dist_path, 'nsis', 'starter_kit_weather_station_demo_installer.nsi')
+    nsis_template_path = os.path.join(root_path, 'build_data', 'windows', 'nsis', '{0}_installer.nsi.template'.format(UNDERSCORE_NAME))
+    nsis_path = os.path.join(dist_path, 'nsis', '{0}_installer.nsi'.format(UNDERSCORE_NAME))
     specialize_template(nsis_template_path, nsis_path,
                         {'<<DEMO_DOT_VERSION>>': DEMO_VERSION,
                          '<<DEMO_UNDERSCORE_VERSION>>': DEMO_VERSION.replace('.', '_')})
 
     print('building NSIS installer')
-    system('"C:\\Program Files\\NSIS\\makensis.exe" dist\\nsis\\starter_kit_weather_station_demo_installer.nsi')
-    installer = 'starter_kit_weather_station_demo_windows_{0}.exe'.format(DEMO_VERSION.replace('.', '_'))
+    system('"C:\\Program Files\\NSIS\\makensis.exe" dist\\nsis\\{0}_installer.nsi'.format(UNDERSCORE_NAME))
+    installer = '{0}_windows_{1}.exe'.format(UNDERSCORE_NAME, DEMO_VERSION.replace('.', '_'))
 
     if os.path.exists(installer):
         os.unlink(installer)
@@ -230,7 +235,7 @@ def build_linux_pkg():
 
     print('removing old build directories')
     dist_path = os.path.join(root_path, 'dist')
-    egg_info_path = os.path.join(root_path, 'starter_kit_weather_station_demo.egg-info')
+    egg_info_path = os.path.join(root_path, '{0}.egg-info'.format(UNDERSCORE_NAME))
 
     if os.path.exists(dist_path):
         shutil.rmtree(dist_path)
@@ -245,16 +250,16 @@ def build_linux_pkg():
         shutil.rmtree(egg_info_path)
 
     print('copying build data')
-    build_data_path = os.path.join(root_path, 'build_data', 'linux', 'starter_kit_weather_station_demo')
+    build_data_path = os.path.join(root_path, 'build_data', 'linux', UNDERSCORE_NAME)
     linux_path = os.path.join(dist_path, 'linux')
     shutil.copytree(build_data_path, linux_path)
 
     print('unpacking sdist tar file')
-    system('tar -x -C {0} -f {0}/starter_kit_weather_station_demo-{1}.tar.gz starter_kit_weather_station_demo-{1}/starter_kit_weather_station_demo'.format(dist_path, DEMO_VERSION))
+    system('tar -x -C {0} -f {0}/{1}-{2}.tar.gz {1}-{2}/{1}'.format(dist_path, UNDERSCORE_NAME, DEMO_VERSION))
 
     print('copying unpacked demo source')
-    unpacked_path = os.path.join(dist_path, 'starter_kit_weather_station_demo-{0}'.format(DEMO_VERSION), 'starter_kit_weather_station_demo')
-    linux_share_path = os.path.join(linux_path, 'usr', 'share', 'starter_kit_weather_station_demo')
+    unpacked_path = os.path.join(dist_path, '{0}-{1}'.format(UNDERSCORE_NAME, DEMO_VERSION), UNDERSCORE_NAME)
+    linux_share_path = os.path.join(linux_path, 'usr', 'share', UNDERSCORE_NAME)
     shutil.copytree(unpacked_path, linux_share_path)
 
     print('creating DEBIAN/control from template')
@@ -271,13 +276,13 @@ def build_linux_pkg():
     system('sudo chown -R root:root dist/linux')
 
     print('building Debian package')
-    system('dpkg -b dist/linux starter-kit-weather-station-demo-{0}_all.deb'.format(DEMO_VERSION))
+    system('dpkg -b dist/linux {0}-{1}_all.deb'.format(UNDERSCORE_NAME.replace('_', '-'), DEMO_VERSION))
 
     print('changing owner back to original user')
     system('sudo chown -R `logname`:`logname` dist/linux')
 
     #print('checking Debian package')
-    #system('lintian --pedantic starter-kit-weather-station-demo-{0}_all.deb'.format(DEMO_VERSION))
+    #system('lintian --pedantic {0}-{1}_all.deb'.format(UNDERSCORE_NAME.replace('_', '-'), DEMO_VERSION))
 
 
 # run 'python build_pkg.py' to build the windows/linux/macosx package

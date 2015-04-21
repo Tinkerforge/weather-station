@@ -28,11 +28,15 @@ import glob
 from setuptools import setup, find_packages
 from starter_kit_weather_station_demo.config import DEMO_VERSION
 
+UNDERSCORE_NAME = 'starter_kit_weather_station_demo'
+CAMEL_CASE_NAME = 'Starter Kit Weather Station Demo'
+DESCRIPTION = 'Demo for Starter Kit: Weather Station'
+
 # Find demo packages
 if sys.platform == 'darwin':
     packages = find_packages() # FIXME: setuptools on our macbook doesn't understand 'include'
 else:
-    packages = find_packages(include=['starter_kit_weather_station_demo', 'starter_kit_weather_station_demo.*'])
+    packages = find_packages(include=[UNDERSCORE_NAME, '{0}.*'.format(UNDERSCORE_NAME)])
 
 # Collect non-frozen package_data
 package_data = {}
@@ -50,7 +54,7 @@ if sys.platform.startswith('linux'):
         if len(images) > 0:
             package_data[package] = [os.path.basename(d) for d in images]
 
-    package_data['starter_kit_weather_station_demo'].append('starter_kit_weather_station_demo.desktop')
+    package_data[UNDERSCORE_NAME].append('{0}.desktop'.format(UNDERSCORE_NAME))
 
 # Collect platform specific data_files
 def collect_data_files(path, excludes=None):
@@ -72,30 +76,29 @@ def collect_data_files(path, excludes=None):
 data_files = []
 
 if sys.platform.startswith('linux'):
-    data_files.append(('/usr/share/pixmaps/', ['starter_kit_weather_station_demo/starter_kit_weather_station_demo-icon.png']))
-    data_files.append(('/usr/share/applications/', ['starter_kit_weather_station_demo/starter_kit_weather_station_demo.desktop']))
+    data_files.append(('/usr/share/pixmaps/', ['{0}/{0}-icon.png'.format(UNDERSCORE_NAME)]))
+    data_files.append(('/usr/share/applications/', ['{0}/{0}.desktop'.format(UNDERSCORE_NAME)]))
 elif sys.platform == 'win32':
-    data_files += collect_data_files('build_data/windows/', ['starter_kit_weather_station_demo-icon.ico'])
+    data_files += collect_data_files('build_data/windows/', ['{0}-icon.ico'.format(UNDERSCORE_NAME)])
 elif sys.platform == 'darwin':
     data_files += collect_data_files('build_data/macosx/')
 
 # Run setup
 setup_arguments = {
-    'name':             'starter_kit_weather_station_demo',
-    'version':          DEMO_VERSION,
-    'author':           'Tinkerforge',
-    'author_email':     'info@tinkerforge.com',
-    'url':              'http://www.tinkerforge.com',
-    'license':          'GPL v2',
-    'description':      'tarter Kit: Weather Station Demo',
-    'long_description': 'Demo for the Starter Kit: Weather Station',
-    'packages':         packages,
-    'package_data':     package_data,
-    'data_files':       data_files
+    'name':         UNDERSCORE_NAME,
+    'version':      DEMO_VERSION,
+    'author':       'Tinkerforge',
+    'author_email': 'info@tinkerforge.com',
+    'url':          'http://www.tinkerforge.com',
+    'license':      'GPL v2',
+    'description':  DESCRIPTION,
+    'packages':     packages,
+    'package_data': package_data,
+    'data_files':   data_files
 }
 
 if sys.platform.startswith('linux'):
-    setup_arguments['scripts'] = ['starter_kit_weather_station_demo/starter_kit_weather_station_demo']
+    setup_arguments['scripts'] = ['{0}/{0}'.format(UNDERSCORE_NAME)]
 elif sys.platform == 'win32':
     import py2exe
 
@@ -134,9 +137,9 @@ elif sys.platform == 'win32':
     }
 
     windows = [{
-        'script':        'starter_kit_weather_station_demo/main.py',
-        'dest_base':     'starter_kit_weather_station_demo',
-        'icon_resources': [(0, os.path.normcase('build_data/windows/starter_kit_weather_station_demo-icon.ico'))]
+        'script':        '{0}/main.py'.format(UNDERSCORE_NAME),
+        'dest_base':     UNDERSCORE_NAME,
+        'icon_resources': [(0, os.path.normcase('build_data/windows/{0}-icon.ico'.format(UNDERSCORE_NAME)))]
     }]
 
     setup_arguments['options'] = options
@@ -146,7 +149,7 @@ elif sys.platform == 'darwin':
     options = {
         'py2app': {
             'argv_emulation': True,
-            'iconfile':       'build_data/macosx/starter_kit_weather_station_demo-icon.icns',
+            'iconfile':       'build_data/macosx/{0}-icon.icns'.format(UNDERSCORE_NAME),
             'site_packages':  True,
             'includes':       ['atexit',
                                'sip',
@@ -178,19 +181,21 @@ elif sys.platform == 'darwin':
     }
 
     app = [{
-        'script': 'starter_kit_weather_station_demo/main.py',
+        'script': '{0}/main.py'.format(UNDERSCORE_NAME),
         'plist': {
-            'CFBundleName':               'Starter Kit Weather Station Demo',
+            'CFBundleName':               CAMEL_CASE_NAME,
+            'CFBundleVersion':            DEMO_VERSION,
             'CFBundleShortVersionString': DEMO_VERSION,
-            'CFBundleGetInfoString':      'Starter Kit: Weather Station Demo {0}'.format(DEMO_VERSION),
-            'CFBundleExecutable':         'starter_kit_weather_station_demo',
-            'CFBundleIdentifier':         'com.tinkerforge.starter_kit_weather_station_demo',
-            'CFBundleIconFile':           'starter_kit_weather_station_demo-icon.icns',
+            'CFBundleGetInfoString':      DESCRIPTION,
+            'CFBundleExecutable':         UNDERSCORE_NAME,
+            'CFBundleIdentifier':         'com.tinkerforge.{0}'.format(UNDERSCORE_NAME),
+            'CFBundleIconFile':           '{0}-icon.icns'.format(UNDERSCORE_NAME),
+            'NSHumanReadableCopyright':   'Tinkerforge GmbH 2013-2015'
         }
     }]
 
     setup_arguments['options']   = options
-    setup_arguments['scripts']   = ['starter_kit_weather_station_demo/main.py']
+    setup_arguments['scripts']   = ['{0}/main.py'.format(UNDERSCORE_NAME)]
     setup_arguments['app']       = app
 
 setup(**setup_arguments)
