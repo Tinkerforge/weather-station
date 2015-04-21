@@ -56,8 +56,8 @@ import time
 import math
 import signal
 
-from PyQt4.QtGui import QApplication, QWidget, QErrorMessage, QGridLayout, QIcon
-from PyQt4.QtGui import QPalette, QTextFormat, QTabWidget, QMainWindow, QVBoxLayout
+from PyQt4.QtGui import QApplication, QWidget, QErrorMessage, QGridLayout, QIcon, \
+                        QPalette, QTextFormat, QTabWidget, QMainWindow, QVBoxLayout, QFont
 from PyQt4.QtCore import QTimer, pyqtSignal
 
 from starter_kit_weather_station_demo.tinkerforge.ip_connection import IPConnection, Error
@@ -274,6 +274,18 @@ class WeatherStation(QApplication):
                     time.sleep(1)
 
 if __name__ == "__main__":
-    weather_station = WeatherStation(sys.argv)
+    argv = sys.argv
 
-    sys.exit(weather_station.exec_())
+    if sys.platform == 'win32':
+        argv += ['-style', 'windowsxp']
+
+    if sys.platform == 'darwin':
+        # fix OSX 10.9 font
+        # http://successfulsoftware.net/2013/10/23/fixing-qt-4-for-mac-os-x-10-9-mavericks/
+        # https://bugreports.qt-project.org/browse/QTBUG-32789
+        QFont.insertSubstitution('.Lucida Grande UI', 'Lucida Grande')
+        # fix OSX 10.10 font
+        # https://bugreports.qt-project.org/browse/QTBUG-40833
+        QFont.insertSubstitution('.Helvetica Neue DeskInterface', 'Helvetica Neue')
+
+    sys.exit(WeatherStation(argv).exec_())
