@@ -1,0 +1,2 @@
+The demo uses the status/weather-few-clouds icon from the Tango Icon Theme
+that is released into the Public Domain.
