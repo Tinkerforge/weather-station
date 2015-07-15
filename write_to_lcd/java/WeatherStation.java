@@ -1,17 +1,20 @@
 import com.tinkerforge.IPConnection;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletAmbientLight;
+import com.tinkerforge.BrickletAmbientLightV2;
 import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.BrickletBarometer;
 
 class WeatherListener implements IPConnection.EnumerateListener,
                                  IPConnection.ConnectedListener,
                                  BrickletAmbientLight.IlluminanceListener,
+                                 BrickletAmbientLightV2.IlluminanceListener,
                                  BrickletHumidity.HumidityListener,
                                  BrickletBarometer.AirPressureListener {
 	private IPConnection ipcon = null;
 	private BrickletLCD20x4 brickletLCD = null;
 	private BrickletAmbientLight brickletAmbientLight = null;
+	private BrickletAmbientLightV2 brickletAmbientLightV2 = null;
 	private BrickletHumidity brickletHumidity = null;
 	private BrickletBarometer brickletBarometer = null;
 
@@ -22,6 +25,18 @@ class WeatherListener implements IPConnection.EnumerateListener,
 	public void illuminance(int illuminance) {
 		if(brickletLCD != null) {
 			String text = String.format("Illuminanc %6.2f lx", illuminance/10.0);
+			try {
+				brickletLCD.writeLine((short)0, (short)0, text);
+			} catch(com.tinkerforge.TinkerforgeException e) {
+			}
+
+			System.out.println("Write to line 0: " + text);
+		}
+    }
+
+	public void illuminance(long illuminance) {
+		if(brickletLCD != null) {
+			String text = String.format("Illuminanc %6.2f lx", illuminance/100.0);
 			try {
 				brickletLCD.writeLine((short)0, (short)0, text);
 			} catch(com.tinkerforge.TinkerforgeException e) {
@@ -96,6 +111,16 @@ class WeatherListener implements IPConnection.EnumerateListener,
 				} catch(com.tinkerforge.TinkerforgeException e) {
 					brickletAmbientLight = null;
 					System.out.println("Ambient Light init failed: " + e);
+				}
+			} else if(deviceIdentifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER) {
+				try {
+					brickletAmbientLightV2 = new BrickletAmbientLightV2(uid, ipcon);
+					brickletAmbientLightV2.setIlluminanceCallbackPeriod(1000);
+					brickletAmbientLightV2.addIlluminanceListener(this);
+					System.out.println("Ambient Light 2.0 initialized");
+				} catch(com.tinkerforge.TinkerforgeException e) {
+					brickletAmbientLightV2 = null;
+					System.out.println("Ambient Light 2.0 init failed: " + e);
 				}
 			} else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER) {
 				try {

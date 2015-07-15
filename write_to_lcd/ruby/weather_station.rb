@@ -4,6 +4,7 @@
 require 'tinkerforge/ip_connection'
 require 'tinkerforge/bricklet_lcd_20x4'
 require 'tinkerforge/bricklet_ambient_light'
+require 'tinkerforge/bricklet_ambient_light_v2'
 require 'tinkerforge/bricklet_humidity'
 require 'tinkerforge/bricklet_barometer'
 
@@ -14,6 +15,7 @@ PORT = 4223
 
 lcd = nil
 ambient_light = nil
+ambient_light_v2 = nil
 humidity = nil
 barometer = nil
 
@@ -58,6 +60,22 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
       rescue Exception => e
         ambient_light = nil
         puts 'Ambient Light init failed: ' + e
+      end
+    elsif device_identifier == BrickletAmbientLightV2::DEVICE_IDENTIFIER
+      begin
+        ambient_light_v2 = BrickletAmbientLightV2.new uid, ipcon
+        ambient_light_v2.set_illuminance_callback_period 1000
+        ambient_light_v2.register_callback(BrickletAmbientLightV2::CALLBACK_ILLUMINANCE) do |illuminance|
+          if lcd != nil
+            text = 'Illuminanc %6.2f lx' % (illuminance/100.0)
+            lcd.write_line 0, 0, text
+            puts "Write to line 0: #{text}"
+          end
+        end
+        puts 'Ambient Light 2.0 initialized'
+      rescue Exception => e
+        ambient_light = nil
+        puts 'Ambient Light 2.0 init failed: ' + e
       end
     elsif device_identifier == BrickletHumidity::DEVICE_IDENTIFIER
       begin

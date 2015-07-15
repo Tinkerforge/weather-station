@@ -10,12 +10,23 @@ class WeatherStation
 	private static BrickletHumidity brickletHumidity = null;
 	private static BrickletBarometer brickletBarometer = null;
 	private static BrickletAmbientLight brickletAmbientLight = null;
+	private static BrickletAmbientLightV2 brickletAmbientLightV2 = null;
 
 	static void IlluminanceCB(BrickletAmbientLight sender, int illuminance)
 	{
 		if(brickletLCD != null)
 		{
 			string text = string.Format("Illuminanc {0,6:###.00} lx", illuminance/10.0);
+			brickletLCD.WriteLine(0, 0, text);
+			System.Console.WriteLine("Write to line 0: " + text);
+		}
+	}
+
+	static void IlluminanceV2CB(BrickletAmbientLightV2 sender, long illuminance)
+	{
+		if(brickletLCD != null)
+		{
+			string text = string.Format("Illuminanc {0,6:###.00} lx", illuminance/100.0);
 			brickletLCD.WriteLine(0, 0, text);
 			System.Console.WriteLine("Write to line 0: " + text);
 		}
@@ -92,6 +103,21 @@ class WeatherStation
 				{
 					System.Console.WriteLine("Ambient Light init failed: " + e.Message);
 					brickletAmbientLight = null;
+				}
+			}
+			else if(deviceIdentifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER)
+			{
+				try
+				{
+					brickletAmbientLightV2 = new BrickletAmbientLightV2(UID, ipcon);
+					brickletAmbientLightV2.SetIlluminanceCallbackPeriod(1000);
+					brickletAmbientLightV2.Illuminance += IlluminanceV2CB;
+					System.Console.WriteLine("Ambient Light 2.0 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Ambient Light 2.0 init failed: " + e.Message);
+					brickletAmbientLightV2 = null;
 				}
 			}
 			else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER)

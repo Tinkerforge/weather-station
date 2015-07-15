@@ -271,25 +271,25 @@ class ProjectXively(QWidget):
             self.xively_items[identifier] = (value, value, value)
 
     def update_illuminance_data_slot(self, illuminance):
-        self.put('AmbientLight', illuminance/10.0)
+        self.put('AmbientLight', illuminance)
 
     def update_illuminance(self, illuminance):
         self.qtcb_update_illuminance.emit(illuminance)
 
     def update_humidity_data_slot(self, humidity):
-        self.put('Humidity', humidity/10.0)
+        self.put('Humidity', humidity)
     
     def update_humidity(self, humidity):
         self.qtcb_update_humidity.emit(humidity)
 
     def update_air_pressure_data_slot(self, air_pressure):
-        self.put('AirPressure', air_pressure/1000.0)
+        self.put('AirPressure', air_pressure)
     
     def update_air_pressure(self, air_pressure):
         self.qtcb_update_air_pressure.emit(air_pressure)
 
     def update_temperature_data_slot(self, temperature):
-        self.put('Temperature', temperature/100.0)
+        self.put('Temperature', temperature)
 
     def update_temperature(self, temperature):
         self.qtcb_update_temperature.emit(temperature)

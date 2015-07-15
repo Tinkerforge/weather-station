@@ -25,9 +25,10 @@ class WeatherStation
 
 	private static IPConnection ipcon = null;
 	private static BrickletLCD20x4 brickletLCD = null;
+	private static BrickletAmbientLight brickletAmbientLight = null;
+	private static BrickletAmbientLightV2 brickletAmbientLightV2 = null;
 	private static BrickletHumidity brickletHumidity = null;
 	private static BrickletBarometer brickletBarometer = null;
-	private static BrickletAmbientLight brickletAmbientLight = null;
 
 	private static double latestIlluminance = Double.NaN;
 	private static double latestHumidity = Double.NaN;
@@ -41,12 +42,17 @@ class WeatherStation
 
 	private static byte buttonPressed = 0;
 	private static int[] buttonPressedCounter = {0, 0, 0, 0};
-	
+
 	private static Timer timer;
 
 	static void IlluminanceCB(BrickletAmbientLight sender, int illuminance)
 	{
 		latestIlluminance = illuminance/10.0;
+	}
+
+	static void IlluminanceV2CB(BrickletAmbientLightV2 sender, long illuminance)
+	{
+		latestIlluminance = illuminance/100.0;
 	}
 
 	static void HumidityCB(BrickletHumidity sender, int humidity)
@@ -93,11 +99,11 @@ class WeatherStation
 					brickletLCD.BacklightOn();
 					ConfigureCustomChars(brickletLCD);
 					brickletLCD.ButtonPressed += PressedCB;
-					System.Console.WriteLine("LCD20x4 initialized");
+					System.Console.WriteLine("LCD 20x4 initialized");
 				}
 				catch(TinkerforgeException e)
 				{
-					System.Console.WriteLine("LCD20x4 init failed: " + e.Message);
+					System.Console.WriteLine("LCD 20x4 init failed: " + e.Message);
 					brickletLCD = null;
 				}
 			}
@@ -108,12 +114,27 @@ class WeatherStation
 					brickletAmbientLight = new BrickletAmbientLight(UID, ipcon);
 					brickletAmbientLight.SetIlluminanceCallbackPeriod(1000);
 					brickletAmbientLight.Illuminance += IlluminanceCB;
-					System.Console.WriteLine("AmbientLight initialized");
+					System.Console.WriteLine("Ambient Light initialized");
 				}
 				catch(TinkerforgeException e)
 				{
-					System.Console.WriteLine("AmbientLight init failed: " + e.Message);
+					System.Console.WriteLine("Ambient Light init failed: " + e.Message);
 					brickletAmbientLight = null;
+				}
+			}
+			else if(deviceIdentifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER)
+			{
+				try
+				{
+					brickletAmbientLightV2 = new BrickletAmbientLightV2(UID, ipcon);
+					brickletAmbientLightV2.SetIlluminanceCallbackPeriod(1000);
+					brickletAmbientLightV2.Illuminance += IlluminanceV2CB;
+					System.Console.WriteLine("Ambient Light 2.0 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Ambient Light 2.0 init failed: " + e.Message);
+					brickletAmbientLightV2 = null;
 				}
 			}
 			else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER)

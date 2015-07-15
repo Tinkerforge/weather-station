@@ -6,13 +6,22 @@ Module WeatherStation
 
     Private ipcon As IPConnection = Nothing
     Private brickletLCD As BrickletLCD20x4 = Nothing
+    Private brickletAmbientLight As BrickletAmbientLight = Nothing
+    Private brickletAmbientLightV2 As BrickletAmbientLightV2 = Nothing
     Private brickletHumidity As BrickletHumidity = Nothing
     Private brickletBarometer As BrickletBarometer = Nothing
-    Private brickletAmbientLight As BrickletAmbientLight = Nothing
 
     Sub IlluminanceCB(ByVal sender As BrickletAmbientLight, ByVal illuminance As Integer)
         If brickletLCD IsNot Nothing Then
             Dim text As String = String.Format("Illuminanc {0,6:###.00} lx", illuminance/10.0)
+            brickletLCD.WriteLine(0, 0, text)
+            System.Console.WriteLine("Write to line 0: " + text)
+        End If
+    End Sub
+
+    Sub IlluminanceV2CB(ByVal sender As BrickletAmbientLightV2, ByVal illuminance As Long)
+        If brickletLCD IsNot Nothing Then
+            Dim text As String = String.Format("Illuminanc {0,6:###.00} lx", illuminance/100.0)
             brickletLCD.WriteLine(0, 0, text)
             System.Console.WriteLine("Write to line 0: " + text)
         End If
@@ -72,6 +81,16 @@ Module WeatherStation
                 Catch e As TinkerforgeException
                     System.Console.WriteLine("Ambient Light init failed: " + e.Message)
                     brickletAmbientLight = Nothing
+                End Try
+            Else If deviceIdentifier = BrickletAmbientLightV2.DEVICE_IDENTIFIER Then
+                Try
+                    brickletAmbientLightV2 = New BrickletAmbientLightV2(UID, ipcon)
+                    brickletAmbientLightV2.SetIlluminanceCallbackPeriod(1000)
+                    AddHandler brickletAmbientLightV2.Illuminance, AddressOf IlluminanceV2CB
+                    System.Console.WriteLine("Ambient Light 2.0 initialized")
+                Catch e As TinkerforgeException
+                    System.Console.WriteLine("Ambient Light 2.0 init failed: " + e.Message)
+                    brickletAmbientLightV2 = Nothing
                 End Try
             Else If deviceIdentifier = BrickletHumidity.DEVICE_IDENTIFIER Then
                 Try

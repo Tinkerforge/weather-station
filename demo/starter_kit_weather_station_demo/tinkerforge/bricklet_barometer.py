@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #############################################################
-# This file was automatically generated on 2015-04-20.      #
+# This file was automatically generated on 2015-07-15.      #
 #                                                           #
 # Bindings Version 2.1.4                                    #
 #                                                           #
@@ -29,7 +29,7 @@ GetIdentity = namedtuple('Identity', ['uid', 'connected_uid', 'position', 'hardw
 
 class BrickletBarometer(Device):
     """
-    Device for sensing air pressure and altitude changes
+    Measures air pressure and altitude changes
     """
 
     DEVICE_IDENTIFIER = 221
@@ -246,8 +246,8 @@ class BrickletBarometer(Device):
         reference.
         
         Well known reference values are the Q codes
-        `QNH <http://en.wikipedia.org/wiki/QNH>`__ and
-        `QFE <http://en.wikipedia.org/wiki/Mean_sea_level_pressure#Mean_sea_level_pressure>`__
+        `QNH <https://en.wikipedia.org/wiki/QNH>`__ and
+        `QFE <https://en.wikipedia.org/wiki/Mean_sea_level_pressure#Mean_sea_level_pressure>`__
         used in aviation.
         
         The default value is 1013.25mbar.
@@ -277,7 +277,7 @@ class BrickletBarometer(Device):
         Sets the different averaging parameters. It is possible to set
         the length of a normal averaging for the temperature and pressure,
         as well as an additional length of a 
-        `moving average <http://en.wikipedia.org/wiki/Moving_average>`__ 
+        `moving average <https://en.wikipedia.org/wiki/Moving_average>`__ 
         for the pressure. The moving average is calculated from the normal 
         averages.  There is no moving average for the temperature.
         
@@ -293,7 +293,7 @@ class BrickletBarometer(Device):
         The default values are 10 for the normal averages and 25 for the
         moving average.
         
-        .. versionadded:: 2.0.1~(Plugin)
+        .. versionadded:: 2.0.1$nbsp;(Plugin)
         """
         self.ipcon.send_request(self, BrickletBarometer.FUNCTION_SET_AVERAGING, (moving_average_pressure, average_pressure, average_temperature), 'B B B', '')
 
@@ -301,7 +301,7 @@ class BrickletBarometer(Device):
         """
         Returns the averaging configuration as set by :func:`SetAveraging`.
         
-        .. versionadded:: 2.0.1~(Plugin)
+        .. versionadded:: 2.0.1$nbsp;(Plugin)
         """
         return GetAveraging(*self.ipcon.send_request(self, BrickletBarometer.FUNCTION_GET_AVERAGING, (), '', 'B B B'))
 

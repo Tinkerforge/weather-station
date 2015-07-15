@@ -16,6 +16,7 @@ from tinkerforge.ip_connection import Error
 from tinkerforge.brick_master import Master
 from tinkerforge.bricklet_lcd_20x4 import LCD20x4
 from tinkerforge.bricklet_ambient_light import AmbientLight
+from tinkerforge.bricklet_ambient_light_v2 import AmbientLightV2
 from tinkerforge.bricklet_humidity import Humidity
 from tinkerforge.bricklet_barometer import Barometer
 
@@ -85,6 +86,7 @@ class WeatherStation:
     ipcon = None
     lcd = None
     al = None
+    al_v2 = None
     hum = None
     baro = None
 
@@ -122,6 +124,13 @@ class WeatherStation:
             self.xively.put('AmbientLight', illuminance/10.0)
             log.info('Write to line 0: ' + text)
 
+    def cb_illuminance_v2(self, illuminance):
+        if self.lcd is not None:
+            text = 'Illuminanc %6.2f lx' % (illuminance/100.0)
+            self.lcd.write_line(0, 0, text)
+            self.xively.put('AmbientLight', illuminance/100.0)
+            log.info('Write to line 0: ' + text)
+
     def cb_humidity(self, humidity):
         if self.lcd is not None:
             text = 'Humidity   %6.2f %%' % (humidity/10.0)
@@ -152,9 +161,9 @@ class WeatherStation:
                     self.lcd = LCD20x4(uid, self.ipcon)
                     self.lcd.clear_display()
                     self.lcd.backlight_on()
-                    log.info('LCD20x4 initialized')
+                    log.info('LCD 20x4 initialized')
                 except Error as e:
-                    log.error('LCD20x4 init failed: ' + str(e.description))
+                    log.error('LCD 20x4 init failed: ' + str(e.description))
                     self.lcd = None
             elif device_identifier == AmbientLight.DEVICE_IDENTIFIER:
                 try:
@@ -162,10 +171,20 @@ class WeatherStation:
                     self.al.set_illuminance_callback_period(1000)
                     self.al.register_callback(self.al.CALLBACK_ILLUMINANCE,
                                               self.cb_illuminance)
-                    log.info('AmbientLight initialized')
+                    log.info('Ambient Light initialized')
                 except Error as e:
-                    log.error('AmbientLight init failed: ' + str(e.description))
+                    log.error('Ambient Light init failed: ' + str(e.description))
                     self.al = None
+            elif device_identifier == AmbientLightV2.DEVICE_IDENTIFIER:
+                try:
+                    self.al_v2 = AmbientLightV2(uid, self.ipcon)
+                    self.al_v2.set_illuminance_callback_period(1000)
+                    self.al_v2.register_callback(self.al_v2.CALLBACK_ILLUMINANCE,
+                                                 self.cb_illuminance_v2)
+                    log.info('Ambient Light 2.0 initialized')
+                except Error as e:
+                    log.error('Ambient Light 2.0 init failed: ' + str(e.description))
+                    self.al_v2 = None
             elif device_identifier == Humidity.DEVICE_IDENTIFIER:
                 try:
                     self.hum = Humidity(uid, self.ipcon)

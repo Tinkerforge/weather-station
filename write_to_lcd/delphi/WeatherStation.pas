@@ -5,7 +5,7 @@ program WeatherStation;
 
 uses
   SysUtils, IPConnection, Device, BrickletLCD20x4, BrickletHumidity,
-  BrickletBarometer, BrickletAmbientLight;
+  BrickletBarometer, BrickletAmbientLight, BrickletAmbientLightV2;
 
 const
   HOST = 'localhost';
@@ -19,6 +19,7 @@ type
     brickletHumidity: TBrickletHumidity;
     brickletBarometer: TBrickletBarometer;
     brickletAmbientLight: TBrickletAmbientLight;
+    brickletAmbientLightV2: TBrickletAmbientLightV2;
   public
     constructor Create;
     destructor Destroy; override;
@@ -29,6 +30,7 @@ type
                           const firmwareVersion: TVersionNumber;
                           const deviceIdentifier: word; const enumerationType: byte);
     procedure IlluminanceCB(sender: TBrickletAmbientLight; const illuminance: word);
+    procedure IlluminanceV2CB(sender: TBrickletAmbientLightV2; const illuminance: longword);
     procedure HumidityCB(sender: TBrickletHumidity; const humidity: word);
     procedure AirPressureCB(sender: TBrickletBarometer; const airPressure: longint);
     procedure Execute;
@@ -52,6 +54,7 @@ begin
   if (brickletHumidity <> nil) then brickletHumidity.Destroy;
   if (brickletBarometer <> nil) then brickletBarometer.Destroy;
   if (brickletAmbientLight <> nil) then brickletAmbientLight.Destroy;
+  if (brickletAmbientLightV2 <> nil) then brickletAmbientLightV2.Destroy;
   if (ipcon <> nil) then ipcon.Destroy;
   inherited Destroy;
 end;
@@ -108,6 +111,19 @@ begin
         end;
       end;
     end
+    else if (deviceIdentifier = BRICKLET_AMBIENT_LIGHT_V2_DEVICE_IDENTIFIER) then begin
+      try
+        brickletAmbientLightV2 := TBrickletAmbientLightV2.Create(uid, ipcon);
+        brickletAmbientLightV2.SetIlluminanceCallbackPeriod(1000);
+        brickletAmbientLightV2.OnIlluminance := {$ifdef FPC}@{$endif}IlluminanceV2CB;
+        WriteLn('Ambient Light 2.0 initialized');
+      except
+        on e: Exception do begin
+          WriteLn('Ambient Light 2.0 init failed: ' + e.Message);
+          brickletAmbientLightV2 := nil;
+        end;
+      end;
+    end
     else if (deviceIdentifier = BRICKLET_HUMIDITY_DEVICE_IDENTIFIER) then begin
       try
         brickletHumidity := TBrickletHumidity.Create(uid, ipcon);
@@ -142,6 +158,16 @@ var text: string;
 begin
   if (brickletLCD <> nil) then begin
     text := Format('Illuminanc %6.2f lx', [illuminance/10.0]);
+    brickletLCD.WriteLine(0, 0, text);
+    WriteLn('Write to line 0: ' + text);
+  end;
+end;
+
+procedure TWeatherStation.IlluminanceV2CB(sender: TBrickletAmbientLightV2; const illuminance: longword);
+var text: string;
+begin
+  if (brickletLCD <> nil) then begin
+    text := Format('Illuminanc %6.2f lx', [illuminance/100.0]);
     brickletLCD.WriteLine(0, 0, text);
     WriteLn('Write to line 0: ' + text);
   end;

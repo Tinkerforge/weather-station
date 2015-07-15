@@ -74,21 +74,21 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_button_pressed.connect(self.button_pressed_slot)
 
     def update_illuminance_data_slot(self, illuminance):
-        text = 'Illuminanc %6.2f lx' % (illuminance/10.0)
+        text = 'Illuminanc %6.2f lx' % illuminance
         self.lcdwidget.write_line(0, 0, text, self)
 
     def update_illuminance(self, illuminance):
         self.qtcb_update_illuminance.emit(illuminance)
 
     def update_humidity_data_slot(self, humidity):
-        text = 'Humidity   %6.2f %%' % (humidity/10.0)
+        text = 'Humidity   %6.2f %%' % humidity
         self.lcdwidget.write_line(1, 0, text, self)
     
     def update_humidity(self, humidity):
         self.qtcb_update_humidity.emit(humidity)
 
     def update_air_pressure_data_slot(self, air_pressure):
-        text = 'Air Press %7.2f mb' % (air_pressure/1000.0)
+        text = 'Air Press %7.2f mb' % air_pressure
         self.lcdwidget.write_line(2, 0, text, self)
     
     def update_air_pressure(self, air_pressure):
@@ -96,7 +96,7 @@ class ProjectEnvDisplay(QWidget):
 
     def update_temperature_data_slot(self, temperature):
         # \xDF == ° on LCD 20x4 charset
-        text = 'Temperature %5.2f \xDFC' % (temperature/100.0)
+        text = 'Temperature %5.2f \xDFC' % temperature
         self.lcdwidget.write_line(3, 0, text, self)
 
     def update_temperature(self, temperature):

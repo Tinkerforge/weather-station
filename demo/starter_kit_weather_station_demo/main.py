@@ -63,6 +63,7 @@ from PyQt4.QtCore import QTimer, pyqtSignal
 from starter_kit_weather_station_demo.tinkerforge.ip_connection import IPConnection, Error
 from starter_kit_weather_station_demo.tinkerforge.bricklet_lcd_20x4 import LCD20x4
 from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light import AmbientLight
+from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light_v2 import AmbientLightV2
 from starter_kit_weather_station_demo.tinkerforge.bricklet_humidity import Humidity
 from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer import Barometer
 from starter_kit_weather_station_demo.Project_Env_Display import ProjectEnvDisplay
@@ -88,6 +89,7 @@ class WeatherStation(QApplication):
     ipcon = None
     lcd = None
     al = None
+    al_v2 = None
     hum = None
     baro = None
 
@@ -181,15 +183,19 @@ class WeatherStation(QApplication):
 
     def cb_illuminance(self, illuminance):
         for p in self.projects:
-            p.update_illuminance(illuminance)
+            p.update_illuminance(illuminance/10.0)
+
+    def cb_illuminance_v2(self, illuminance):
+        for p in self.projects:
+            p.update_illuminance(illuminance/100.0)
 
     def cb_humidity(self, humidity):
         for p in self.projects:
-            p.update_humidity(humidity)
+            p.update_humidity(humidity/10.0)
 
     def cb_air_pressure(self, air_pressure):
         for p in self.projects:
-            p.update_air_pressure(air_pressure)
+            p.update_air_pressure(air_pressure/1000.0)
 
         try:
             temperature = self.baro.get_chip_temperature()
@@ -242,6 +248,15 @@ class WeatherStation(QApplication):
                                               self.cb_illuminance)
                 except Error as e:
                     self.error_msg.showMessage('Ambient Light init failed: ' + str(e.description))
+                    self.al = None
+            elif device_identifier == AmbientLightV2.DEVICE_IDENTIFIER:
+                try:
+                    self.al_v2 = AmbientLightV2(uid, self.ipcon)
+                    self.al_v2.set_illuminance_callback_period(1000)
+                    self.al_v2.register_callback(self.al_v2.CALLBACK_ILLUMINANCE,
+                                                 self.cb_illuminance_v2)
+                except Error as e:
+                    self.error_msg.showMessage('Ambient Light 2.0 init failed: ' + str(e.description))
                     self.al = None
             elif device_identifier == Humidity.DEVICE_IDENTIFIER:
                 try:

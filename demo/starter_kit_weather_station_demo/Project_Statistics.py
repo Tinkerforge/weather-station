@@ -28,7 +28,7 @@ import time
 from PyQt4.QtCore import Qt, QTimer, pyqtSignal
 from PyQt4.QtGui import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
 
-from starter_kit_weather_station_demo. LCDWidget import LCDWidget
+from starter_kit_weather_station_demo.LCDWidget import LCDWidget
 
 class ProjectStatistics(QWidget):
     UPDATE_TYPE_STANDARD = 0
@@ -140,25 +140,25 @@ class ProjectStatistics(QWidget):
         self.timer.start(1000)
 
     def update_illuminance_data_slot(self, illuminance):
-        self.latestIlluminance = illuminance/10.0
+        self.latestIlluminance = illuminance
 
     def update_illuminance(self, illuminance):
         self.qtcb_update_illuminance.emit(illuminance)
 
     def update_humidity_data_slot(self, humidity):
-        self.latestHumidity = humidity/10.0
+        self.latestHumidity = humidity
     
     def update_humidity(self, humidity):
         self.qtcb_update_humidity.emit(humidity)
 
     def update_air_pressure_data_slot(self, air_pressure):
-        self.latestAirPressure = air_pressure/1000.0
+        self.latestAirPressure = air_pressure
     
     def update_air_pressure(self, air_pressure):
         self.qtcb_update_air_pressure.emit(air_pressure)
 
     def update_temperature_data_slot(self, temperature):
-        self.latestTemperature = temperature/100.0
+        self.latestTemperature = temperature
 
     def update_temperature(self, temperature):
         self.qtcb_update_temperature.emit(temperature)

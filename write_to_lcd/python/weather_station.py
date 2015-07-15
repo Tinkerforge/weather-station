@@ -13,6 +13,7 @@ from tinkerforge.ip_connection import Error
 from tinkerforge.brick_master import Master
 from tinkerforge.bricklet_lcd_20x4 import LCD20x4
 from tinkerforge.bricklet_ambient_light import AmbientLight
+from tinkerforge.bricklet_ambient_light_v2 import AmbientLightV2
 from tinkerforge.bricklet_humidity import Humidity
 from tinkerforge.bricklet_barometer import Barometer
 
@@ -23,6 +24,7 @@ class WeatherStation:
     ipcon = None
     lcd = None
     al = None
+    al_v2 = None
     hum = None
     baro = None
 
@@ -55,6 +57,12 @@ class WeatherStation:
     def cb_illuminance(self, illuminance):
         if self.lcd is not None:
             text = 'Illuminanc %6.2f lx' % (illuminance/10.0)
+            self.lcd.write_line(0, 0, text)
+            log.info('Write to line 0: ' + text)
+
+    def cb_illuminance_v2(self, illuminance):
+        if self.lcd is not None:
+            text = 'Illuminanc %6.2f lx' % (illuminance/100.0)
             self.lcd.write_line(0, 0, text)
             log.info('Write to line 0: ' + text)
 
@@ -103,6 +111,16 @@ class WeatherStation:
                     log.info('Ambient Light initialized')
                 except Error as e:
                     log.error('Ambient Light init failed: ' + str(e.description))
+                    self.al = None
+            elif device_identifier == AmbientLightV2.DEVICE_IDENTIFIER:
+                try:
+                    self.al_v2 = AmbientLightV2(uid, self.ipcon)
+                    self.al_v2.set_illuminance_callback_period(1000)
+                    self.al_v2.register_callback(self.al_v2.CALLBACK_ILLUMINANCE,
+                                                 self.cb_illuminance_v2)
+                    log.info('Ambient Light 2.0 initialized')
+                except Error as e:
+                    log.error('Ambient Light 2.0 init failed: ' + str(e.description))
                     self.al = None
             elif device_identifier == Humidity.DEVICE_IDENTIFIER:
                 try:

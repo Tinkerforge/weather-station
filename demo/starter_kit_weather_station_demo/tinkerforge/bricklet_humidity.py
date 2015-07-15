@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #############################################################
-# This file was automatically generated on 2015-04-20.      #
+# This file was automatically generated on 2015-07-15.      #
 #                                                           #
 # Bindings Version 2.1.4                                    #
 #                                                           #
@@ -28,7 +28,7 @@ GetIdentity = namedtuple('Identity', ['uid', 'connected_uid', 'position', 'hardw
 
 class BrickletHumidity(Device):
     """
-    Device for sensing Humidity
+    Measures relative humidity
     """
 
     DEVICE_IDENTIFIER = 27

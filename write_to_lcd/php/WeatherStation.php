@@ -3,12 +3,14 @@
 require_once('Tinkerforge/IPConnection.php');
 require_once('Tinkerforge/BrickletLCD20x4.php');
 require_once('Tinkerforge/BrickletAmbientLight.php');
+require_once('Tinkerforge/BrickletAmbientLightV2.php');
 require_once('Tinkerforge/BrickletHumidity.php');
 require_once('Tinkerforge/BrickletBarometer.php');
 
 use Tinkerforge\IPConnection;
 use Tinkerforge\BrickletLCD20x4;
 use Tinkerforge\BrickletAmbientLight;
+use Tinkerforge\BrickletAmbientLightV2;
 use Tinkerforge\BrickletHumidity;
 use Tinkerforge\BrickletBarometer;
 
@@ -21,6 +23,7 @@ class WeatherStation
     {
 		$this->brickletLCD = null;
 		$this->brickletAmbientLight = null;
+		$this->brickletAmbientLightV2 = null;
 		$this->brickletHumidity = null;
 		$this->brickletBarometer = null;
 		$this->ipcon = new IPConnection();
@@ -53,6 +56,15 @@ class WeatherStation
 	{
 		if($this->brickletLCD != null) {
 			$text = sprintf("Illuminanc %6.2f lx", $illuminance/10.0);
+			$this->brickletLCD->writeLine(0, 0, $text);
+			echo "Write to line 0: $text\n";
+		}
+	}
+
+	function cb_illuminanceV2($illuminance)
+	{
+		if($this->brickletLCD != null) {
+			$text = sprintf("Illuminanc %6.2f lx", $illuminance/100.0);
 			$this->brickletLCD->writeLine(0, 0, $text);
 			echo "Write to line 0: $text\n";
 		}
@@ -114,6 +126,17 @@ class WeatherStation
 				} catch(Exception $e) {
 					$this->brickletAmbientLight = null;
 					echo "Ambient Light init failed: $e\n";
+				}
+			} else if($deviceIdentifier == BrickletAmbientLightV2::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletAmbientLightV2 = new BrickletAmbientLightV2($uid, $this->ipcon);
+					$this->brickletAmbientLightV2->setIlluminanceCallbackPeriod(1000);
+					$this->brickletAmbientLightV2->registerCallback(BrickletAmbientLightV2::CALLBACK_ILLUMINANCE,
+					                                                array($this, 'cb_illuminanceV2'));
+					echo "Ambient Light 2.0 initialized\n";
+				} catch(Exception $e) {
+					$this->brickletAmbientLight = null;
+					echo "Ambient Light 2.0 init failed: $e\n";
 				}
 			} else if($deviceIdentifier == BrickletHumidity::DEVICE_IDENTIFIER) {
 				try {

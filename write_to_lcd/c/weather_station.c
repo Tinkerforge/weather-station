@@ -5,6 +5,7 @@
 #include "bricklet_humidity.h"
 #include "bricklet_barometer.h"
 #include "bricklet_ambient_light.h"
+#include "bricklet_ambient_light_v2.h"
 
 #define HOST "localhost"
 #define PORT 4223
@@ -13,13 +14,14 @@ typedef struct {
 	IPConnection ipcon;
 	LCD20x4 lcd;
 	bool lcd_created;
+	AmbientLight ambient_light;
+	AmbientLightV2 ambient_light_v2;
 	Humidity humidity;
 	Barometer barometer;
-	AmbientLight ambient_light;
 } WeatherStation;
 
 void cb_illuminance(uint16_t illuminance, void *user_data) {
-	WeatherStation *ws = (WeatherStation*)user_data;
+	WeatherStation *ws = (WeatherStation *)user_data;
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
@@ -29,8 +31,19 @@ void cb_illuminance(uint16_t illuminance, void *user_data) {
 	}
 }
 
+void cb_illuminance_v2(uint32_t illuminance, void *user_data) {
+	WeatherStation *ws = (WeatherStation *)user_data;
+
+	if(ws->lcd_created) {
+		char text[30] = {'\0'};
+		sprintf(text, "Illuminanc %6.2f lx", illuminance/100.0);
+		lcd_20x4_write_line(&ws->lcd, 0, 0, text);
+		printf("Write to line 0: %s\n", text);
+	}
+}
+
 void cb_humidity(uint16_t humidity, void *user_data) {
-	WeatherStation *ws = (WeatherStation*)user_data;
+	WeatherStation *ws = (WeatherStation *)user_data;
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
@@ -113,6 +126,19 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 				fprintf(stderr, "Ambient Light init failed: %d\n", rc);
 			} else {
 				printf("Ambient Light initialized\n");
+			}
+		} else if(device_identifier == AMBIENT_LIGHT_V2_DEVICE_IDENTIFIER) {
+			ambient_light_v2_create(&ws->ambient_light_v2, uid, &ws->ipcon);
+			ambient_light_v2_register_callback(&ws->ambient_light_v2,
+			                                   AMBIENT_LIGHT_V2_CALLBACK_ILLUMINANCE,
+			                                   (void *)cb_illuminance_v2,
+			                                   (void *)ws);
+			rc = ambient_light_v2_set_illuminance_callback_period(&ws->ambient_light_v2, 1000);
+
+			if(rc < 0) {
+				fprintf(stderr, "Ambient Light 2.0 init failed: %d\n", rc);
+			} else {
+				printf("Ambient Light 2.0 initialized\n");
 			}
 		} else if(device_identifier == HUMIDITY_DEVICE_IDENTIFIER) {
 			humidity_create(&ws->humidity, uid, &ws->ipcon);
