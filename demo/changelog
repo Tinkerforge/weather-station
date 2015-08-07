@@ -10,3 +10,7 @@
 
 1.0.3:
 - Add support for Ambient Light Bricklet 2.0
+
+1.0.4:
+- Fix formatting of illuminance values from Ambient Light Bricklet 2.0
+- Add missing division by 100 for temperature values
