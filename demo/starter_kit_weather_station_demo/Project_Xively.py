@@ -230,8 +230,7 @@ class ProjectXively(QWidget):
                                  'min_value': value[1],
                                  'max_value': value[2]})
 
-        data = {'version': '1.0.0',
-                    'datastreams': stream_items}
+        data = {'version': '1.0.0', 'datastreams': stream_items}
         self.xively_items = {}
         body = json.dumps(data)
 

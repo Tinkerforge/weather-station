@@ -114,6 +114,8 @@ begin
     else if (deviceIdentifier = BRICKLET_AMBIENT_LIGHT_V2_DEVICE_IDENTIFIER) then begin
       try
         brickletAmbientLightV2 := TBrickletAmbientLightV2.Create(uid, ipcon);
+        brickletAmbientLightV2.SetConfiguration(BRICKLET_AMBIENT_LIGHT_V2_ILLUMINANCE_RANGE_64000LUX,
+                                                BRICKLET_AMBIENT_LIGHT_V2_INTEGRATION_TIME_200MS);
         brickletAmbientLightV2.SetIlluminanceCallbackPeriod(1000);
         brickletAmbientLightV2.OnIlluminance := {$ifdef FPC}@{$endif}IlluminanceV2CB;
         WriteLn('Ambient Light 2.0 initialized');
@@ -167,7 +169,7 @@ procedure TWeatherStation.IlluminanceV2CB(sender: TBrickletAmbientLightV2; const
 var text: string;
 begin
   if (brickletLCD <> nil) then begin
-    text := Format('Illuminanc %6.2f lx', [illuminance/100.0]);
+    text := Format('Illumina %8.2f lx', [illuminance/100.0]);
     brickletLCD.WriteLine(0, 0, text);
     WriteLn('Write to line 0: ' + text);
   end;

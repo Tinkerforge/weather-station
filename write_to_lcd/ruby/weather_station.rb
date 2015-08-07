@@ -64,10 +64,12 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
     elsif device_identifier == BrickletAmbientLightV2::DEVICE_IDENTIFIER
       begin
         ambient_light_v2 = BrickletAmbientLightV2.new uid, ipcon
+        ambient_light_v2.set_configuration(BrickletAmbientLightV2::ILLUMINANCE_RANGE_64000LUX,
+                                           BrickletAmbientLightV2::INTEGRATION_TIME_200MS)
         ambient_light_v2.set_illuminance_callback_period 1000
         ambient_light_v2.register_callback(BrickletAmbientLightV2::CALLBACK_ILLUMINANCE) do |illuminance|
           if lcd != nil
-            text = 'Illuminanc %6.2f lx' % (illuminance/100.0)
+            text = 'Illumina %8.2f lx' % (illuminance/100.0)
             lcd.write_line 0, 0, text
             puts "Write to line 0: #{text}"
           end

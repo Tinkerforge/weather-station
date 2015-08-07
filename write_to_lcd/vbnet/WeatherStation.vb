@@ -21,7 +21,7 @@ Module WeatherStation
 
     Sub IlluminanceV2CB(ByVal sender As BrickletAmbientLightV2, ByVal illuminance As Long)
         If brickletLCD IsNot Nothing Then
-            Dim text As String = String.Format("Illuminanc {0,6:###.00} lx", illuminance/100.0)
+            Dim text As String = String.Format("Illumina {0,8:###.00} lx", illuminance/100.0)
             brickletLCD.WriteLine(0, 0, text)
             System.Console.WriteLine("Write to line 0: " + text)
         End If
@@ -85,6 +85,8 @@ Module WeatherStation
             Else If deviceIdentifier = BrickletAmbientLightV2.DEVICE_IDENTIFIER Then
                 Try
                     brickletAmbientLightV2 = New BrickletAmbientLightV2(UID, ipcon)
+                    brickletAmbientLightV2.SetConfiguration(BrickletAmbientLightV2.ILLUMINANCE_RANGE_64000LUX, _
+                                                            BrickletAmbientLightV2.INTEGRATION_TIME_200MS)
                     brickletAmbientLightV2.SetIlluminanceCallbackPeriod(1000)
                     AddHandler brickletAmbientLightV2.Illuminance, AddressOf IlluminanceV2CB
                     System.Console.WriteLine("Ambient Light 2.0 initialized")

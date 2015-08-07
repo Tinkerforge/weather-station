@@ -216,7 +216,7 @@ class ProjectStatistics(QWidget):
 
     def UpdateStandard(self):
         if not self.latestIlluminance == None:
-            text = 'Illuminanc %6.2f lx' % (self.latestIlluminance)
+            text = 'Illumina %8.2f lx' % (self.latestIlluminance)
             self.lcdwidget.write_line(0, 0, text, self)
 
         if not self.latestHumidity == None:
@@ -330,9 +330,9 @@ class ProjectStatistics(QWidget):
             self.UpdateMinMaxAvgWrite("Temperature    " + self.TimeFromSeconds(len(self.temperatureQueue)), "\xDFC", self.GetMinMaxAvg(self.temperatureQueue))
 
     def UpdateMinMaxAvgWrite(self, title, unit, values):
-        vmin = "Min: %6.2f" % values[0] + " " + unit
-        vavg = "Avg: %6.2f" % values[2] + " " + unit
-        vmax = "Max: %6.2f" % values[1] + " " + unit
+        vmin = "Min: %8.2f" % values[0] + " " + unit
+        vavg = "Avg: %8.2f" % values[2] + " " + unit
+        vmax = "Max: %8.2f" % values[1] + " " + unit
 
         self.lcdwidget.write_line(0, 0, title, self)
         self.lcdwidget.write_line(1, 0, vmin, self)

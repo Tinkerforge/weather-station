@@ -126,7 +126,7 @@ class WeatherStation:
 
     def cb_illuminance_v2(self, illuminance):
         if self.lcd is not None:
-            text = 'Illuminanc %6.2f lx' % (illuminance/100.0)
+            text = 'Illumina %8.2f lx' % (illuminance/100.0)
             self.lcd.write_line(0, 0, text)
             self.xively.put('AmbientLight', illuminance/100.0)
             log.info('Write to line 0: ' + text)
@@ -178,6 +178,8 @@ class WeatherStation:
             elif device_identifier == AmbientLightV2.DEVICE_IDENTIFIER:
                 try:
                     self.al_v2 = AmbientLightV2(uid, self.ipcon)
+                    self.al_v2.set_configuration(AmbientLightV2.ILLUMINANCE_RANGE_64000LUX,
+                                                 AmbientLightV2.INTEGRATION_TIME_200MS)
                     self.al_v2.set_illuminance_callback_period(1000)
                     self.al_v2.register_callback(self.al_v2.CALLBACK_ILLUMINANCE,
                                                  self.cb_illuminance_v2)

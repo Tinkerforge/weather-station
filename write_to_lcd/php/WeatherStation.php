@@ -64,7 +64,7 @@ class WeatherStation
 	function cb_illuminanceV2($illuminance)
 	{
 		if($this->brickletLCD != null) {
-			$text = sprintf("Illuminanc %6.2f lx", $illuminance/100.0);
+			$text = sprintf("Illumina %8.2f lx", $illuminance/100.0);
 			$this->brickletLCD->writeLine(0, 0, $text);
 			echo "Write to line 0: $text\n";
 		}
@@ -130,6 +130,8 @@ class WeatherStation
 			} else if($deviceIdentifier == BrickletAmbientLightV2::DEVICE_IDENTIFIER) {
 				try {
 					$this->brickletAmbientLightV2 = new BrickletAmbientLightV2($uid, $this->ipcon);
+					$this->brickletAmbientLightV2->setConfiguration(BrickletAmbientLightV2::ILLUMINANCE_RANGE_64000LUX,
+					                                                BrickletAmbientLightV2::INTEGRATION_TIME_200MS);
 					$this->brickletAmbientLightV2->setIlluminanceCallbackPeriod(1000);
 					$this->brickletAmbientLightV2->registerCallback(BrickletAmbientLightV2::CALLBACK_ILLUMINANCE,
 					                                                array($this, 'cb_illuminanceV2'));

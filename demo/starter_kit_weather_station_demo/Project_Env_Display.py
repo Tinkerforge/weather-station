@@ -74,7 +74,7 @@ class ProjectEnvDisplay(QWidget):
         self.qtcb_button_pressed.connect(self.button_pressed_slot)
 
     def update_illuminance_data_slot(self, illuminance):
-        text = 'Illuminanc %6.2f lx' % illuminance
+        text = 'Illumina %8.2f lx' % illuminance
         self.lcdwidget.write_line(0, 0, text, self)
 
     def update_illuminance(self, illuminance):

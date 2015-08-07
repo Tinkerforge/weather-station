@@ -127,6 +127,8 @@ class WeatherStation
 				try
 				{
 					brickletAmbientLightV2 = new BrickletAmbientLightV2(UID, ipcon);
+					brickletAmbientLightV2.SetConfiguration(BrickletAmbientLightV2.ILLUMINANCE_RANGE_64000LUX,
+					                                        BrickletAmbientLightV2.INTEGRATION_TIME_200MS);
 					brickletAmbientLightV2.SetIlluminanceCallbackPeriod(1000);
 					brickletAmbientLightV2.Illuminance += IlluminanceV2CB;
 					System.Console.WriteLine("Ambient Light 2.0 initialized");
@@ -362,7 +364,7 @@ class WeatherStation
 
 	static private void UpdateStandard()
 	{
-		string text = string.Format("Illuminanc {0,6:###.00} lx", latestIlluminance);
+		string text = string.Format("Illumina {0,8:###.00} lx", latestIlluminance);
 		brickletLCD.WriteLine(0, 0, text);
 
 		text = string.Format("Humidity   {0,6:###.00} %", latestHumidity);

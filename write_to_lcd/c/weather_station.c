@@ -36,7 +36,7 @@ void cb_illuminance_v2(uint32_t illuminance, void *user_data) {
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
-		sprintf(text, "Illuminanc %6.2f lx", illuminance/100.0);
+		sprintf(text, "Illumina %8.2f lx", illuminance/100.0);
 		lcd_20x4_write_line(&ws->lcd, 0, 0, text);
 		printf("Write to line 0: %s\n", text);
 	}
@@ -133,12 +133,20 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			                                   AMBIENT_LIGHT_V2_CALLBACK_ILLUMINANCE,
 			                                   (void *)cb_illuminance_v2,
 			                                   (void *)ws);
-			rc = ambient_light_v2_set_illuminance_callback_period(&ws->ambient_light_v2, 1000);
+			rc = ambient_light_v2_set_configuration(&ws->ambient_light_v2,
+			                                        AMBIENT_LIGHT_V2_ILLUMINANCE_RANGE_64000LUX,
+			                                        AMBIENT_LIGHT_V2_INTEGRATION_TIME_200MS);
 
 			if(rc < 0) {
-				fprintf(stderr, "Ambient Light 2.0 init failed: %d\n", rc);
+				fprintf(stderr, "Ambient Light 2.0 init step 1 failed: %d\n", rc);
 			} else {
-				printf("Ambient Light 2.0 initialized\n");
+				rc = ambient_light_v2_set_illuminance_callback_period(&ws->ambient_light_v2, 1000);
+
+				if(rc < 0) {
+					fprintf(stderr, "Ambient Light 2.0 init step 2 failed: %d\n", rc);
+				} else {
+					printf("Ambient Light 2.0 initialized\n");
+				}
 			}
 		} else if(device_identifier == HUMIDITY_DEVICE_IDENTIFIER) {
 			humidity_create(&ws->humidity, uid, &ws->ipcon);

@@ -36,7 +36,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 	public void illuminance(long illuminance) {
 		if(brickletLCD != null) {
-			String text = String.format("Illuminanc %6.2f lx", illuminance/100.0);
+			String text = String.format("Illumina %8.2f lx", illuminance/100.0);
 			try {
 				brickletLCD.writeLine((short)0, (short)0, text);
 			} catch(com.tinkerforge.TinkerforgeException e) {
@@ -115,6 +115,8 @@ class WeatherListener implements IPConnection.EnumerateListener,
 			} else if(deviceIdentifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER) {
 				try {
 					brickletAmbientLightV2 = new BrickletAmbientLightV2(uid, ipcon);
+					brickletAmbientLightV2.setConfiguration(BrickletAmbientLightV2.ILLUMINANCE_RANGE_64000LUX,
+					                                        BrickletAmbientLightV2.INTEGRATION_TIME_200MS);
 					brickletAmbientLightV2.setIlluminanceCallbackPeriod(1000);
 					brickletAmbientLightV2.addIlluminanceListener(this);
 					System.out.println("Ambient Light 2.0 initialized");

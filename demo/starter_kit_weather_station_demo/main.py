@@ -204,7 +204,7 @@ class WeatherStation(QApplication):
             return
 
         for p in self.projects:
-            p.update_temperature(temperature)
+            p.update_temperature(temperature/100.0)
 
     def configure_custom_chars(self):
         c = [[0x00 for x in range(8)] for y in range(8)]
@@ -252,6 +252,8 @@ class WeatherStation(QApplication):
             elif device_identifier == AmbientLightV2.DEVICE_IDENTIFIER:
                 try:
                     self.al_v2 = AmbientLightV2(uid, self.ipcon)
+                    self.al_v2.set_configuration(AmbientLightV2.ILLUMINANCE_RANGE_64000LUX,
+                                                 AmbientLightV2.INTEGRATION_TIME_200MS)
                     self.al_v2.set_illuminance_callback_period(1000)
                     self.al_v2.register_callback(self.al_v2.CALLBACK_ILLUMINANCE,
                                                  self.cb_illuminance_v2)
