@@ -279,7 +279,7 @@ def build_linux_pkg():
     system('dpkg -b dist/linux {0}-{1}_all.deb'.format(UNDERSCORE_NAME.replace('_', '-'), DEMO_VERSION))
 
     print('changing owner back to original user')
-    system('sudo chown -R `logname`:`logname` dist/linux')
+    system('sudo chown -R ${USER}:${USER} dist/linux')
 
     #print('checking Debian package')
     #system('lintian --pedantic {0}-{1}_all.deb'.format(UNDERSCORE_NAME.replace('_', '-'), DEMO_VERSION))
