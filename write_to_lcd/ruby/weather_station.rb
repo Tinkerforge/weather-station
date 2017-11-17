@@ -6,6 +6,7 @@ require 'tinkerforge/bricklet_lcd_20x4'
 require 'tinkerforge/bricklet_ambient_light'
 require 'tinkerforge/bricklet_ambient_light_v2'
 require 'tinkerforge/bricklet_humidity'
+require 'tinkerforge/bricklet_humidity_v2'
 require 'tinkerforge/bricklet_barometer'
 
 include Tinkerforge
@@ -17,6 +18,7 @@ lcd = nil
 ambient_light = nil
 ambient_light_v2 = nil
 humidity = nil
+humidity_v2 = nil
 barometer = nil
 
 ipcon = IPConnection.new
@@ -94,6 +96,22 @@ ipcon.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid
       rescue Exception => e
         humidity = nil
         puts 'Humidity init failed: ' + e
+      end
+    elsif device_identifier == BrickletHumidityV2::DEVICE_IDENTIFIER
+      begin
+        humidity_v2 = BrickletHumidityV2.new uid, ipcon
+        humidity_v2.set_humidity_callback_configuration 1000, true, 'x', 0, 0
+        humidity_v2.register_callback(BrickletHumidityV2::CALLBACK_HUMIDITY) do |relative_humidity|
+          if lcd != nil
+            text = 'Humidity   %6.2f %%' % (relative_humidity/100.0)
+            lcd.write_line 1, 0, text
+            puts "Write to line 1: #{text}"
+          end
+        end
+        puts 'Humidity 2.0 initialized'
+      rescue Exception => e
+        humidity_v2 = nil
+        puts 'Humidity 2.0 init failed: ' + e
       end
     elsif device_identifier == BrickletBarometer::DEVICE_IDENTIFIER
       begin

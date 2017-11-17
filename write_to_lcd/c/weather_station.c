@@ -2,10 +2,11 @@
 
 #include "ip_connection.h"
 #include "bricklet_lcd_20x4.h"
-#include "bricklet_humidity.h"
-#include "bricklet_barometer.h"
 #include "bricklet_ambient_light.h"
 #include "bricklet_ambient_light_v2.h"
+#include "bricklet_humidity.h"
+#include "bricklet_humidity_v2.h"
+#include "bricklet_barometer.h"
 
 #define HOST "localhost"
 #define PORT 4223
@@ -17,6 +18,7 @@ typedef struct {
 	AmbientLight ambient_light;
 	AmbientLightV2 ambient_light_v2;
 	Humidity humidity;
+	HumidityV2 humidity_v2;
 	Barometer barometer;
 } WeatherStation;
 
@@ -48,6 +50,17 @@ void cb_humidity(uint16_t humidity, void *user_data) {
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
 		sprintf(text, "Humidity   %6.2f %%", humidity/10.0);
+		lcd_20x4_write_line(&ws->lcd, 1, 0, text);
+		printf("Write to line 1: %s\n", text);
+	}
+}
+
+void cb_humidity_v2(uint16_t humidity, void *user_data) {
+	WeatherStation *ws = (WeatherStation *)user_data;
+
+	if(ws->lcd_created) {
+		char text[30] = {'\0'};
+		sprintf(text, "Humidity   %6.2f %%", humidity/100.0);
 		lcd_20x4_write_line(&ws->lcd, 1, 0, text);
 		printf("Write to line 1: %s\n", text);
 	}
@@ -160,6 +173,19 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 				fprintf(stderr, "Humidity init failed: %d\n", rc);
 			} else {
 				printf("Humidity initialized\n");
+			}
+		} else if(device_identifier == HUMIDITY_V2_DEVICE_IDENTIFIER) {
+			humidity_v2_create(&ws->humidity, uid, &ws->ipcon);
+			humidity_v2_register_callback(&ws->humidity_v2,
+			                              HUMIDITY_V2_CALLBACK_HUMIDITY,
+			                              (void *)cb_humidity_v2,
+			                              (void *)ws);
+			rc = humidity_v2_set_humidity_callback_configuration(&ws->humidity, 1000, true, 'x', 0, 0);
+
+			if(rc < 0) {
+				fprintf(stderr, "Humidity 2.0 init failed: %d\n", rc);
+			} else {
+				printf("Humidity 2.0 initialized\n");
 			}
 		} else if(device_identifier == BAROMETER_DEVICE_IDENTIFIER) {
 			barometer_create(&ws->barometer, uid, &ws->ipcon);

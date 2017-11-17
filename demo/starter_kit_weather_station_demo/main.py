@@ -61,11 +61,12 @@ from PyQt4.QtGui import QApplication, QWidget, QErrorMessage, QGridLayout, QIcon
 from PyQt4.QtCore import QTimer, pyqtSignal
 
 from starter_kit_weather_station_demo.tinkerforge.ip_connection import IPConnection, Error
-from starter_kit_weather_station_demo.tinkerforge.bricklet_lcd_20x4 import LCD20x4
-from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light import AmbientLight
-from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light_v2 import AmbientLightV2
-from starter_kit_weather_station_demo.tinkerforge.bricklet_humidity import Humidity
-from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer import Barometer
+from starter_kit_weather_station_demo.tinkerforge.bricklet_lcd_20x4 import BrickletLCD20x4
+from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light import BrickletAmbientLight
+from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light_v2 import BrickletAmbientLightV2
+from starter_kit_weather_station_demo.tinkerforge.bricklet_humidity import BrickletHumidity
+from starter_kit_weather_station_demo.tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
+from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer import BrickletBarometer
 from starter_kit_weather_station_demo.Project_Env_Display import ProjectEnvDisplay
 from starter_kit_weather_station_demo.Project_Statistics import ProjectStatistics
 from starter_kit_weather_station_demo.Project_Xively import ProjectXively
@@ -91,6 +92,7 @@ class WeatherStation(QApplication):
     al = None
     al_v2 = None
     hum = None
+    hum_v2 = None
     baro = None
 
     projects = []
@@ -193,6 +195,10 @@ class WeatherStation(QApplication):
         for p in self.projects:
             p.update_humidity(humidity/10.0)
 
+    def cb_humidity_v2(self, humidity):
+        for p in self.projects:
+            p.update_humidity(humidity/100.0)
+
     def cb_air_pressure(self, air_pressure):
         for p in self.projects:
             p.update_air_pressure(air_pressure/1000.0)
@@ -229,9 +235,9 @@ class WeatherStation(QApplication):
                      firmware_version, device_identifier, enumeration_type):
         if enumeration_type == IPConnection.ENUMERATION_TYPE_CONNECTED or \
            enumeration_type == IPConnection.ENUMERATION_TYPE_AVAILABLE:
-            if device_identifier == LCD20x4.DEVICE_IDENTIFIER:
+            if device_identifier == BrickletLCD20x4.DEVICE_IDENTIFIER:
                 try:
-                    self.lcd = LCD20x4(uid, self.ipcon)
+                    self.lcd = BrickletLCD20x4(uid, self.ipcon)
                     self.lcd.clear_display()
                     self.lcd.backlight_on()
                     self.lcd.register_callback(self.lcd.CALLBACK_BUTTON_PRESSED, self.cb_button_pressed)
@@ -240,38 +246,47 @@ class WeatherStation(QApplication):
                 except Error as e:
                     self.error_msg.showMessage('LCD 20x4 init failed: ' + str(e.description))
                     self.lcd = None
-            elif device_identifier == AmbientLight.DEVICE_IDENTIFIER:
+            elif device_identifier == BrickletAmbientLight.DEVICE_IDENTIFIER:
                 try:
-                    self.al = AmbientLight(uid, self.ipcon)
+                    self.al = BrickletAmbientLight(uid, self.ipcon)
                     self.al.set_illuminance_callback_period(1000)
                     self.al.register_callback(self.al.CALLBACK_ILLUMINANCE,
                                               self.cb_illuminance)
                 except Error as e:
                     self.error_msg.showMessage('Ambient Light init failed: ' + str(e.description))
                     self.al = None
-            elif device_identifier == AmbientLightV2.DEVICE_IDENTIFIER:
+            elif device_identifier == BrickletAmbientLightV2.DEVICE_IDENTIFIER:
                 try:
-                    self.al_v2 = AmbientLightV2(uid, self.ipcon)
-                    self.al_v2.set_configuration(AmbientLightV2.ILLUMINANCE_RANGE_64000LUX,
-                                                 AmbientLightV2.INTEGRATION_TIME_200MS)
+                    self.al_v2 = BrickletAmbientLightV2(uid, self.ipcon)
+                    self.al_v2.set_configuration(self.al_v2.ILLUMINANCE_RANGE_64000LUX,
+                                                 self.al_v2.INTEGRATION_TIME_200MS)
                     self.al_v2.set_illuminance_callback_period(1000)
                     self.al_v2.register_callback(self.al_v2.CALLBACK_ILLUMINANCE,
                                                  self.cb_illuminance_v2)
                 except Error as e:
                     self.error_msg.showMessage('Ambient Light 2.0 init failed: ' + str(e.description))
-                    self.al = None
-            elif device_identifier == Humidity.DEVICE_IDENTIFIER:
+                    self.al_v2 = None
+            elif device_identifier == BrickletHumidity.DEVICE_IDENTIFIER:
                 try:
-                    self.hum = Humidity(uid, self.ipcon)
+                    self.hum = BrickletHumidity(uid, self.ipcon)
                     self.hum.set_humidity_callback_period(1000)
                     self.hum.register_callback(self.hum.CALLBACK_HUMIDITY,
                                                self.cb_humidity)
                 except Error as e:
                     self.error_msg.showMessage('Humidity init failed: ' + str(e.description))
                     self.hum = None
-            elif device_identifier == Barometer.DEVICE_IDENTIFIER:
+            elif device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
                 try:
-                    self.baro = Barometer(uid, self.ipcon)
+                    self.hum_v2 = BrickletHumidityV2(uid, self.ipcon)
+                    self.hum_v2.set_humidity_callback_configuration(1000, True, 'x', 0, 0)
+                    self.hum_v2.register_callback(self.hum_v2.CALLBACK_HUMIDITY,
+                                                  self.cb_humidity_v2)
+                except Error as e:
+                    self.error_msg.showMessage('Humidity 2.0 init failed: ' + str(e.description))
+                    self.hum_v2 = None
+            elif device_identifier == BrickletBarometer.DEVICE_IDENTIFIER:
+                try:
+                    self.baro = BrickletBarometer(uid, self.ipcon)
                     self.baro.set_air_pressure_callback_period(1000)
                     self.baro.register_callback(self.baro.CALLBACK_AIR_PRESSURE,
                                                 self.cb_air_pressure)

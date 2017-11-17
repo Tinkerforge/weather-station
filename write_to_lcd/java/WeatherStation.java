@@ -3,6 +3,7 @@ import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletAmbientLightV2;
 import com.tinkerforge.BrickletHumidity;
+import com.tinkerforge.BrickletHumidityV2;
 import com.tinkerforge.BrickletBarometer;
 
 class WeatherListener implements IPConnection.EnumerateListener,
@@ -10,12 +11,14 @@ class WeatherListener implements IPConnection.EnumerateListener,
                                  BrickletAmbientLight.IlluminanceListener,
                                  BrickletAmbientLightV2.IlluminanceListener,
                                  BrickletHumidity.HumidityListener,
+                                 BrickletHumidityV2.HumidityListener,
                                  BrickletBarometer.AirPressureListener {
 	private IPConnection ipcon = null;
 	private BrickletLCD20x4 brickletLCD = null;
 	private BrickletAmbientLight brickletAmbientLight = null;
 	private BrickletAmbientLightV2 brickletAmbientLightV2 = null;
 	private BrickletHumidity brickletHumidity = null;
+	private BrickletHumidityV2 brickletHumidityV2 = null;
 	private BrickletBarometer brickletBarometer = null;
 
 	public WeatherListener(IPConnection ipcon) {
@@ -25,6 +28,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 	public void illuminance(int illuminance) {
 		if(brickletLCD != null) {
 			String text = String.format("Illuminanc %6.2f lx", illuminance/10.0);
+
 			try {
 				brickletLCD.writeLine((short)0, (short)0, text);
 			} catch(com.tinkerforge.TinkerforgeException e) {
@@ -37,6 +41,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 	public void illuminance(long illuminance) {
 		if(brickletLCD != null) {
 			String text = String.format("Illumina %8.2f lx", illuminance/100.0);
+
 			try {
 				brickletLCD.writeLine((short)0, (short)0, text);
 			} catch(com.tinkerforge.TinkerforgeException e) {
@@ -48,7 +53,14 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 	public void humidity(int humidity) {
 		if(brickletLCD != null) {
-			String text = String.format("Humidity   %6.2f %%", humidity/10.0);
+			float factor = 10.0f;
+
+			if (brickletHumidityV2 != null) {
+				factor = 100.0f; // FIXME: assuming that only one Humiditiy Bricklet (2.0) is connected
+			}
+
+			String text = String.format("Humidity   %6.2f %%", humidity/factor);
+
 			try {
 				brickletLCD.writeLine((short)1, (short)0, text);
 			} catch(com.tinkerforge.TinkerforgeException e) {
@@ -133,6 +145,16 @@ class WeatherListener implements IPConnection.EnumerateListener,
 				} catch(com.tinkerforge.TinkerforgeException e) {
 					brickletHumidity = null;
 					System.out.println("Humidity init failed: " + e);
+				}
+			} else if(deviceIdentifier == BrickletHumidityV2.DEVICE_IDENTIFIER) {
+				try {
+					brickletHumidityV2 = new BrickletHumidityV2(uid, ipcon);
+					brickletHumidityV2.setHumidityCallbackConfiguration(1000, true, 'x', 0, 0);
+					brickletHumidityV2.addHumidityListener(this);
+					System.out.println("Humidity 2.0 initialized");
+				} catch(com.tinkerforge.TinkerforgeException e) {
+					brickletHumidityV2 = null;
+					System.out.println("Humidity 2.0 init failed: " + e);
 				}
 			} else if(deviceIdentifier == BrickletBarometer.DEVICE_IDENTIFIER) {
 				try {

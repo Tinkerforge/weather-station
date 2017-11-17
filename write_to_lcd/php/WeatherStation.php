@@ -5,6 +5,7 @@ require_once('Tinkerforge/BrickletLCD20x4.php');
 require_once('Tinkerforge/BrickletAmbientLight.php');
 require_once('Tinkerforge/BrickletAmbientLightV2.php');
 require_once('Tinkerforge/BrickletHumidity.php');
+require_once('Tinkerforge/BrickletHumidityV2.php');
 require_once('Tinkerforge/BrickletBarometer.php');
 
 use Tinkerforge\IPConnection;
@@ -12,6 +13,7 @@ use Tinkerforge\BrickletLCD20x4;
 use Tinkerforge\BrickletAmbientLight;
 use Tinkerforge\BrickletAmbientLightV2;
 use Tinkerforge\BrickletHumidity;
+use Tinkerforge\BrickletHumidityV2;
 use Tinkerforge\BrickletBarometer;
 
 class WeatherStation
@@ -25,6 +27,7 @@ class WeatherStation
 		$this->brickletAmbientLight = null;
 		$this->brickletAmbientLightV2 = null;
 		$this->brickletHumidity = null;
+		$this->brickletHumidityV2 = null;
 		$this->brickletBarometer = null;
 		$this->ipcon = new IPConnection();
 
@@ -74,6 +77,15 @@ class WeatherStation
 	{
 		if($this->brickletLCD != null) {
 			$text = sprintf("Humidity   %6.2f %%", $humidity/10.0);
+			$this->brickletLCD->writeLine(1, 0, $text);
+			echo "Write to line 1: $text\n";
+		}
+	}
+
+	function cb_humidityV2($humidity)
+	{
+		if($this->brickletLCD != null) {
+			$text = sprintf("Humidity   %6.2f %%", $humidity/100.0);
 			$this->brickletLCD->writeLine(1, 0, $text);
 			echo "Write to line 1: $text\n";
 		}
@@ -150,6 +162,17 @@ class WeatherStation
 				} catch(Exception $e) {
 					$this->brickletHumidity = null;
 					echo "Humidity init failed: $e\n";
+				}
+			} else if($deviceIdentifier == BrickletHumidity::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletHumidityV2 = new BrickletHumidityV2($uid, $this->ipcon);
+					$this->brickletHumidityV2->setHumidityCallbackPeriod(1000, true, 'x', 0, 0);
+					$this->brickletHumidityV2->registerCallback(BrickletHumidityV2::CALLBACK_HUMIDITY,
+					                                            array($this, 'cb_humidityV2'));
+					echo "Humidity 2.0 initialized\n";
+				} catch(Exception $e) {
+					$this->brickletHumidity = null;
+					echo "Humidity 2.0 init failed: $e\n";
 				}
 			} else if($deviceIdentifier == BrickletBarometer::DEVICE_IDENTIFIER) {
 				try {

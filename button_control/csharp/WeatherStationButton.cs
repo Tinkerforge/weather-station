@@ -28,6 +28,7 @@ class WeatherStation
 	private static BrickletAmbientLight brickletAmbientLight = null;
 	private static BrickletAmbientLightV2 brickletAmbientLightV2 = null;
 	private static BrickletHumidity brickletHumidity = null;
+	private static BrickletHumidityV2 brickletHumidityV2 = null;
 	private static BrickletBarometer brickletBarometer = null;
 
 	private static double latestIlluminance = Double.NaN;
@@ -58,6 +59,11 @@ class WeatherStation
 	static void HumidityCB(BrickletHumidity sender, int humidity)
 	{
 		latestHumidity = humidity/10.0;
+	}
+
+	static void HumidityV2CB(BrickletHumidityV2 sender, int humidity)
+	{
+		latestHumidity = humidity/100.0;
 	}
 
 	static void AirPressureCB(BrickletBarometer sender, int airPressure)
@@ -146,11 +152,27 @@ class WeatherStation
 					brickletHumidity = new BrickletHumidity(UID, ipcon);
 					brickletHumidity.SetHumidityCallbackPeriod(1000);
 					brickletHumidity.Humidity += HumidityCB;
+					System.Console.WriteLine("Humidity initialized");
 				}
 				catch(TinkerforgeException e)
 				{
 					System.Console.WriteLine("Humidity init failed: " + e.Message);
 					brickletHumidity = null;
+				}
+			}
+			else if(deviceIdentifier == BrickletHumidityV2.DEVICE_IDENTIFIER)
+			{
+				try
+				{
+					brickletHumidityV2 = new BrickletHumidityV2(UID, ipcon);
+					brickletHumidityV2.SetHumidityCallbackConfiguration(1000, true, 'x', 0, 0);
+					brickletHumidityV2.HumidityCallback += HumidityV2CB;
+					System.Console.WriteLine("Humidity 2.0 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Humidity 2.0 init failed: " + e.Message);
+					brickletHumidityV2 = null;
 				}
 			}
 			else if(deviceIdentifier == BrickletBarometer.DEVICE_IDENTIFIER)
@@ -160,6 +182,7 @@ class WeatherStation
 					brickletBarometer = new BrickletBarometer(UID, ipcon);
 					brickletBarometer.SetAirPressureCallbackPeriod(1000);
 					brickletBarometer.AirPressure += AirPressureCB;
+					System.Console.WriteLine("Barometer initialized");
 				}
 				catch(TinkerforgeException e)
 				{

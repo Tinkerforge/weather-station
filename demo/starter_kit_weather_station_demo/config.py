@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-DEMO_VERSION = "1.0.4"
+DEMO_VERSION = "1.0.5"

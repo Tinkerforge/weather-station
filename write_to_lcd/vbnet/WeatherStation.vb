@@ -9,6 +9,7 @@ Module WeatherStation
     Private brickletAmbientLight As BrickletAmbientLight = Nothing
     Private brickletAmbientLightV2 As BrickletAmbientLightV2 = Nothing
     Private brickletHumidity As BrickletHumidity = Nothing
+    Private brickletHumidityV2 As BrickletHumidityV2 = Nothing
     Private brickletBarometer As BrickletBarometer = Nothing
 
     Sub IlluminanceCB(ByVal sender As BrickletAmbientLight, ByVal illuminance As Integer)
@@ -30,6 +31,14 @@ Module WeatherStation
     Sub HumidityCB(ByVal sender As BrickletHumidity, ByVal humidity As Integer)
         If brickletLCD IsNot Nothing Then
             Dim text As String = String.Format("Humidity   {0,6:###.00} %", humidity/10.0)
+            brickletLCD.WriteLine(1, 0, text)
+            System.Console.WriteLine("Write to line 1: " + text)
+        End If
+    End Sub
+
+    Sub HumidityV2CB(ByVal sender As BrickletHumidityV2, ByVal humidity As Integer)
+        If brickletLCD IsNot Nothing Then
+            Dim text As String = String.Format("Humidity   {0,6:###.00} %", humidity/100.0)
             brickletLCD.WriteLine(1, 0, text)
             System.Console.WriteLine("Write to line 1: " + text)
         End If
@@ -103,6 +112,16 @@ Module WeatherStation
                 Catch e As TinkerforgeException
                     System.Console.WriteLine("Humidity init failed: " + e.Message)
                     brickletHumidity = Nothing
+                End Try
+            Else If deviceIdentifier = BrickletHumidityV2.DEVICE_IDENTIFIER Then
+                Try
+                    brickletHumidityV2 = New BrickletHumidityV2(UID, ipcon)
+                    brickletHumidityV2.SetHumidityCallbackConfiguration(1000, True, "x"C, 0, 0)
+                    AddHandler brickletHumidityV2.HumidityCallback, AddressOf HumidityV2CB
+                    System.Console.WriteLine("Humidity 2.0 initialized")
+                Catch e As TinkerforgeException
+                    System.Console.WriteLine("Humidity 2.0 init failed: " + e.Message)
+                    brickletHumidityV2 = Nothing
                 End Try
             Else If deviceIdentifier = BrickletBarometer.DEVICE_IDENTIFIER Then
                 Try

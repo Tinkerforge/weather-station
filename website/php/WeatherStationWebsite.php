@@ -4,12 +4,14 @@ require_once('Tinkerforge/IPConnection.php');
 require_once('Tinkerforge/BrickletAmbientLight.php');
 require_once('Tinkerforge/BrickletAmbientLightV2.php');
 require_once('Tinkerforge/BrickletHumidity.php');
+require_once('Tinkerforge/BrickletHumidityV2.php');
 require_once('Tinkerforge/BrickletBarometer.php');
 
 use Tinkerforge\IPConnection;
 use Tinkerforge\BrickletAmbientLight;
 use Tinkerforge\BrickletAmbientLightV2;
 use Tinkerforge\BrickletHumidity;
+use Tinkerforge\BrickletHumidityV2;
 use Tinkerforge\BrickletBarometer;
 
 $ipcon = new IPConnection();
@@ -26,7 +28,10 @@ $ipcon->connect("localhost", 4223);
 // then uncomment the next line and comment the line after that
 //$illuminance = $brickletAmbientLight->getIlluminance()/10.0;
 $illuminance = $brickletAmbientLightV2->getIlluminance()/100.0;
-$humidity = $brickletHumidity->getHumidity()/10.0;
+// NOTE: if you have a first generation Humidity Bricklet,
+// then uncomment the next line and comment the line after that
+//$humidity = $brickletHumidity->getHumidity()/10.0;
+$humidity = $brickletHumidityV2->getHumidity()/100.0;
 $air_pressure = $brickletBarometer->getAirPressure()/1000.0;
 $temperature = $brickletBarometer->getChipTemperature()/100.0;
 

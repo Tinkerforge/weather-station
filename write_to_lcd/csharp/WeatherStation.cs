@@ -7,10 +7,11 @@ class WeatherStation
 
 	private static IPConnection ipcon = null;
 	private static BrickletLCD20x4 brickletLCD = null;
-	private static BrickletHumidity brickletHumidity = null;
-	private static BrickletBarometer brickletBarometer = null;
 	private static BrickletAmbientLight brickletAmbientLight = null;
 	private static BrickletAmbientLightV2 brickletAmbientLightV2 = null;
+	private static BrickletHumidity brickletHumidity = null;
+	private static BrickletHumidityV2 brickletHumidityV2 = null;
+	private static BrickletBarometer brickletBarometer = null;
 
 	static void IlluminanceCB(BrickletAmbientLight sender, int illuminance)
 	{
@@ -37,6 +38,16 @@ class WeatherStation
 		if(brickletLCD != null)
 		{
 			string text = string.Format("Humidity   {0,6:###.00} %", humidity/10.0);
+			brickletLCD.WriteLine(1, 0, text);
+			System.Console.WriteLine("Write to line 1: " + text);
+		}
+	}
+
+	static void HumidityV2CB(BrickletHumidityV2 sender, int humidity)
+	{
+		if(brickletLCD != null)
+		{
+			string text = string.Format("Humidity   {0,6:###.00} %", humidity/100.0);
 			brickletLCD.WriteLine(1, 0, text);
 			System.Console.WriteLine("Write to line 1: " + text);
 		}
@@ -135,6 +146,21 @@ class WeatherStation
 				{
 					System.Console.WriteLine("Humidity init failed: " + e.Message);
 					brickletHumidity = null;
+				}
+			}
+			else if(deviceIdentifier == BrickletHumidityV2.DEVICE_IDENTIFIER)
+			{
+				try
+				{
+					brickletHumidityV2 = new BrickletHumidityV2(UID, ipcon);
+					brickletHumidityV2.SetHumidityCallbackConfiguration(1000, true, 'x', 0, 0);
+					brickletHumidityV2.HumidityCallback += HumidityV2CB;
+					System.Console.WriteLine("Humidity 2.0 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Humidity 2.0 init failed: " + e.Message);
+					brickletHumidityV2 = null;
 				}
 			}
 			else if(deviceIdentifier == BrickletBarometer.DEVICE_IDENTIFIER)
