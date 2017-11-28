@@ -14,7 +14,7 @@ from tinkerforge.bricklet_lcd_20x4 import BrickletLCD20x4
 from tinkerforge.bricklet_ambient_light import BrickletAmbientLight
 from tinkerforge.bricklet_ambient_light_v2 import BrickletAmbientLightV2
 from tinkerforge.bricklet_humidity import BrickletHumidity
-from tinkerforge.bricklet_humidity_v2 import BrickletHumidity2
+from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.bricklet_barometer import BrickletBarometer
 
 class WeatherStation:
@@ -143,9 +143,9 @@ class WeatherStation:
                     self.hum = None
             elif device_identifier == BrickletHumidityV2.DEVICE_IDENTIFIER:
                 try:
-                    self.hum_v2 = BrickletHumidity(uid, self.ipcon)
+                    self.hum_v2 = BrickletHumidityV2(uid, self.ipcon)
                     self.hum_v2.set_humidity_callback_configuration(1000, True, 'x', 0, 0)
-                    self.hum_v2.register_callback(self_v2.hum.CALLBACK_HUMIDITY,
+                    self.hum_v2.register_callback(self.hum_v2.CALLBACK_HUMIDITY,
                                                   self.cb_humidity_v2)
                     log.info('Humidity 2.0 initialized')
                 except Error as e:
