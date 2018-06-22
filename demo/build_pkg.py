@@ -120,7 +120,7 @@ def freeze_images():
     images.close()
 
 
-def build_macosx_pkg():
+def build_macos_pkg():
     print('building demo disk image')
     root_path = os.getcwd()
 
@@ -141,7 +141,7 @@ def build_macosx_pkg():
     system('python setup.py py2app build')
 
     print('copying build data')
-    build_data_path = os.path.join(root_path, 'build_data', 'macosx', '*')
+    build_data_path = os.path.join(root_path, 'build_data', 'macos', '*')
     resources_path = os.path.join(dist_path, '{0}.app'.format(CAMEL_CASE_NAME), 'Contents', 'Resources')
     system('cp -R {0} "{1}"'.format(build_data_path, resources_path))
 
@@ -285,7 +285,7 @@ def build_linux_pkg():
     #system('lintian --pedantic {0}-{1}_all.deb'.format(UNDERSCORE_NAME.replace('_', '-'), DEMO_VERSION))
 
 
-# run 'python build_pkg.py' to build the windows/linux/macosx package
+# run 'python build_pkg.py' to build the windows/linux/macos package
 if __name__ == '__main__':
     if sys.platform != 'win32' and os.geteuid() == 0:
         print('error: must not be started as root, exiting')
@@ -296,7 +296,7 @@ if __name__ == '__main__':
     elif sys.platform == 'win32':
         build_windows_pkg()
     elif sys.platform == 'darwin':
-        build_macosx_pkg()
+        build_macos_pkg()
     else:
         print('error: unsupported platform: ' + sys.platform)
         sys.exit(1)

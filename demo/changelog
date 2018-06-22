@@ -6,7 +6,7 @@
 
 2015-04-21: 1.0.2 (a8fc738)
 - Windows installer is signed now
-- Add workaround for Mac OS X font problem
+- Add workaround for macOS font problem
 
 2015-07-15: 1.0.3 (13f6f14)
 - Add support for Ambient Light Bricklet 2.0
