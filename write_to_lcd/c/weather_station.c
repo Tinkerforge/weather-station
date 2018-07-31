@@ -175,12 +175,12 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 				printf("Humidity initialized\n");
 			}
 		} else if(device_identifier == HUMIDITY_V2_DEVICE_IDENTIFIER) {
-			humidity_v2_create(&ws->humidity, uid, &ws->ipcon);
+			humidity_v2_create(&ws->humidity_v2, uid, &ws->ipcon);
 			humidity_v2_register_callback(&ws->humidity_v2,
 			                              HUMIDITY_V2_CALLBACK_HUMIDITY,
 			                              (void *)cb_humidity_v2,
 			                              (void *)ws);
-			rc = humidity_v2_set_humidity_callback_configuration(&ws->humidity, 1000, true, 'x', 0, 0);
+			rc = humidity_v2_set_humidity_callback_configuration(&ws->humidity_v2, 1000, true, 'x', 0, 0);
 
 			if(rc < 0) {
 				fprintf(stderr, "Humidity 2.0 init failed: %d\n", rc);
