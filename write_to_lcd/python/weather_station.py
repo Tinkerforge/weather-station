@@ -133,7 +133,7 @@ class WeatherStation:
                     self.al_v2 = None
             elif device_identifier == BrickletHumidity.DEVICE_IDENTIFIER:
                 try:
-                    self.hum = Humidity(uid, self.ipcon)
+                    self.hum = BrickletHumidity(uid, self.ipcon)
                     self.hum.set_humidity_callback_period(1000)
                     self.hum.register_callback(self.hum.CALLBACK_HUMIDITY,
                                                self.cb_humidity)
