@@ -2,7 +2,7 @@ sitemap tf_weather_station label="Starter Kit: Weather Station"
 {
     Frame
     {
-        Text item=TF_Humdity
+        Text item=TF_Humidity
         Text item=TF_Barometer
         Text item=TF_Barometer_Temperature
         Text item=TF_AmbientLight

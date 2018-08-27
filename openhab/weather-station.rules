@@ -16,7 +16,7 @@ then
         sendCommand(TF_LCD, "TFNUM<30>Luminance  :")
         sendCommand(TF_LCD, "TFNUM<318>lx")
         sendCommand(TF_LCD, String::format("TFNUM<013>%4s", TF_Barometer_Temperature.state.format("%.1f")))
-        sendCommand(TF_LCD, String::format("TFNUM<113>%4s", TF_Humdity.state.format("%.1f")))
+        sendCommand(TF_LCD, String::format("TFNUM<113>%4s", TF_Humidity.state.format("%.1f")))
         sendCommand(TF_LCD, String::format("TFNUM<213>%4s", TF_Barometer.state.format("%.0f")))
         sendCommand(TF_LCD, String::format("TFNUM<313>%4s", TF_AmbientLight.state.format("%.0f")))
     ]
@@ -49,9 +49,9 @@ end
 
 rule "Weather Station LCD Update Humidity"
 when
-    Item TF_Humdity received update
+    Item TF_Humidity received update
 then
-    sendCommand(TF_LCD, String::format("TFNUM<113>%4s", TF_Humdity.state.format("%.1f")))
+    sendCommand(TF_LCD, String::format("TFNUM<113>%4s", TF_Humidity.state.format("%.1f")))
 end
 
 rule "Weather Station LCD Update Air Pressure"
