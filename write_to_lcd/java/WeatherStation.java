@@ -2,24 +2,30 @@ import com.tinkerforge.IPConnection;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletAmbientLightV2;
+import com.tinkerforge.BrickletAmbientLightV3;
 import com.tinkerforge.BrickletHumidity;
 import com.tinkerforge.BrickletHumidityV2;
 import com.tinkerforge.BrickletBarometer;
+import com.tinkerforge.BrickletBarometerV2;
 
 class WeatherListener implements IPConnection.EnumerateListener,
-                                 IPConnection.ConnectedListener,
-                                 BrickletAmbientLight.IlluminanceListener,
-                                 BrickletAmbientLightV2.IlluminanceListener,
-                                 BrickletHumidity.HumidityListener,
-                                 BrickletHumidityV2.HumidityListener,
-                                 BrickletBarometer.AirPressureListener {
+	                             IPConnection.ConnectedListener,
+	                             BrickletAmbientLight.IlluminanceListener,
+	                             BrickletAmbientLightV2.IlluminanceListener,
+	                             BrickletAmbientLightV3.IlluminanceListener,
+	                             BrickletHumidity.HumidityListener,
+	                             BrickletHumidityV2.HumidityListener,
+	                             BrickletBarometer.AirPressureListener,
+	                             BrickletBarometerV2.AirPressureListener {
 	private IPConnection ipcon = null;
 	private BrickletLCD20x4 brickletLCD = null;
 	private BrickletAmbientLight brickletAmbientLight = null;
 	private BrickletAmbientLightV2 brickletAmbientLightV2 = null;
+	private BrickletAmbientLightV3 brickletAmbientLightV3 = null;
 	private BrickletHumidity brickletHumidity = null;
 	private BrickletHumidityV2 brickletHumidityV2 = null;
 	private BrickletBarometer brickletBarometer = null;
+	private BrickletBarometerV2 brickletBarometerV2 = null;
 
 	public WeatherListener(IPConnection ipcon) {
 		this.ipcon = ipcon;
@@ -36,7 +42,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 			System.out.println("Write to line 0: " + text);
 		}
-    }
+	}
 
 	public void illuminance(long illuminance) {
 		if(brickletLCD != null) {
@@ -49,7 +55,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 			System.out.println("Write to line 0: " + text);
 		}
-    }
+	}
 
 	public void humidity(int humidity) {
 		if(brickletLCD != null) {
@@ -68,7 +74,7 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 			System.out.println("Write to line 1: " + text);
 		}
-    }
+	}
 
 	public void airPressure(int airPressure) {
 		if(brickletLCD != null) {
@@ -82,7 +88,12 @@ class WeatherListener implements IPConnection.EnumerateListener,
 
 			int temperature;
 			try {
-				temperature = brickletBarometer.getChipTemperature();
+				if (brickletBarometerV2 != null) {
+					temperature = brickletBarometerV2.getTemperature();
+				}
+				else {
+					temperature = brickletBarometer.getChipTemperature();
+				}
 			} catch(com.tinkerforge.TinkerforgeException e) {
 				System.out.println("Could not get temperature: " + e);
 				return;
@@ -136,6 +147,18 @@ class WeatherListener implements IPConnection.EnumerateListener,
 					brickletAmbientLightV2 = null;
 					System.out.println("Ambient Light 2.0 init failed: " + e);
 				}
+			} else if(deviceIdentifier == BrickletAmbientLightV3.DEVICE_IDENTIFIER) {
+				try {
+					brickletAmbientLightV3 = new BrickletAmbientLightV3(uid, ipcon);
+					brickletAmbientLightV3.setConfiguration(BrickletAmbientLightV3.ILLUMINANCE_RANGE_64000LUX,
+					                                        BrickletAmbientLightV3.INTEGRATION_TIME_200MS);
+					brickletAmbientLightV3.setIlluminanceCallbackConfiguration(1000, false, 'x', 0, 0);
+					brickletAmbientLightV3.addIlluminanceListener(this);
+					System.out.println("Ambient Light 3.0 initialized");
+				} catch(com.tinkerforge.TinkerforgeException e) {
+					brickletAmbientLightV3 = null;
+					System.out.println("Ambient Light 3.0 init failed: " + e);
+				}
 			} else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER) {
 				try {
 					brickletHumidity = new BrickletHumidity(uid, ipcon);
@@ -165,6 +188,16 @@ class WeatherListener implements IPConnection.EnumerateListener,
 				} catch(com.tinkerforge.TinkerforgeException e) {
 					brickletBarometer = null;
 					System.out.println("Barometer init failed: " + e);
+				}
+			} else if(deviceIdentifier == BrickletBarometerV2.DEVICE_IDENTIFIER) {
+				try {
+					brickletBarometerV2 = new BrickletBarometerV2(uid, ipcon);
+					brickletBarometerV2.setAirPressureCallbackConfiguration(1000, false, 'x', 0, 0);
+					brickletBarometerV2.addAirPressureListener(this);
+					System.out.println("Barometer 2.0 initialized");
+				} catch(com.tinkerforge.TinkerforgeException e) {
+					brickletBarometerV2 = null;
+					System.out.println("Barometer 2.0 init failed: " + e);
 				}
 			}
 		}

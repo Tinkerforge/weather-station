@@ -64,9 +64,11 @@ from starter_kit_weather_station_demo.tinkerforge.ip_connection import IPConnect
 from starter_kit_weather_station_demo.tinkerforge.bricklet_lcd_20x4 import BrickletLCD20x4
 from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light import BrickletAmbientLight
 from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light_v2 import BrickletAmbientLightV2
+from starter_kit_weather_station_demo.tinkerforge.bricklet_ambient_light_v3 import BrickletAmbientLightV3
 from starter_kit_weather_station_demo.tinkerforge.bricklet_humidity import BrickletHumidity
 from starter_kit_weather_station_demo.tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer import BrickletBarometer
+from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer_v2 import BrickletBarometerV2
 from starter_kit_weather_station_demo.Project_Env_Display import ProjectEnvDisplay
 from starter_kit_weather_station_demo.Project_Statistics import ProjectStatistics
 from starter_kit_weather_station_demo.Project_Xively import ProjectXively
@@ -91,9 +93,11 @@ class WeatherStation(QApplication):
     lcd = None
     al = None
     al_v2 = None
+    al_v3 = None
     hum = None
     hum_v2 = None
     baro = None
+    baro_v2 = None
 
     projects = []
     active_project = None
@@ -191,6 +195,10 @@ class WeatherStation(QApplication):
         for p in self.projects:
             p.update_illuminance(illuminance/100.0)
 
+    def cb_illuminance_v3(self, illuminance):
+        for p in self.projects:
+            p.update_illuminance(illuminance/100.0)
+
     def cb_humidity(self, humidity):
         for p in self.projects:
             p.update_humidity(humidity/10.0)
@@ -205,6 +213,19 @@ class WeatherStation(QApplication):
 
         try:
             temperature = self.baro.get_chip_temperature()
+        except Error as e:
+            print('Could not get temperature: ' + str(e.description))
+            return
+
+        for p in self.projects:
+            p.update_temperature(temperature/100.0)
+
+    def cb_air_pressure_v2(self, air_pressure):
+        for p in self.projects:
+            p.update_air_pressure(air_pressure/1000.0)
+
+        try:
+            temperature = self.baro_v2.get_temperature()
         except Error as e:
             print('Could not get temperature: ' + str(e.description))
             return
@@ -266,6 +287,15 @@ class WeatherStation(QApplication):
                 except Error as e:
                     self.error_msg.showMessage('Ambient Light 2.0 init failed: ' + str(e.description))
                     self.al_v2 = None
+            elif device_identifier == BrickletAmbientLightV3.DEVICE_IDENTIFIER:
+                try:
+                    self.al_v3 = BrickletAmbientLightV3(uid, self.ipcon)
+                    self.al_v3.set_illuminance_callback_configuration(1000, False, 'x', 0, 0)
+                    self.al_v3.register_callback(self.al_v3.CALLBACK_ILLUMINANCE,
+                                                 self.cb_illuminance_v3)
+                except Error as e:
+                    self.error_msg.showMessage('Ambient Light 3.0 init failed: ' + str(e.description))
+                    self.al_v3 = None
             elif device_identifier == BrickletHumidity.DEVICE_IDENTIFIER:
                 try:
                     self.hum = BrickletHumidity(uid, self.ipcon)
@@ -293,6 +323,15 @@ class WeatherStation(QApplication):
                 except Error as e:
                     self.error_msg.showMessage('Barometer init failed: ' + str(e.description))
                     self.baro = None
+            elif device_identifier == BrickletBarometerV2.DEVICE_IDENTIFIER:
+                try:
+                    self.baro_v2 = BrickletBarometerV2(uid, self.ipcon)
+                    self.baro_v2.set_air_pressure_callback_configuration(1000, False, 'x', 0, 0)
+                    self.baro_v2.register_callback(self.baro_v2.CALLBACK_AIR_PRESSURE,
+                                                   self.cb_air_pressure_v2)
+                except Error as e:
+                    self.error_msg.showMessage('Barometer 2.0 init failed: ' + str(e.description))
+                    self.baro_v2 = None
 
     def cb_connected(self, connected_reason):
         if connected_reason == IPConnection.CONNECT_REASON_AUTO_RECONNECT:

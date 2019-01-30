@@ -4,9 +4,11 @@
 #include "bricklet_lcd_20x4.h"
 #include "bricklet_ambient_light.h"
 #include "bricklet_ambient_light_v2.h"
+#include "bricklet_ambient_light_v3.h"
 #include "bricklet_humidity.h"
 #include "bricklet_humidity_v2.h"
 #include "bricklet_barometer.h"
+#include "bricklet_barometer_v2.h"
 
 #define HOST "localhost"
 #define PORT 4223
@@ -17,9 +19,11 @@ typedef struct {
 	bool lcd_created;
 	AmbientLight ambient_light;
 	AmbientLightV2 ambient_light_v2;
+	AmbientLightV3 ambient_light_v3;
 	Humidity humidity;
 	HumidityV2 humidity_v2;
 	Barometer barometer;
+	BarometerV2 barometer_v2;
 } WeatherStation;
 
 void cb_illuminance(uint16_t illuminance, void *user_data) {
@@ -27,7 +31,8 @@ void cb_illuminance(uint16_t illuminance, void *user_data) {
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
-		sprintf(text, "Illuminanc %6.2f lx", illuminance/10.0);
+
+		sprintf(text, "Illuminanc %6.2f lx", illuminance / 10.0);
 		lcd_20x4_write_line(&ws->lcd, 0, 0, text);
 		printf("Write to line 0: %s\n", text);
 	}
@@ -38,7 +43,20 @@ void cb_illuminance_v2(uint32_t illuminance, void *user_data) {
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
-		sprintf(text, "Illumina %8.2f lx", illuminance/100.0);
+
+		sprintf(text, "Illumina %8.2f lx", illuminance / 100.0);
+		lcd_20x4_write_line(&ws->lcd, 0, 0, text);
+		printf("Write to line 0: %s\n", text);
+	}
+}
+
+void cb_illuminance_v3(uint32_t illuminance, void *user_data) {
+	WeatherStation *ws = (WeatherStation *)user_data;
+
+	if(ws->lcd_created) {
+		char text[30] = {'\0'};
+
+		sprintf(text, "Illumina %8.2f lx", illuminance / 100.0);
 		lcd_20x4_write_line(&ws->lcd, 0, 0, text);
 		printf("Write to line 0: %s\n", text);
 	}
@@ -49,6 +67,7 @@ void cb_humidity(uint16_t humidity, void *user_data) {
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
+
 		sprintf(text, "Humidity   %6.2f %%", humidity/10.0);
 		lcd_20x4_write_line(&ws->lcd, 1, 0, text);
 		printf("Write to line 1: %s\n", text);
@@ -60,6 +79,7 @@ void cb_humidity_v2(uint16_t humidity, void *user_data) {
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
+
 		sprintf(text, "Humidity   %6.2f %%", humidity/100.0);
 		lcd_20x4_write_line(&ws->lcd, 1, 0, text);
 		printf("Write to line 1: %s\n", text);
@@ -71,22 +91,56 @@ void cb_air_pressure(int32_t air_pressure, void *user_data) {
 
 	if(ws->lcd_created) {
 		char text[30] = {'\0'};
-		sprintf(text, "Air Press %7.2f mb", air_pressure/1000.0);
+
+		sprintf(text, "Air Press %7.2f mb", air_pressure / 1000.0);
 		lcd_20x4_write_line(&ws->lcd, 2, 0, text);
 		printf("Write to line 2: %s\n", text);
 
 		int16_t temperature;
 		int rc = barometer_get_chip_temperature(&ws->barometer, &temperature);
+
+		if(rc < 0) {
+			fprintf(stderr, "Could not get temperature: %d\n", rc);
+
+			return;
+		}
+
+		memset(text, '\0', sizeof(text));
+
+		// 0xDF == ° on LCD 20x4 charset.
+		sprintf(text, "Temperature %5.2f %cC", temperature / 100.0, 0xDF);
+
+		lcd_20x4_write_line(&ws->lcd, 3, 0, text);
+		sprintf(text, "Temperature %5.2f °C", temperature / 100.0);
+		printf("Write to line 3: %s\n", text);
+	}
+}
+
+void cb_air_pressure_v2(int32_t air_pressure, void *user_data) {
+	WeatherStation *ws = (WeatherStation *)user_data;
+
+	if(ws->lcd_created) {
+		char text[30] = {'\0'};
+
+		sprintf(text, "Air Press %7.2f mb", air_pressure / 1000.0);
+		lcd_20x4_write_line(&ws->lcd, 2, 0, text);
+		printf("Write to line 2: %s\n", text);
+
+		int32_t temperature;
+		int rc = barometer_v2_get_temperature(&ws->barometer, &temperature);
+
 		if(rc < 0) {
 			fprintf(stderr, "Could not get temperature: %d\n", rc);
 			return;
 		}
 
 		memset(text, '\0', sizeof(text));
-		// 0xDF == ° on LCD 20x4 charset
-		sprintf(text, "Temperature %5.2f %cC", temperature/100.0, 0xDF);
+
+		// 0xDF == ° on LCD 20x4 charset.
+		sprintf(text, "Temperature %5.2f %cC", temperature / 100.0, 0xDF);
+
 		lcd_20x4_write_line(&ws->lcd, 3, 0, text);
-		sprintf(text, "Temperature %5.2f °C", temperature/100.0);
+		sprintf(text, "Temperature %5.2f °C", temperature / 100.0);
 		printf("Write to line 3: %s\n", text);
 	}
 }
@@ -99,9 +153,12 @@ void cb_connected(uint8_t connected_reason, void *user_data) {
 
 		while(true) {
 			int rc = ipcon_enumerate(&ws->ipcon);
+
 			if(rc < 0) {
 				fprintf(stderr, "Could not enumerate: %d\n", rc);
-				// TODO: sleep 1s
+
+				// TODO: sleep 1s.
+
 				continue;
 			}
 			break;
@@ -113,11 +170,14 @@ void cb_enumerate(const char *uid, const char *connected_uid,
                   char position, uint8_t hardware_version[3],
                   uint8_t firmware_version[3], uint16_t device_identifier,
                   uint8_t enumeration_type, void *user_data) {
-	WeatherStation *ws = (WeatherStation *)user_data;
 	int rc;
+	WeatherStation *ws = (WeatherStation *)user_data;
 
-	// avoid unused parameter warning
-	(void)connected_uid; (void)position; (void)hardware_version; (void)firmware_version;
+	// Avoid unused parameter warning.
+	(void)position;
+	(void)connected_uid;
+	(void)hardware_version;
+	(void)firmware_version;
 
 	if(enumeration_type == IPCON_ENUMERATION_TYPE_CONNECTED ||
 	   enumeration_type == IPCON_ENUMERATION_TYPE_AVAILABLE) {
@@ -161,6 +221,27 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 					printf("Ambient Light 2.0 initialized\n");
 				}
 			}
+		} else if(device_identifier == AMBIENT_LIGHT_V3_DEVICE_IDENTIFIER) {
+			ambient_light_v3_create(&ws->ambient_light_v3, uid, &ws->ipcon);
+			ambient_light_v3_register_callback(&ws->ambient_light_v3,
+			                                   AMBIENT_LIGHT_V3_CALLBACK_ILLUMINANCE,
+			                                   (void *)cb_illuminance_v3,
+			                                   (void *)ws);
+			rc = ambient_light_v3_set_configuration(&ws->ambient_light_v3,
+			                                        AMBIENT_LIGHT_V3_ILLUMINANCE_RANGE_64000LUX,
+			                                        AMBIENT_LIGHT_V3_INTEGRATION_TIME_200MS);
+
+			if(rc < 0) {
+				fprintf(stderr, "Ambient Light 3.0 init step 1 failed: %d\n", rc);
+			} else {
+				rc = ambient_light_v3_set_illuminance_callback_configuration(&ws->ambient_light_v3, 1000, false, 'x', 0, 0);
+
+				if(rc < 0) {
+					fprintf(stderr, "Ambient Light 3.0 init step 2 failed: %d\n", rc);
+				} else {
+					printf("Ambient Light 3.0 initialized\n");
+				}
+			}
 		} else if(device_identifier == HUMIDITY_DEVICE_IDENTIFIER) {
 			humidity_create(&ws->humidity, uid, &ws->ipcon);
 			humidity_register_callback(&ws->humidity,
@@ -200,6 +281,19 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			} else {
 				printf("Barometer initialized\n");
 			}
+		} else if(device_identifier == BAROMETER_V2_DEVICE_IDENTIFIER) {
+			barometer_v2_create(&ws->barometer, uid, &ws->ipcon);
+			barometer_v2_register_callback(&ws->barometer,
+			                               BAROMETER_V2_CALLBACK_AIR_PRESSURE,
+			                               (void *)cb_air_pressure_v2,
+			                               (void *)ws);
+			rc = barometer_v2_set_air_pressure_callback_configuration(&ws->barometer, 1000, false, 'x', 0, 0);
+
+			if(rc < 0) {
+				fprintf(stderr, "Barometer 2.0 init failed: %d\n", rc);
+			} else {
+				printf("Barometer 2.0 initialized\n");
+			}
 		}
 	}
 }
@@ -212,11 +306,15 @@ int main() {
 
 	while(true) {
 		int rc = ipcon_connect(&ws.ipcon, HOST, PORT);
+
 		if(rc < 0) {
 			fprintf(stderr, "Could not connect to brickd: %d\n", rc);
+
 			// TODO: sleep 1s
+
 			continue;
 		}
+
 		break;
 	}
 
@@ -232,16 +330,21 @@ int main() {
 
 	while(true) {
 		int rc = ipcon_enumerate(&ws.ipcon);
+
 		if(rc < 0) {
 			fprintf(stderr, "Could not enumerate: %d\n", rc);
+
 			// TODO: sleep 1s
+
 			continue;
 		}
+
 		break;
 	}
 
 	printf("Press key to exit\n");
 	getchar();
 	ipcon_destroy(&ws.ipcon);
+
 	return 0;
 }

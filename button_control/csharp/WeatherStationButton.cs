@@ -27,9 +27,11 @@ class WeatherStation
 	private static BrickletLCD20x4 brickletLCD = null;
 	private static BrickletAmbientLight brickletAmbientLight = null;
 	private static BrickletAmbientLightV2 brickletAmbientLightV2 = null;
+	private static BrickletAmbientLightV3 brickletAmbientLightV3 = null;
 	private static BrickletHumidity brickletHumidity = null;
 	private static BrickletHumidityV2 brickletHumidityV2 = null;
 	private static BrickletBarometer brickletBarometer = null;
+	private static BrickletBarometerV2 brickletBarometerV2 = null;
 
 	private static double latestIlluminance = Double.NaN;
 	private static double latestHumidity = Double.NaN;
@@ -56,6 +58,11 @@ class WeatherStation
 		latestIlluminance = illuminance/100.0;
 	}
 
+	static void IlluminanceV3CB(BrickletAmbientLightV3 sender, long illuminance)
+	{
+		latestIlluminance = illuminance/100.0;
+	}
+
 	static void HumidityCB(BrickletHumidity sender, int humidity)
 	{
 		latestHumidity = humidity/10.0;
@@ -71,6 +78,14 @@ class WeatherStation
 		latestAirPressure = airPressure/1000.0;
 
 		int temperature = sender.GetChipTemperature();
+		latestTemperature = temperature/100.0;
+	}
+
+	static void AirPressureV2CB(BrickletBarometerV2 sender, int airPressure)
+	{
+		latestAirPressure = airPressure/1000.0;
+
+		int temperature = sender.GetTemperature();
 		latestTemperature = temperature/100.0;
 	}
 
@@ -145,6 +160,23 @@ class WeatherStation
 					brickletAmbientLightV2 = null;
 				}
 			}
+			else if(deviceIdentifier == BrickletAmbientLightV3.DEVICE_IDENTIFIER)
+			{
+				try
+				{
+					brickletAmbientLightV3 = new BrickletAmbientLightV3(UID, ipcon);
+					brickletAmbientLightV3.SetConfiguration(BrickletAmbientLightV3.ILLUMINANCE_RANGE_64000LUX,
+					                                        BrickletAmbientLightV3.INTEGRATION_TIME_200MS);
+					brickletAmbientLightV3.SetIlluminanceCallbackConfiguration(1000, false, 'x', 0, 0);
+					brickletAmbientLightV3.IlluminanceCallback += IlluminanceV3CB;
+					System.Console.WriteLine("Ambient Light 3.0 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Ambient Light 3.0 init failed: " + e.Message);
+					brickletAmbientLightV3 = null;
+				}
+			}
 			else if(deviceIdentifier == BrickletHumidity.DEVICE_IDENTIFIER)
 			{
 				try
@@ -187,6 +219,21 @@ class WeatherStation
 				catch(TinkerforgeException e)
 				{
 					System.Console.WriteLine("Barometer init failed: " + e.Message);
+					brickletBarometer = null;
+				}
+			}
+			else if(deviceIdentifier == BrickletBarometerV2.DEVICE_IDENTIFIER)
+			{
+				try
+				{
+					brickletBarometerV2 = new BrickletBarometerV2(UID, ipcon);
+					brickletBarometerV2.SetAirPressureCallbackConfiguration(1000, false, 'x', 0, 0);
+					brickletBarometerV2.AirPressureCallback += AirPressureV2CB;
+					System.Console.WriteLine("Barometer 2.0 initialized");
+				}
+				catch(TinkerforgeException e)
+				{
+					System.Console.WriteLine("Barometer 2.0 init failed: " + e.Message);
 					brickletBarometer = null;
 				}
 			}

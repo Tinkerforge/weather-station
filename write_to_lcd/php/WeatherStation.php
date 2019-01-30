@@ -4,17 +4,21 @@ require_once('Tinkerforge/IPConnection.php');
 require_once('Tinkerforge/BrickletLCD20x4.php');
 require_once('Tinkerforge/BrickletAmbientLight.php');
 require_once('Tinkerforge/BrickletAmbientLightV2.php');
+require_once('Tinkerforge/BrickletAmbientLightV3.php');
 require_once('Tinkerforge/BrickletHumidity.php');
 require_once('Tinkerforge/BrickletHumidityV2.php');
 require_once('Tinkerforge/BrickletBarometer.php');
+require_once('Tinkerforge/BrickletBarometerV2.php');
 
 use Tinkerforge\IPConnection;
 use Tinkerforge\BrickletLCD20x4;
 use Tinkerforge\BrickletAmbientLight;
 use Tinkerforge\BrickletAmbientLightV2;
+use Tinkerforge\BrickletAmbientLightV3;
 use Tinkerforge\BrickletHumidity;
 use Tinkerforge\BrickletHumidityV2;
 use Tinkerforge\BrickletBarometer;
+use Tinkerforge\BrickletBarometerV2;
 
 class WeatherStation
 {
@@ -26,9 +30,11 @@ class WeatherStation
 		$this->brickletLCD = null;
 		$this->brickletAmbientLight = null;
 		$this->brickletAmbientLightV2 = null;
+		$this->brickletAmbientLightV3 = null;
 		$this->brickletHumidity = null;
 		$this->brickletHumidityV2 = null;
 		$this->brickletBarometer = null;
+		$this->brickletBarometerV2 = null;
 		$this->ipcon = new IPConnection();
 
 		while(true) {
@@ -73,6 +79,15 @@ class WeatherStation
 		}
 	}
 
+	function cb_illuminanceV3($illuminance)
+	{
+		if($this->brickletLCD != null) {
+			$text = sprintf("Illumina %8.2f lx", $illuminance/100.0);
+			$this->brickletLCD->writeLine(0, 0, $text);
+			echo "Write to line 0: $text\n";
+		}
+	}
+
 	function cb_humidity($humidity)
 	{
 		if($this->brickletLCD != null) {
@@ -100,6 +115,28 @@ class WeatherStation
 
 			try {
 				$temperature = $this->brickletBarometer->getChipTemperature();
+			} catch(Exception $e) {
+				echo "Could not get temperature: $e\n";
+				return;
+			}
+
+			// 0xDF == ° on LCD 20x4 charset
+			$text = sprintf("Temperature %5.2f %cC", $temperature/100.0, 0xDF);
+			$this->brickletLCD->writeLine(3, 0, $text);
+			$text = str_replace(sprintf("%c", 0xDF), '°', $text);
+			echo "Write to line 3: $text\n";
+		}
+	}
+
+	function cb_airPressureV2($airPressure)
+	{
+		if($this->brickletLCD != null) {
+			$text = sprintf("Air Press %7.2f mb", $airPressure/1000.0);
+			$this->brickletLCD->writeLine(2, 0, $text);
+			echo "Write to line 2: $text\n";
+
+			try {
+				$temperature = $this->brickletBarometerV2->getTemperature();
 			} catch(Exception $e) {
 				echo "Could not get temperature: $e\n";
 				return;
@@ -152,6 +189,19 @@ class WeatherStation
 					$this->brickletAmbientLight = null;
 					echo "Ambient Light 2.0 init failed: $e\n";
 				}
+			} else if($deviceIdentifier == BrickletAmbientLightV3::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletAmbientLightV3 = new BrickletAmbientLightV3($uid, $this->ipcon);
+					$this->brickletAmbientLightV3->setConfiguration(BrickletAmbientLightV3::ILLUMINANCE_RANGE_64000LUX,
+					                                                BrickletAmbientLightV3::INTEGRATION_TIME_200MS);
+					$this->brickletAmbientLightV3->setIlluminanceCallbackConfiguration(1000, false, 'x', 0, 0);
+					$this->brickletAmbientLightV3->registerCallback(BrickletAmbientLightV3::CALLBACK_ILLUMINANCE,
+					                                                array($this, 'cb_illuminanceV3'));
+					echo "Ambient Light 3.0 initialized\n";
+				} catch(Exception $e) {
+					$this->brickletAmbientLight = null;
+					echo "Ambient Light 3.0 init failed: $e\n";
+				}
 			} else if($deviceIdentifier == BrickletHumidity::DEVICE_IDENTIFIER) {
 				try {
 					$this->brickletHumidity = new BrickletHumidity($uid, $this->ipcon);
@@ -184,6 +234,17 @@ class WeatherStation
 				} catch(Exception $e) {
 					$this->brickletBarometer = null;
 					echo "Barometer init failed: $e\n";
+				}
+			} else if($deviceIdentifier == BrickletBarometerV2::DEVICE_IDENTIFIER) {
+				try {
+					$this->brickletBarometerV2 = new BrickletBarometerV2($uid, $this->ipcon);
+					$this->brickletBarometerV2->setAirPressureCallbackConfiguration(1000, false, 'x', 0, 0);
+					$this->brickletBarometerV2->registerCallback(BrickletBarometerV2::CALLBACK_AIR_PRESSURE,
+					                                             array($this, 'cb_airPressureV2'));
+					echo "Barometer 2.0 initialized\n";
+				} catch(Exception $e) {
+					$this->brickletBarometer = null;
+					echo "Barometer 2.0 init failed: $e\n";
 				}
 			}
 		}

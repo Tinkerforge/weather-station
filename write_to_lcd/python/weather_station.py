@@ -13,9 +13,11 @@ from tinkerforge.ip_connection import Error
 from tinkerforge.bricklet_lcd_20x4 import BrickletLCD20x4
 from tinkerforge.bricklet_ambient_light import BrickletAmbientLight
 from tinkerforge.bricklet_ambient_light_v2 import BrickletAmbientLightV2
+from tinkerforge.bricklet_ambient_light_v3 import BrickletAmbientLightV3
 from tinkerforge.bricklet_humidity import BrickletHumidity
 from tinkerforge.bricklet_humidity_v2 import BrickletHumidityV2
 from tinkerforge.bricklet_barometer import BrickletBarometer
+from tinkerforge.bricklet_barometer_v2 import BrickletBarometerV2
 
 class WeatherStation:
     HOST = "localhost"
@@ -25,9 +27,11 @@ class WeatherStation:
     lcd = None
     al = None
     al_v2 = None
+    al_v3 = None
     hum = None
     hum_v2 = None
     baro = None
+    baro_v2 = None
 
     def __init__(self):
         self.ipcon = IPConnection()
@@ -67,6 +71,12 @@ class WeatherStation:
             self.lcd.write_line(0, 0, text)
             log.info('Write to line 0: ' + text)
 
+    def cb_illuminance_v3(self, illuminance):
+        if self.lcd is not None:
+            text = 'Illumina %8.2f lx' % (illuminance/100.0)
+            self.lcd.write_line(0, 0, text)
+            log.info('Write to line 0: ' + text)
+
     def cb_humidity(self, humidity):
         if self.lcd is not None:
             text = 'Humidity   %6.2f %%' % (humidity/10.0)
@@ -87,6 +97,23 @@ class WeatherStation:
 
             try:
                 temperature = self.baro.get_chip_temperature()
+            except Error as e:
+                log.error('Could not get temperature: ' + str(e.description))
+                return
+
+            # \xDF == ° on LCD 20x4 charset
+            text = 'Temperature %5.2f \xDFC' % (temperature/100.0)
+            self.lcd.write_line(3, 0, text)
+            log.info('Write to line 3: ' + text.replace('\xDF', '°'))
+
+    def cb_air_pressure_v2(self, air_pressure):
+        if self.lcd is not None:
+            text = 'Air Press %7.2f mb' % (air_pressure/1000.0)
+            self.lcd.write_line(2, 0, text)
+            log.info('Write to line 2: ' + text)
+
+            try:
+                temperature = self.baro_v2.get_temperature()
             except Error as e:
                 log.error('Could not get temperature: ' + str(e.description))
                 return
@@ -131,6 +158,18 @@ class WeatherStation:
                 except Error as e:
                     log.error('Ambient Light 2.0 init failed: ' + str(e.description))
                     self.al_v2 = None
+            elif device_identifier == BrickletAmbientLightV3.DEVICE_IDENTIFIER:
+                try:
+                    self.al_v3 = BrickletAmbientLightV3(uid, self.ipcon)
+                    self.al_v3.set_configuration(self.al_v3.ILLUMINANCE_RANGE_64000LUX,
+                                                 self.al_v3.INTEGRATION_TIME_200MS)
+                    self.al_v3.set_illuminance_callback_configuration(1000, False, 'x', 0, 0)
+                    self.al_v3.register_callback(self.al_v3.CALLBACK_ILLUMINANCE,
+                                                 self.cb_illuminance_v3)
+                    log.info('Ambient Light 3.0 initialized')
+                except Error as e:
+                    log.error('Ambient Light 3.0 init failed: ' + str(e.description))
+                    self.al_v3 = None
             elif device_identifier == BrickletHumidity.DEVICE_IDENTIFIER:
                 try:
                     self.hum = BrickletHumidity(uid, self.ipcon)
@@ -161,6 +200,16 @@ class WeatherStation:
                 except Error as e:
                     log.error('Barometer init failed: ' + str(e.description))
                     self.baro = None
+            elif device_identifier == BrickletBarometerV2.DEVICE_IDENTIFIER:
+                try:
+                    self.baro_v2 = BrickletBarometerV2(uid, self.ipcon)
+                    self.baro_v2.set_air_pressure_callback_configuration(1000, False, 'x', 0, 0)
+                    self.baro_v2.register_callback(self.baro_v2.CALLBACK_AIR_PRESSURE,
+                                                   self.cb_air_pressure_v2)
+                    log.info('Barometer initialized')
+                except Error as e:
+                    log.error('Barometer init failed: ' + str(e.description))
+                    self.baro_v2 = None
 
     def cb_connected(self, connected_reason):
         if connected_reason == IPConnection.CONNECT_REASON_AUTO_RECONNECT:
