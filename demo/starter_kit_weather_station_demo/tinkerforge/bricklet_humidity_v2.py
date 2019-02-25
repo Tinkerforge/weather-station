@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #############################################################
-# This file was automatically generated on 2017-11-17.      #
+# This file was automatically generated on 2019-02-25.      #
 #                                                           #
-# Python Bindings Version 2.1.14                            #
+# Python Bindings Version 2.1.21                            #
 #                                                           #
 # If you have a bugfix for this file and want to commit it, #
 # please fix the bug in the generator. You can find a link  #
@@ -29,6 +29,7 @@ class BrickletHumidityV2(Device):
 
     DEVICE_IDENTIFIER = 283
     DEVICE_DISPLAY_NAME = 'Humidity Bricklet 2.0'
+    DEVICE_URL_PART = 'humidity_v2' # internal
 
     CALLBACK_HUMIDITY = 4
     CALLBACK_TEMPERATURE = 8
@@ -44,6 +45,8 @@ class BrickletHumidityV2(Device):
     FUNCTION_GET_HEATER_CONFIGURATION = 10
     FUNCTION_SET_MOVING_AVERAGE_CONFIGURATION = 11
     FUNCTION_GET_MOVING_AVERAGE_CONFIGURATION = 12
+    FUNCTION_SET_SAMPLES_PER_SECOND = 13
+    FUNCTION_GET_SAMPLES_PER_SECOND = 14
     FUNCTION_GET_SPITFP_ERROR_COUNT = 234
     FUNCTION_SET_BOOTLOADER_MODE = 235
     FUNCTION_GET_BOOTLOADER_MODE = 236
@@ -64,6 +67,12 @@ class BrickletHumidityV2(Device):
     THRESHOLD_OPTION_GREATER = '>'
     HEATER_CONFIG_DISABLED = 0
     HEATER_CONFIG_ENABLED = 1
+    SPS_20 = 0
+    SPS_10 = 1
+    SPS_5 = 2
+    SPS_1 = 3
+    SPS_02 = 4
+    SPS_01 = 5
     BOOTLOADER_MODE_BOOTLOADER = 0
     BOOTLOADER_MODE_FIRMWARE = 1
     BOOTLOADER_MODE_BOOTLOADER_WAIT_FOR_REBOOT = 2
@@ -87,7 +96,7 @@ class BrickletHumidityV2(Device):
         """
         Device.__init__(self, uid, ipcon)
 
-        self.api_version = (2, 0, 0)
+        self.api_version = (2, 0, 2)
 
         self.response_expected[BrickletHumidityV2.FUNCTION_GET_HUMIDITY] = BrickletHumidityV2.RESPONSE_EXPECTED_ALWAYS_TRUE
         self.response_expected[BrickletHumidityV2.FUNCTION_SET_HUMIDITY_CALLBACK_CONFIGURATION] = BrickletHumidityV2.RESPONSE_EXPECTED_TRUE
@@ -99,6 +108,8 @@ class BrickletHumidityV2(Device):
         self.response_expected[BrickletHumidityV2.FUNCTION_GET_HEATER_CONFIGURATION] = BrickletHumidityV2.RESPONSE_EXPECTED_ALWAYS_TRUE
         self.response_expected[BrickletHumidityV2.FUNCTION_SET_MOVING_AVERAGE_CONFIGURATION] = BrickletHumidityV2.RESPONSE_EXPECTED_FALSE
         self.response_expected[BrickletHumidityV2.FUNCTION_GET_MOVING_AVERAGE_CONFIGURATION] = BrickletHumidityV2.RESPONSE_EXPECTED_ALWAYS_TRUE
+        self.response_expected[BrickletHumidityV2.FUNCTION_SET_SAMPLES_PER_SECOND] = BrickletHumidityV2.RESPONSE_EXPECTED_FALSE
+        self.response_expected[BrickletHumidityV2.FUNCTION_GET_SAMPLES_PER_SECOND] = BrickletHumidityV2.RESPONSE_EXPECTED_ALWAYS_TRUE
         self.response_expected[BrickletHumidityV2.FUNCTION_GET_SPITFP_ERROR_COUNT] = BrickletHumidityV2.RESPONSE_EXPECTED_ALWAYS_TRUE
         self.response_expected[BrickletHumidityV2.FUNCTION_SET_BOOTLOADER_MODE] = BrickletHumidityV2.RESPONSE_EXPECTED_ALWAYS_TRUE
         self.response_expected[BrickletHumidityV2.FUNCTION_GET_BOOTLOADER_MODE] = BrickletHumidityV2.RESPONSE_EXPECTED_ALWAYS_TRUE
@@ -153,10 +164,9 @@ class BrickletHumidityV2(Device):
 
          "'x'",    "Threshold is turned off"
          "'o'",    "Threshold is triggered when the value is *outside* the min and max values"
-         "'i'",    "Threshold is triggered when the value is *inside* the min and max values"
+         "'i'",    "Threshold is triggered when the value is *inside* or equal to the min and max values"
          "'<'",    "Threshold is triggered when the value is smaller than the min value (max is ignored)"
          "'>'",    "Threshold is triggered when the value is greater than the min value (max is ignored)"
-
 
         If the option is set to 'x' (threshold turned off) the callback is triggered with the fixed period.
 
@@ -213,10 +223,9 @@ class BrickletHumidityV2(Device):
 
          "'x'",    "Threshold is turned off"
          "'o'",    "Threshold is triggered when the value is *outside* the min and max values"
-         "'i'",    "Threshold is triggered when the value is *inside* the min and max values"
+         "'i'",    "Threshold is triggered when the value is *inside* or equal to the min and max values"
          "'<'",    "Threshold is triggered when the value is smaller than the min value (max is ignored)"
          "'>'",    "Threshold is triggered when the value is greater than the min value (max is ignored)"
-
 
         If the option is set to 'x' (threshold turned off) the callback is triggered with the fixed period.
 
@@ -228,13 +237,13 @@ class BrickletHumidityV2(Device):
         min = int(min)
         max = int(max)
 
-        self.ipcon.send_request(self, BrickletHumidityV2.FUNCTION_SET_TEMPERATURE_CALLBACK_CONFIGURATION, (period, value_has_to_change, option, min, max), 'I ! c H H', '')
+        self.ipcon.send_request(self, BrickletHumidityV2.FUNCTION_SET_TEMPERATURE_CALLBACK_CONFIGURATION, (period, value_has_to_change, option, min, max), 'I ! c h h', '')
 
     def get_temperature_callback_configuration(self):
         """
         Returns the callback configuration as set by :func:`Set Temperature Callback Configuration`.
         """
-        return GetTemperatureCallbackConfiguration(*self.ipcon.send_request(self, BrickletHumidityV2.FUNCTION_GET_TEMPERATURE_CALLBACK_CONFIGURATION, (), '', 'I ! c H H'))
+        return GetTemperatureCallbackConfiguration(*self.ipcon.send_request(self, BrickletHumidityV2.FUNCTION_GET_TEMPERATURE_CALLBACK_CONFIGURATION, (), '', 'I ! c h h'))
 
     def set_heater_configuration(self, heater_config):
         """
@@ -263,11 +272,16 @@ class BrickletHumidityV2(Device):
 
         The range for the averaging is 1-1000.
 
-        New data is gathered every 50ms. With a moving average of length 1000 the resulting
+        New data is gathered every 50ms*. With a moving average of length 1000 the resulting
         averaging window has a length of 50s. If you want to do long term measurements the longest
         moving average will give the cleanest results.
 
-        The default value is 100.
+        The default value is 5.
+
+        \* In firmware version 2.0.3 we added the :func:`Set Samples Per Second` function. It
+        configures the measurement frequency. Since high frequencies can result in self-heating
+        of th IC, changed the default value from 20 samples per second to 1. With 1 sample per second
+        a moving average length of 1000 would result in an averaging window of 1000 seconds!
         """
         moving_average_length_humidity = int(moving_average_length_humidity)
         moving_average_length_temperature = int(moving_average_length_temperature)
@@ -280,15 +294,41 @@ class BrickletHumidityV2(Device):
         """
         return GetMovingAverageConfiguration(*self.ipcon.send_request(self, BrickletHumidityV2.FUNCTION_GET_MOVING_AVERAGE_CONFIGURATION, (), '', 'H H'))
 
+    def set_samples_per_second(self, sps):
+        """
+        Sets the samples per second that are gathered by the humidity/temperature sensor HDC1080.
+
+        We added this function since we found out that a high measurement frequency can lead to
+        self-heating of the sensor. Which can distort the temperature measurement.
+
+        If you don't need a lot of measurements, you can use the lowest available measurement
+        frequency of 0.1 samples per second for the least amount of self-heating.
+
+        Before version 2.0.3 the default was 20 samples per second. The new default is 1 sample per second.
+
+        .. versionadded:: 2.0.3$nbsp;(Plugin)
+        """
+        sps = int(sps)
+
+        self.ipcon.send_request(self, BrickletHumidityV2.FUNCTION_SET_SAMPLES_PER_SECOND, (sps,), 'B', '')
+
+    def get_samples_per_second(self):
+        """
+        Returnes the samples per second, as set by :func:`Set Samples Per Second`.
+
+        .. versionadded:: 2.0.3$nbsp;(Plugin)
+        """
+        return self.ipcon.send_request(self, BrickletHumidityV2.FUNCTION_GET_SAMPLES_PER_SECOND, (), '', 'B')
+
     def get_spitfp_error_count(self):
         """
         Returns the error count for the communication between Brick and Bricklet.
 
         The errors are divided into
 
-        * ack checksum errors,
+        * ACK checksum errors,
         * message checksum errors,
-        * frameing errors and
+        * framing errors and
         * overflow errors.
 
         The errors counts are for errors that occur on the Bricklet side. All
@@ -303,7 +343,7 @@ class BrickletHumidityV2(Device):
 
         You can change from bootloader mode to firmware mode and vice versa. A change
         from bootloader mode to firmware mode will only take place if the entry function,
-        device identifier und crc are present and correct.
+        device identifier and CRC are present and correct.
 
         This function is used by Brick Viewer during flashing. It should not be
         necessary to call it in a normal user program.

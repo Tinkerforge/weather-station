@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #############################################################
-# This file was automatically generated on 2017-11-17.      #
+# This file was automatically generated on 2019-02-25.      #
 #                                                           #
-# Python Bindings Version 2.1.14                            #
+# Python Bindings Version 2.1.21                            #
 #                                                           #
 # If you have a bugfix for this file and want to commit it, #
 # please fix the bug in the generator. You can find a link  #
@@ -26,6 +26,7 @@ class BrickletLCD20x4(Device):
 
     DEVICE_IDENTIFIER = 212
     DEVICE_DISPLAY_NAME = 'LCD 20x4 Bricklet'
+    DEVICE_URL_PART = 'lcd_20x4' # internal
 
     CALLBACK_BUTTON_PRESSED = 9
     CALLBACK_BUTTON_RELEASED = 10
@@ -55,7 +56,7 @@ class BrickletLCD20x4(Device):
         """
         Device.__init__(self, uid, ipcon)
 
-        self.api_version = (2, 0, 0)
+        self.api_version = (2, 0, 2)
 
         self.response_expected[BrickletLCD20x4.FUNCTION_WRITE_LINE] = BrickletLCD20x4.RESPONSE_EXPECTED_FALSE
         self.response_expected[BrickletLCD20x4.FUNCTION_CLEAR_DISPLAY] = BrickletLCD20x4.RESPONSE_EXPECTED_FALSE
