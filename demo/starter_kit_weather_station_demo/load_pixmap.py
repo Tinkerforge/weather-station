@@ -25,36 +25,28 @@ Boston, MA 02111-1307, USA.
 import os
 import sys
 
-from PyQt4.QtGui import QPixmap, QColor
-from PyQt4.QtCore import Qt, QByteArray
+from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtCore import Qt, QByteArray
 
-if hasattr(sys, 'frozen'):
-    from starter_kit_weather_station_demo.frozen_images import image_data
-else:
-    image_data = None
+def get_resources_path(relative_path):
+    try:
+        # PyInstaller stores data files in a tmp folder refered to as _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.dirname(os.path.realpath(__file__))
 
-def get_program_path():
-    # from http://www.py2exe.org/index.cgi/WhereAmI
-    if hasattr(sys, 'frozen'):
-        path = sys.executable
-    else:
-        path = __file__
+    path = os.path.join(base_path, relative_path)
 
-    return os.path.dirname(os.path.realpath(unicode(path, sys.getfilesystemencoding())))
+    # If the path still doesn't exist, this function won't help you
+    if not os.path.exists(path):
+        print("Resource not found: " + relative_path)
+        return None
 
-def get_resources_path():
-    if sys.platform == "darwin" and hasattr(sys, 'frozen'):
-        return os.path.join(os.path.split(get_program_path())[0], 'Resources')
-    else:
-        return get_program_path()
+    return path
 
-def load_pixmap(path, apply_mask=False):
-    if image_data != None:
-        data = QByteArray.fromBase64(image_data[path][1])
-        pixmap = QPixmap()
-        pixmap.loadFromData(data, image_data[path][0])
-    else:
-        absolute_path = os.path.join(get_resources_path(), path)
-        pixmap = QPixmap(absolute_path)
+
+def load_pixmap(path):
+    absolute_path = get_resources_path(path)
+    pixmap = QPixmap(absolute_path)
 
     return pixmap

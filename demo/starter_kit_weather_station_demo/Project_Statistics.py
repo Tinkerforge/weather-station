@@ -7,8 +7,8 @@ Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 Project_Statistics.py: Statistics Display Project Implementation
 
 This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License 
-as published by the Free Software Foundation; either version 2 
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -25,8 +25,8 @@ Boston, MA 02111-1307, USA.
 import math
 import time
 
-from PyQt4.QtCore import Qt, QTimer, pyqtSignal
-from PyQt4.QtGui import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget, QLabel, QPushButton
 
 from starter_kit_weather_station_demo.LCDWidget import LCDWidget
 
@@ -76,7 +76,7 @@ class ProjectStatistics(QWidget):
 
         layout1 = QHBoxLayout()
         layout2 = QVBoxLayout()
-        
+
         layout1.addStretch()
         layout1.addLayout(layout2)
         layout1.addStretch()
@@ -117,7 +117,7 @@ class ProjectStatistics(QWidget):
         self.buttons[3].setFixedSize(100, 30)
         self.buttons[3].setText("BTN3")
         self.buttons[3].clicked.connect(lambda: self.button_pressed_slot(7))
-        
+
         layout3 = QHBoxLayout()
         layout3.addWidget(self.buttons[0])
         layout3.addWidget(self.buttons[1])
@@ -147,13 +147,13 @@ class ProjectStatistics(QWidget):
 
     def update_humidity_data_slot(self, humidity):
         self.latestHumidity = humidity
-    
+
     def update_humidity(self, humidity):
         self.qtcb_update_humidity.emit(humidity)
 
     def update_air_pressure_data_slot(self, air_pressure):
         self.latestAirPressure = air_pressure
-    
+
     def update_air_pressure(self, air_pressure):
         self.qtcb_update_air_pressure.emit(air_pressure)
 
@@ -180,8 +180,8 @@ class ProjectStatistics(QWidget):
 
     def TimeFromSeconds(self, s):
         string = "("
-        m = s/60
-        h = m/60
+        m = s//60
+        h = m//60
 
         if h > 0:
             string += str(h) + "h)"
@@ -226,7 +226,7 @@ class ProjectStatistics(QWidget):
         if not self.latestAirPressure == None:
             text = 'Air Press %7.2f mb' % (self.latestAirPressure)
             self.lcdwidget.write_line(2, 0, text, self)
-        
+
         if not self.latestTemperature == None:
             text = 'Temperature %5.2f \xDFC' % (self.latestTemperature)
             self.lcdwidget.write_line(3, 0, text, self)
@@ -234,7 +234,7 @@ class ProjectStatistics(QWidget):
     def UpdateGraph(self):
         barSumMin = 0.0
         barSumMax = 0.0
-    
+
         if self.buttonPressedCounter[1] % 4 == self.MODE_ILLUMINANCE:
             [barSumMin, barSumMax] = self.UpdateGraphWriteBars(self.illuminanceQueue)
             self.UpdateGraphWriteTitle("I: ", barSumMin, barSumMax, len(self.illuminanceQueue))
@@ -268,7 +268,7 @@ class ProjectStatistics(QWidget):
 
         count = len(q)
 
-        countBars = count/self.LINE_LENGTH
+        countBars = count//self.LINE_LENGTH
         if countBars == 0:
             countBars = 1
 
@@ -278,13 +278,13 @@ class ProjectStatistics(QWidget):
                     0.0, 0.0, 0.0, 0.0, 0.0 ]
         i = 0
         for v in q:
-            barSum[i/countBars] += v
+            barSum[i//countBars] += v
             i += 1
             if i == self.LINE_LENGTH*countBars:
                 break
 
         for i in range(len(barSum)):
-            barSum[i] /= countBars
+            barSum[i] //= countBars
             if barSum[i] < barSumMin:
                 barSumMin = barSum[i]
             if barSum[i] > barSumMax:
@@ -293,7 +293,7 @@ class ProjectStatistics(QWidget):
         if (barSumMax - barSumMin) == 0:
             scale = 1
         else:
-            scale = (self.BAR_HEIGHT-1)/(barSumMax - barSumMin)
+            scale = (self.BAR_HEIGHT-1)//(barSumMax - barSumMin)
 
         offset = barSumMin * scale - 1
 
@@ -304,12 +304,12 @@ class ProjectStatistics(QWidget):
         lines = [[' ' for x in range(20)] for y in range(4)]
 
         for i in range(len(barHeight)):
-            barLenght = barHeight[i]/8
+            barLenght = barHeight[i]//8
             j = 0
             for j in range(barLenght):
                 lines[j+1][i] = chr(self.CUSTOM_CHAR_END)
             if j < 3:
-                lines[j+1][i] = chr((barHeight[i]-1)/3 + self.CUSTOM_CHAR_START)
+                lines[j+1][i] = chr((barHeight[i]-1)//3 + self.CUSTOM_CHAR_START)
 
         for line in range(4):
             string = ''
@@ -338,8 +338,8 @@ class ProjectStatistics(QWidget):
         self.lcdwidget.write_line(1, 0, vmin, self)
         self.lcdwidget.write_line(2, 0, vavg, self)
         self.lcdwidget.write_line(3, 0, vmax, self)
-        
-    def UpdateTime(self): 
+
+    def UpdateTime(self):
         line0 = time.strftime("%H:%M:%S")
         line1 = time.strftime("%A")
         line2 = time.strftime("%d. %b %Y")
@@ -368,12 +368,12 @@ class ProjectStatistics(QWidget):
             self.humidityQueue.append(self.latestHumidity)
             if len(self.humidityQueue) > 60*60*24:
                 self.humidityQueue.pop()
-        
+
         if not self.latestAirPressure == None:
             self.airPressureQueue.append(self.latestAirPressure)
             if len(self.airPressureQueue) > 60*60*24:
                 self.airPressureQueue.pop()
-        
+
         if not self.latestTemperature == None:
             self.temperatureQueue.append(self.latestTemperature)
             if len(self.temperatureQueue) > 60*60*24:

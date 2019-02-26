@@ -7,8 +7,8 @@ Copyright (C) 2013 Bastian Nordmeyer <bastian@tinkerforge.com>
 Project_Env_Display.py: Environment Display Project Implementation
 
 This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License 
-as published by the Free Software Foundation; either version 2 
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -24,8 +24,8 @@ Boston, MA 02111-1307, USA.
 
 import math
 
-from PyQt4.QtCore import pyqtSignal, Qt
-from PyQt4.QtGui import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QLabel, QPushButton
 
 from starter_kit_weather_station_demo.LCDWidget import LCDWidget
 
@@ -43,7 +43,7 @@ class ProjectEnvDisplay(QWidget):
 
         layout1 = QHBoxLayout()
         layout2 = QVBoxLayout()
-        
+
         layout1.addStretch()
         layout1.addLayout(layout2)
         layout1.addStretch()
@@ -83,14 +83,14 @@ class ProjectEnvDisplay(QWidget):
     def update_humidity_data_slot(self, humidity):
         text = 'Humidity   %6.2f %%' % humidity
         self.lcdwidget.write_line(1, 0, text, self)
-    
+
     def update_humidity(self, humidity):
         self.qtcb_update_humidity.emit(humidity)
 
     def update_air_pressure_data_slot(self, air_pressure):
         text = 'Air Press %7.2f mb' % air_pressure
         self.lcdwidget.write_line(2, 0, text, self)
-    
+
     def update_air_pressure(self, air_pressure):
         self.qtcb_update_air_pressure.emit(air_pressure)
 
