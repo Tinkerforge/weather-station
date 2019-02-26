@@ -71,7 +71,6 @@ from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer import Bric
 from starter_kit_weather_station_demo.tinkerforge.bricklet_barometer_v2 import BrickletBarometerV2
 from starter_kit_weather_station_demo.Project_Env_Display import ProjectEnvDisplay
 from starter_kit_weather_station_demo.Project_Statistics import ProjectStatistics
-from starter_kit_weather_station_demo.Project_Xively import ProjectXively
 from starter_kit_weather_station_demo.config import DEMO_VERSION
 from starter_kit_weather_station_demo.load_pixmap import load_pixmap
 
@@ -132,23 +131,21 @@ class WeatherStation(QApplication):
         self.main = MainWindow(self)
         self.main.setFixedSize(730, 430)
         self.main.setWindowIcon(QIcon(load_pixmap('starter_kit_weather_station_demo-icon.png')))
-        
+
         self.tabs = QTabWidget()
-        
+
         widget = QWidget()
         layout = QVBoxLayout()
         layout.addWidget(self.tabs)
         widget.setLayout(layout)
 
         self.main.setCentralWidget(widget)
-        
+
         self.projects.append(ProjectEnvDisplay(self.tabs, self))
         self.projects.append(ProjectStatistics(self.tabs, self))
-        self.projects.append(ProjectXively(self.tabs, self))
 
         self.tabs.addTab(self.projects[0], "Display Environment Measurements")
         self.tabs.addTab(self.projects[1], "Show Statistics with Button Control")
-        self.tabs.addTab(self.projects[2], "Connect to Xively")
 
         self.active_project = self.projects[0]
 
