@@ -1,2 +1,2 @@
 #!/bin/sh
-python /usr/share/starter_kit_weather_station_demo/main.py "$@"
+python3 /usr/share/starter_kit_weather_station_demo/main.py "$@"
