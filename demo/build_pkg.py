@@ -162,7 +162,7 @@ if __name__ == '__main__':
             sys.exit(1)
 
         root_path = os.getcwd()
-        os.chdir(os.path.join(root_path, 'brickv'))
+        os.chdir(os.path.join(root_path, UNDERSCORE_NAME))
         system(['pyinstaller', 'main_folder.spec'])
         os.chdir(root_path)
     else:
