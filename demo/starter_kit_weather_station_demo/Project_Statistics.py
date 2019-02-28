@@ -216,19 +216,26 @@ class ProjectStatistics(QWidget):
 
     def UpdateStandard(self):
         if not self.latestIlluminance == None:
-            text = 'Illumina %8.2f lx' % (self.latestIlluminance)
+            text = 'Illuminance{}lx'
+
+            if self.latestIlluminance >= 10000:
+                fmt = ' {0:5.0f} '
+            else:
+                spaces = ' ' * (4 - math.floor(math.log10(self.latestIlluminance)))
+                fmt = spaces + '{0:4.1f}'
+            text = text.format(fmt).format(self.latestIlluminance)
             self.lcdwidget.write_line(0, 0, text, self)
 
         if not self.latestHumidity == None:
-            text = 'Humidity   %6.2f %%' % (self.latestHumidity)
+            text = 'Humidity    %6.1f %%' % self.latestHumidity
             self.lcdwidget.write_line(1, 0, text, self)
 
         if not self.latestAirPressure == None:
-            text = 'Air Press %7.2f mb' % (self.latestAirPressure)
+            text = 'AirPressure%7.1fmb' % self.latestAirPressure
             self.lcdwidget.write_line(2, 0, text, self)
 
         if not self.latestTemperature == None:
-            text = 'Temperature %5.2f \xDFC' % (self.latestTemperature)
+            text = 'Temperature  %5.1f\xDFC' % self.latestTemperature
             self.lcdwidget.write_line(3, 0, text, self)
 
     def UpdateGraph(self):
