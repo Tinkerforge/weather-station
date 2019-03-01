@@ -1,6 +1,6 @@
-Name "Starter Kit: Weather Station Demo <<DEMO_DOT_VERSION>>"
+Name "Starter Kit: Weather Station Demo <<DOT_VERSION>>"
 
-OutFile "starter_kit_weather_station_demo_windows_<<DEMO_UNDERSCORE_VERSION>>.exe"
+OutFile "starter_kit_weather_station_demo_windows_<<UNDERSCORE_VERSION>>.exe"
 
 XPStyle on
 
@@ -16,7 +16,7 @@ RequestExecutionLevel admin
 
 ;--------------------------------
 
-!define DEMO_VERSION <<DEMO_DOT_VERSION>>
+!define DEMO_VERSION <<DOT_VERSION>>
 
 ;--------------------------------
 

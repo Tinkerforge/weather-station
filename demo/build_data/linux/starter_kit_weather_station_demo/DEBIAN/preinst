@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+# If the user had installed an old version of starter_kit_weather_station_demo (before the port to Python 3)
+# and ran starter_kit_weather_station_demo with root permissions, pyc files are created in the installation
+# folder. Remove them and all empty folders before installing the new starter_kit_weather_station_demo version.
+
+if [ -d "/usr/share/starter_kit_weather_station_demo" ]; then
+    find /usr/share/starter_kit_weather_station_demo -name "*.pyc" -print0 | xargs --null --no-run-if-empty rm
+    find /usr/lib/python3/dist-packages/ -type d -empty -print0 | xargs --null --no-run-if-empty rmdir
+fi

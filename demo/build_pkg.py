@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
         root_path = os.getcwd()
         os.chdir(os.path.join(root_path, UNDERSCORE_NAME))
-        system(['pyinstaller', 'main_folder.spec'])
+        system(['pyinstaller', '--distpath', os.path.join('..', 'dist'), '--workpath', os.path.join('..', 'build'), 'main_folder.spec', '--'] + sys.argv)
         os.chdir(root_path)
     else:
         print('error: unsupported platform: ' + sys.platform)
