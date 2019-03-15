@@ -92,6 +92,9 @@ def build_linux_pkg():
     if os.path.exists(dist_path):
         shutil.rmtree(dist_path)
 
+    if os.path.exists(egg_info_path):
+        shutil.rmtree(egg_info_path)
+
     print('calling setup.py sdist')
     system(['python3', 'setup.py', 'sdist'])
 
