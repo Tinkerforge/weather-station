@@ -38,10 +38,7 @@ if (sys.hexversion & 0xFF000000) != 0x03000000:
     sys.exit(1)
 
 import os
-import sys
-import base64
 import shutil
-import struct
 import subprocess
 from starter_kit_weather_station_demo.config import DEMO_VERSION
 
@@ -82,8 +79,6 @@ def specialize_template(template_filename, destination_filename, replacements):
     destination_file = open(destination_filename, 'w+')
     destination_file.writelines(lines)
     destination_file.close()
-
-
 
 
 def build_linux_pkg():
@@ -136,17 +131,16 @@ def build_linux_pkg():
     system(['sudo', 'chown', '-R', 'root:root', 'dist/linux'])
 
     print('building Debian package')
-    system(['dpkg', '-b', 'dist/linux', '{0}-{1}_all.deb'.format(UNDERSCORE_NAME, DEMO_VERSION)])
+    system(['dpkg', '-b', 'dist/linux', '{0}-{1}_all.deb'.format(UNDERSCORE_NAME.replace('_', '-'), DEMO_VERSION)])
 
     print('changing owner back to original user')
     system(['sudo', 'chown', '-R', '{}:{}'.format(user, group), 'dist/linux'])
 
     if os.path.exists('/usr/bin/lintian'):
         print('checking Debian package')
-        system(['lintian', '--pedantic', '{0}-{1}_all.deb'.format(UNDERSCORE_NAME, DEMO_VERSION)])
+        system(['lintian', '--pedantic', '{0}-{1}_all.deb'.format(UNDERSCORE_NAME.replace('_', '-'), DEMO_VERSION)])
     else:
         print('skipping lintian check')
-
 
 
 # run 'python build_pkg.py' to build the windows/linux/macos package
@@ -167,7 +161,7 @@ if __name__ == '__main__':
 
         root_path = os.getcwd()
         os.chdir(os.path.join(root_path, UNDERSCORE_NAME))
-        system(['pyinstaller', '--distpath', os.path.join('..', 'dist'), '--workpath', os.path.join('..', 'build'), 'main_folder.spec', '--'] + sys.argv)
+        system(['pyinstaller', '--distpath', '../dist', '--workpath', '../build', 'main_folder.spec', '--'] + sys.argv)
         os.chdir(root_path)
     else:
         print('error: unsupported platform: ' + sys.platform)
