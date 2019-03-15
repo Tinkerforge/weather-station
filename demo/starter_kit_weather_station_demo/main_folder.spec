@@ -66,10 +66,9 @@ excludes = ['wx', 'gtk+', '_gtkagg', 'gtk', 'gdk', 'gtk2', 'gtk3', 'cairo', 'way
             'PyQt5.QtX11Extras',
             'PyQt5.QtXml',
             'PyQt5.QtXmlPatterns']
-
 patterns = ['qt5qml', 'qt5quick', 'libglesv2', 'libcrypto', 'qt5network', 'qt5dbus',
             'qt5svg', 'qt5websockets', 'd3dcompiler', 'libegl', 'opengl32sw', 'qwebp',
-            'qjpeg', 'qwebgl', 'qminimal', 'qoffscreen', 'qwebgl']
+            'qjpeg', 'qminimal', 'qoffscreen', 'qwebgl']
 
 utils = PyinstallerUtils(['starter', 'kit', 'weather', 'station', 'demo'], DEMO_VERSION)
 utils.prepare()
