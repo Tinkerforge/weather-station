@@ -23,8 +23,12 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.
 """
 
-import os
 import sys
+if (sys.hexversion & 0xFF000000) != 0x03000000:
+    print('Python 3.x required')
+    sys.exit(1)
+
+import os
 
 def prepare_package(package_name):
     # from http://www.py2exe.org/index.cgi/WhereAmI
