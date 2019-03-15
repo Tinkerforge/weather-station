@@ -6,6 +6,8 @@ sys.path.append('..')
 from starter_kit_weather_station_demo.pyinstaller_utils import *
 from starter_kit_weather_station_demo.config import DEMO_VERSION
 
+utils = PyinstallerUtils(['starter', 'kit', 'weather', 'station', 'demo'], DEMO_VERSION)
+utils.prepare()
 
 excludes = ['wx', 'gtk+', '_gtkagg', 'gtk', 'gdk', 'gtk2', 'gtk3', 'cairo', 'wayland', 'xinerama', 'share', 'icons', 'atk', 'pango', 'pil', 'PIL',
             '_tkagg',
@@ -69,9 +71,6 @@ excludes = ['wx', 'gtk+', '_gtkagg', 'gtk', 'gdk', 'gtk2', 'gtk3', 'cairo', 'way
 patterns = ['qt5qml', 'qt5quick', 'libglesv2', 'libcrypto', 'qt5network', 'qt5dbus',
             'qt5svg', 'qt5websockets', 'd3dcompiler', 'libegl', 'opengl32sw', 'qwebp',
             'qjpeg', 'qminimal', 'qoffscreen', 'qwebgl']
-
-utils = PyinstallerUtils(['starter', 'kit', 'weather', 'station', 'demo'], DEMO_VERSION)
-utils.prepare()
 
 a = Analysis(['main.py'], pathex=utils.pathex, excludes=excludes)
 
