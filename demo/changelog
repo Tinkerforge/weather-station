@@ -18,6 +18,7 @@
 2017-11-17: 1.0.5 (90e3666)
 - Add support for Humidity Bricklet 2.0
 
-2019-01-30: 1.0.6 (<unknown>)
+<unknown>: 1.1.0 (<unknown>)
 - Add support for Ambient Light Bricklet 3.0
 - Add support for Barometer Bricklet 2.0
+- Port to Python 3 and PyQt 5
