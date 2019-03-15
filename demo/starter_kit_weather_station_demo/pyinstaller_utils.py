@@ -1,8 +1,31 @@
+# -*- coding: utf-8 -*-
+"""
+Starter Kit: Weather Station Demo
+Copyright (C) 2019 Erik Fleckstein <erik@tinkerforge.com>
+Copyright (C) 2019 Matthias Bolte <matthias@tinkerforge.com>
+
+pyinstaller_utils.py: PyInstaller utilities
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.
+"""
+
 import os
 import shutil
 import sys
 import subprocess
-import traceback
 
 import PyInstaller.config
 
@@ -108,6 +131,8 @@ class PyinstallerUtils:
             for file in files:
                 if "brick" not in file:
                     continue
+                if not file.endswith(".py"):
+                    continue
                 full_name = os.path.join(dirpath, file)
                 with open(full_name, 'r') as f:
                     if '#### __DEVICE_IS_NOT_RELEASED__ ####' in f.read():
@@ -138,7 +163,7 @@ class PyinstallerUtils:
         nsis_path = os.path.join(self.dist_path, 'nsis', self.UNDERSCORE_NAME + '.nsi')
         specialize_template(nsis_template_path, nsis_path,
                             {'<<DOT_VERSION>>': self.VERSION,
-                            '<<UNDERSCORE_VERSION>>': self.VERSION.replace('.', '_')})
+                             '<<UNDERSCORE_VERSION>>': self.VERSION.replace('.', '_')})
         system(['C:\\Program Files (x86)\\NSIS\\makensis.exe', nsis_path])
         installer = '{}_windows_{}.exe'.format(self.UNDERSCORE_NAME, self.VERSION.replace('.', '_'))
 
@@ -149,7 +174,7 @@ class PyinstallerUtils:
         shutil.move(os.path.join(self.dist_path, 'nsis', installer), installer_target_path)
         return os.path.join(self.root_path, installer)
 
-    def prepare(self, prepare_script_working_dir = None, prepare_script = None):
+    def prepare(self, prepare_script_working_dir=None, prepare_script=None):
         print('removing old dist directory')
         if os.path.exists(self.dist_path):
             shutil.rmtree(self.dist_path)
@@ -167,9 +192,9 @@ class PyinstallerUtils:
         self.datas = self.collect_data(by_ext(['bmp', 'jpg', 'png', 'svg']))
 
     def strip_binaries(self, binaries, patterns):
-        return [x for x in binaries if all([pattern not in x[0].lower() for pattern in patterns])]
+        return [x for x in binaries if all(pattern not in x[0].lower() for pattern in patterns)]
 
-    def post_generate(self, undo_script_working_dir = None, undo_script = None):
+    def post_generate(self, undo_script_working_dir=None, undo_script=None):
 
         if undo_script is not None:
             if undo_script_working_dir is not None:
