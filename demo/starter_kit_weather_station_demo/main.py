@@ -81,7 +81,8 @@ from starter_kit_weather_station_demo.load_pixmap import load_pixmap
 
 class MainWindow(QMainWindow):
     def __init__(self, app, parent=None):
-        super(QMainWindow, self).__init__(parent)
+        super().__init__(parent)
+
         self.app = app
 
     def closeEvent(self, event):

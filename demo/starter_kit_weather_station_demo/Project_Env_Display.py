@@ -39,7 +39,7 @@ class ProjectEnvDisplay(QWidget):
     lcdwidget = None
 
     def __init__(self, parent, app):
-        super(QWidget, self).__init__()
+        super().__init__()
 
         layout1 = QHBoxLayout()
         layout2 = QVBoxLayout()

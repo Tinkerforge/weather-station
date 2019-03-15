@@ -89,6 +89,7 @@ class LCDWidget (QWidget):
 
     def __init__(self, parent, app):
         super().__init__(parent)
+
         self.array = [[None for x in range(20)] for y in range(4)]
         self.grid = None
 
