@@ -24,11 +24,16 @@ RequestExecutionLevel admin
 
   DetailPrint "Uninstall Starter Kit: Weather Station Demo..."
 
-  RMDir /R $INSTDIR
+  RMDir /R "$INSTDIR"
 
-  ; Remove menu shortcuts
+  ; Remove current user (for backward compatibility) and all users menu shortcuts
+  SetShellVarContext current
   Delete "$SMPROGRAMS\Tinkerforge\Starter Kit Weather Station Demo *.lnk"
   RMDir "$SMPROGRAMS\Tinkerforge"
+  SetShellVarContext all
+  Delete "$SMPROGRAMS\Tinkerforge\Starter Kit Weather Station Demo *.lnk"
+  RMDir "$SMPROGRAMS\Tinkerforge"
+  SetShellVarContext current
 
   ; Remove registry keys
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Tinkerforge Starter Kit Weather Station Demo"
@@ -47,7 +52,7 @@ UninstPage instfiles
 
 ;--------------------------------
 
-Section /o "-uninstall old demo" SEC_UNINSTALL_OLD
+Section /o "-Uninstall Starter Kit: Weather Station Demo" SEC_UNINSTALL_OLD
 
   !insertmacro macrouninstall
 
@@ -78,10 +83,12 @@ Section "Install Starter Kit: Weather Station Demo ${DEMO_VERSION}"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Tinkerforge Starter Kit Weather Station Demo" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
-  ; Create start menu shortcut
+  ; Create start menu shortcut for all users
   SetOutPath $INSTDIR\ ; set working directory for starter_kit_weather_station_demo.exe
+  SetShellVarContext all
   createDirectory "$SMPROGRAMS\Tinkerforge"
   createShortCut "$SMPROGRAMS\Tinkerforge\Starter Kit Weather Station Demo ${DEMO_VERSION}.lnk" "$INSTDIR\starter_kit_weather_station_demo.exe"
+  SetShellVarContext current
 
 SectionEnd
 
@@ -97,7 +104,7 @@ Function .onInit
   ReadRegStr $0 HKLM "Software\Tinkerforge\Starter Kit Weather Station Demo" "Version"
   IfErrors not_installed ; Version not set
 
-  SectionSetText ${SEC_UNINSTALL_OLD} "Uninstall Starter Kit Weather Station Demo $0" ; make item visible
+  SectionSetText ${SEC_UNINSTALL_OLD} "Uninstall Starter Kit: Weather Station Demo $0" ; make item visible
   IntOp $0 ${SF_SELECTED} | ${SF_RO}
   SectionSetFlags ${SEC_UNINSTALL_OLD} $0
 
