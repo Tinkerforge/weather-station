@@ -62,11 +62,11 @@ class LCDChar(QLabel):
             width = self.width()
             height = self.height()
 
-            pixmap = QPixmap(width,height)
+            pixmap = QPixmap(width, height)
             painter = QPainter(pixmap)
 
             painter.fillRect(0, 0, width, height, Qt.blue)
-            painter.fillRect(0, int(height*((8-c)/8.0)), width, height, Qt.white)
+            painter.fillRect(0, int(height * ((8 - c) / 8.0)), width, height, Qt.white)
 
             painter.end()
 
@@ -113,7 +113,7 @@ class LCDWidget (QWidget):
             for x in range(len(self.array[0])):
                 character = LCDChar(self)
                 self.array[y][x] = character
-                self.grid.addWidget(character,y,x)
+                self.grid.addWidget(character, y, x)
 
         self.setLayout(self.grid)
 
@@ -138,7 +138,7 @@ class LCDWidget (QWidget):
 
     def clear(self, proj):
         if proj == self.app.active_project:
-            self.write_line_slot(0,0, "                    ")
-            self.write_line_slot(1,0, "                    ")
-            self.write_line_slot(2,0, "                    ")
-            self.write_line_slot(3,0, "                    ")
+            self.write_line_slot(0, 0, "                    ")
+            self.write_line_slot(1, 0, "                    ")
+            self.write_line_slot(2, 0, "                    ")
+            self.write_line_slot(3, 0, "                    ")

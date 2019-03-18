@@ -267,7 +267,7 @@ class ProjectStatistics(QWidget):
         for i in range(numSpaces):
             line0 += " "
 
-        self.lcdwidget.write_line(0,0, line0 + time, self)
+        self.lcdwidget.write_line(0, 0, line0 + time, self)
 
     def UpdateGraphWriteBars(self, q):
         barSumMin = 10000.0

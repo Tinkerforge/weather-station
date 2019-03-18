@@ -125,7 +125,7 @@ class GameHandle extends Thread {
 
 	public void run() {
 		char mask[][] = new char[4][20];
-		int barlist[] = {0,0,0,0};
+		int barlist[] = {0, 0, 0, 0};
 
 		System.out.println("Start thread");
 
