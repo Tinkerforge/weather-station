@@ -23,3 +23,4 @@
 - Add support for Barometer Bricklet 2.0
 - Port to Python 3 and PyQt 5
 - Install start menu link for all users on Windows
+- Use custom charset for drawing non-ASCII text on LCD 20x4 Bricklet

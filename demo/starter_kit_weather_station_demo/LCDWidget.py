@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import QLabel, QGridLayout, QWidget
 from PyQt5.QtGui import QPixmap, QPainter, QFont
 
 from starter_kit_weather_station_demo.tinkerforge.bricklet_lcd_20x4 import LCD20x4
+from starter_kit_weather_station_demo.tinkerforge.ks0066u import unicode_to_ks0066u
 
 class LCDChar(QLabel):
     qtcb_set_char = pyqtSignal(str)
@@ -120,7 +121,7 @@ class LCDWidget (QWidget):
 
         if self.app.lcd is not None:
             try:
-                self.app.lcd.write_line(line, begin, text)#str(text.toAscii().data()))
+                self.app.lcd.write_line(line, begin, unicode_to_ks0066u(text))
             except Exception:
                 pass
 
