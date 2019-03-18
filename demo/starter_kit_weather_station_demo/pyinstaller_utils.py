@@ -172,7 +172,7 @@ class PyinstallerUtils:
             os.remove(installer_target_path)
 
         shutil.move(os.path.join(self.dist_path, 'nsis', installer), installer_target_path)
-        return os.path.join(self.root_path, installer)
+        return os.path.join(self.root_path,'..', installer)
 
     def prepare(self, prepare_script_working_dir=None, prepare_script=None):
         print('removing old dist directory')
@@ -212,7 +212,7 @@ class PyinstallerUtils:
             self.post_generate_macos()
 
     def post_generate_windows(self):
-        exe_path = os.path.join(self.root_path, 'dist', self.UNDERSCORE_NAME+'.exe')
+        exe_path = os.path.join(self.dist_path, self.UNDERSCORE_NAME+'.exe')
         if '--no-sign' not in sys.argv:
             win_sign(exe_path)
         else:
