@@ -10,4 +10,4 @@ Terminal=false
 Icon=starter_kit_weather_station_demo-icon.png
 Type=Application
 Exec=starter_kit_weather_station_demo
-Categories=Electronics;
+Categories=Development;Electronics
