@@ -131,13 +131,13 @@ class WeatherStation
 	}
 
 	static void EnumerateCB(IPConnection sender,
-	                        istring UID,
-	                        istring connectedUID,
-	                        cihar position,
-	                        ishort[] hardwareVersion,
-	                        ishort[] firmwareVersion,
+	                        string UID,
+	                        string connectedUID,
+	                        char position,
+	                        short[] hardwareVersion,
+	                        short[] firmwareVersion,
 	                        int deviceIdentifier,
-	                        ishort enumerationType)
+	                        short enumerationType)
 	{
 		if(enumerationType == IPConnection.ENUMERATION_TYPE_CONNECTED ||
 		   enumerationType == IPConnection.ENUMERATION_TYPE_AVAILABLE)
