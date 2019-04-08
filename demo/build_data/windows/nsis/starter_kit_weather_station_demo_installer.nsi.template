@@ -99,6 +99,13 @@ SectionEnd
 
 Function .onInit
 
+${IfNot} ${AtLeastWin7}
+
+  MessageBox MB_OK|MB_ICONEXCLAMATION "Starter Kit: Weather Station Demo ${DEMO_VERSION} requires Windows 7 or newer!"
+  Quit
+
+${EndIf}
+
   ; Check to see if already installed
   ClearErrors
   ReadRegStr $0 HKLM "Software\Tinkerforge\Starter Kit Weather Station Demo" "Version"
