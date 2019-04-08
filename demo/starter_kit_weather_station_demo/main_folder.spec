@@ -97,9 +97,15 @@ coll = COLLECT(exe,
                strip=False,
                upx=False,
                name='')
+
 if utils.macos:
     app = BUNDLE(coll,
-                    name=utils.CAMEL_CASE_NAME + '.app',
-                    icon=utils.icon)
+                 name=utils.CAMEL_CASE_NAME + '.app',
+                 icon=utils.icon,
+                 info_plist={
+                     'LSMinimumSystemVersion': '10.11', # required for PyQt 5.11.3
+                     'CFBundleVersion': DEMO_VERSION,
+                     'CFBundleShortVersionString': DEMO_VERSION
+                 })
 
 utils.post_generate()
