@@ -18,9 +18,12 @@
 2017-11-17: 1.0.5 (90e3666)
 - Add support for Humidity Bricklet 2.0
 
-2019-03-18: 1.1.0 (<unknown>)
+2019-03-18: 1.1.0 (e0eac6e)
 - Add support for Ambient Light Bricklet 3.0
 - Add support for Barometer Bricklet 2.0
-- Port to Python 3 and PyQt 5
+- Port to Python 3 and PyQt 5 (macOS 10.11 or Windows 7 required)
 - Install start menu link for all users on Windows
 - Use custom charset for drawing non-ASCII text on LCD 20x4 Bricklet
+
+2019-04-09: 1.1.1 (<unknown>)
+- Add minimum macOS and Windows version checks
