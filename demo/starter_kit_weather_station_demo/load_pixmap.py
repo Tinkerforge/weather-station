@@ -28,22 +28,23 @@ import sys
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt, QByteArray
 
-def get_resources_path(relative_path):
+def get_resources_path(relative_path, warn_on_missing_file=True):
     try:
         # PyInstaller stores data files in a tmp folder refered to as _MEIPASS
+        #pylint: disable=protected-access
         base_path = sys._MEIPASS
-    except Exception:
+    except AttributeError:
         base_path = os.path.dirname(os.path.realpath(__file__))
 
     path = os.path.join(base_path, relative_path)
 
     # If the path still doesn't exist, this function won't help you
     if not os.path.exists(path):
-        print("Resource not found: " + relative_path)
+        if warn_on_missing_file:
+            print("Resource not found: " + relative_path)
         return None
 
     return path
-
 
 def load_pixmap(path):
     absolute_path = get_resources_path(path)
