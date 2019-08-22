@@ -191,7 +191,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			ambient_light_create(&ws->ambient_light, uid, &ws->ipcon);
 			ambient_light_register_callback(&ws->ambient_light,
 			                                AMBIENT_LIGHT_CALLBACK_ILLUMINANCE,
-			                                (void *)cb_illuminance,
+			                                (void (*)(void))cb_illuminance,
 			                                (void *)ws);
 			rc = ambient_light_set_illuminance_callback_period(&ws->ambient_light, 1000);
 
@@ -204,7 +204,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			ambient_light_v2_create(&ws->ambient_light_v2, uid, &ws->ipcon);
 			ambient_light_v2_register_callback(&ws->ambient_light_v2,
 			                                   AMBIENT_LIGHT_V2_CALLBACK_ILLUMINANCE,
-			                                   (void *)cb_illuminance_v2,
+			                                   (void (*)(void))cb_illuminance_v2,
 			                                   (void *)ws);
 			rc = ambient_light_v2_set_configuration(&ws->ambient_light_v2,
 			                                        AMBIENT_LIGHT_V2_ILLUMINANCE_RANGE_64000LUX,
@@ -225,7 +225,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			ambient_light_v3_create(&ws->ambient_light_v3, uid, &ws->ipcon);
 			ambient_light_v3_register_callback(&ws->ambient_light_v3,
 			                                   AMBIENT_LIGHT_V3_CALLBACK_ILLUMINANCE,
-			                                   (void *)cb_illuminance_v3,
+			                                   (void (*)(void))cb_illuminance_v3,
 			                                   (void *)ws);
 			rc = ambient_light_v3_set_configuration(&ws->ambient_light_v3,
 			                                        AMBIENT_LIGHT_V3_ILLUMINANCE_RANGE_64000LUX,
@@ -246,7 +246,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			humidity_create(&ws->humidity, uid, &ws->ipcon);
 			humidity_register_callback(&ws->humidity,
 			                           HUMIDITY_CALLBACK_HUMIDITY,
-			                           (void *)cb_humidity,
+			                           (void (*)(void))cb_humidity,
 			                           (void *)ws);
 			rc = humidity_set_humidity_callback_period(&ws->humidity, 1000);
 
@@ -259,7 +259,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			humidity_v2_create(&ws->humidity_v2, uid, &ws->ipcon);
 			humidity_v2_register_callback(&ws->humidity_v2,
 			                              HUMIDITY_V2_CALLBACK_HUMIDITY,
-			                              (void *)cb_humidity_v2,
+			                              (void (*)(void))cb_humidity_v2,
 			                              (void *)ws);
 			rc = humidity_v2_set_humidity_callback_configuration(&ws->humidity_v2, 1000, true, 'x', 0, 0);
 
@@ -272,7 +272,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			barometer_create(&ws->barometer, uid, &ws->ipcon);
 			barometer_register_callback(&ws->barometer,
 			                            BAROMETER_CALLBACK_AIR_PRESSURE,
-			                            (void *)cb_air_pressure,
+			                            (void (*)(void))cb_air_pressure,
 			                            (void *)ws);
 			rc = barometer_set_air_pressure_callback_period(&ws->barometer, 1000);
 
@@ -285,7 +285,7 @@ void cb_enumerate(const char *uid, const char *connected_uid,
 			barometer_v2_create(&ws->barometer, uid, &ws->ipcon);
 			barometer_v2_register_callback(&ws->barometer,
 			                               BAROMETER_V2_CALLBACK_AIR_PRESSURE,
-			                               (void *)cb_air_pressure_v2,
+			                               (void (*)(void))cb_air_pressure_v2,
 			                               (void *)ws);
 			rc = barometer_v2_set_air_pressure_callback_configuration(&ws->barometer, 1000, false, 'x', 0, 0);
 
@@ -320,12 +320,12 @@ int main() {
 
 	ipcon_register_callback(&ws.ipcon,
 	                        IPCON_CALLBACK_ENUMERATE,
-	                        (void *)cb_enumerate,
+	                        (void (*)(void))cb_enumerate,
 	                        (void *)&ws);
 
 	ipcon_register_callback(&ws.ipcon,
 	                        IPCON_CALLBACK_CONNECTED,
-	                        (void *)cb_connected,
+	                        (void (*)(void))cb_connected,
 	                        (void *)&ws);
 
 	while(true) {
