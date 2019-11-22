@@ -332,7 +332,7 @@ class ProjectStatistics(QWidget):
         if self.buttonPressedCounter[2] % 4 == self.MODE_HUMIDITY:
             self.UpdateMinMaxAvgWrite("Humidity       " + self.TimeFromSeconds(len(self.humidityQueue)), "%RH", self.GetMinMaxAvg(self.humidityQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_AIR_PRESSURE:
-            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "mbar", self.GetMinMaxAvg(self.airPressureQueue))
+            self.UpdateMinMaxAvgWrite("Air Pressure   " + self.TimeFromSeconds(len(self.airPressureQueue)), "hPa", self.GetMinMaxAvg(self.airPressureQueue))
         if self.buttonPressedCounter[2] % 4 == self.MODE_TEMPERATURE:
             self.UpdateMinMaxAvgWrite("Temperature    " + self.TimeFromSeconds(len(self.temperatureQueue)), "\xDFC", self.GetMinMaxAvg(self.temperatureQueue))
 

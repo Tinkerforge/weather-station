@@ -1,5 +1,5 @@
 Number TF_Humidity               "Humidity [%.1f %%]"    { tinkerforge="uid=<HUMIDITY_UID>" }
-Number TF_Barometer              "Pressure [%.0f mbar]"  { tinkerforge="uid=<BAROMETER_UID>" }
+Number TF_Barometer              "Pressure [%.0f hPa]"   { tinkerforge="uid=<BAROMETER_UID>" }
 Number TF_Barometer_Temperature  "Temperature [%.1f °C]" { tinkerforge="uid=<BAROMETER_UID>, subid=temperature" }
 Number TF_AmbientLight           "Luminance [%.0f lx]"   { tinkerforge="uid=<AMBIENT_LIGHT_UID>" }
 String TF_LCD                    "LCD"                   { tinkerforge="uid=<LCD_20X4_UID>"}

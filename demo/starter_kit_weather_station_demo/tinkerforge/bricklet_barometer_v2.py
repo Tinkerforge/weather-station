@@ -146,8 +146,8 @@ class BrickletBarometerV2(Device):
     def get_air_pressure(self):
         """
         Returns the measured air pressure. The value has a range of
-        260000 to 1260000 and is given in mbar/1000, i.e. a value of
-        1001092 means that an air pressure of 1001.092 mbar is measured.
+        260000 to 1260000 and is given in hPa/1000, i.e. a value of
+        1001092 means that an air pressure of 1001.092 hPa is measured.
 
 
         If you want to get the value periodically, it is recommended to use the
@@ -355,7 +355,7 @@ class BrickletBarometerV2(Device):
 
     def set_reference_air_pressure(self, air_pressure):
         """
-        Sets the reference air pressure in mbar/1000 for the altitude calculation.
+        Sets the reference air pressure in hPa/1000 for the altitude calculation.
         Valid values are between 260000 and 1260000. Setting the reference to the
         current air pressure results in a calculated altitude of 0mm. Passing 0 is
         a shortcut for passing the current air pressure as reference.
@@ -365,7 +365,7 @@ class BrickletBarometerV2(Device):
         `QFE <https://en.wikipedia.org/wiki/Mean_sea_level_pressure#Mean_sea_level_pressure>`__
         used in aviation.
 
-        The default value is 1013.25mbar.
+        The default value is 1013.25hPa.
         """
         air_pressure = int(air_pressure)
 
@@ -387,10 +387,10 @@ class BrickletBarometerV2(Device):
         Then the current air pressure has to be measured using the Bricklet
         (``measured air pressure``) and with and accurate reference barometer
         (``actual air pressure``) at the same time and passed to this function in
-        mbar/1000.
+        hPa/1000.
 
         After proper calibration the air pressure measurement can achieve an accuracy
-        up to 0.2 mbar.
+        up to 0.2 hPa.
 
         The calibration is saved in the EEPROM of the Bricklet and only needs to be
         configured once.
